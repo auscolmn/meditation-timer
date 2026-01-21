@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'sounds/*.mp3', 'fonts/*.woff2'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'sounds/*.mp3', 'fonts/*.woff2', '.well-known/assetlinks.json'],
       manifest: {
         name: 'Inner Compass - Meditation Timer',
         short_name: 'Inner Compass',
