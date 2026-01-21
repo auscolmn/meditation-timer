@@ -1,0 +1,226 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.statCard {
+  background-color: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center;
+  box-shadow: 0 1px 4px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.statEmoji {
+  font-size: var(--font-size-xl);
+}
+
+.statValue {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.statLabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/* Calendar */
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.calendarTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.dayNames {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: var(--space-sm);
+}
+
+.dayName {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: var(--space-xs);
+}
+
+.calendarGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-xs);
+}
+
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition: background-color var(--transition-fast);
+  padding: var(--space-xs);
+}
+
+.day:hover:not(:disabled) {
+  background-color: var(--surface-variant);
+}
+
+.day.today {
+  background-color: rgba(var(--primary-rgb), 0.1);
+  border: 2px solid var(--primary);
+}
+
+.day.future {
+  opacity: 0.4;
+}
+
+.dayEmpty {
+  aspect-ratio: 1;
+}
+
+.dayNumber {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sessionDots {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--primary);
+}
+
+.dotMore {
+  font-size: 8px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Goals */
+.sectionTitle {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.goalsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.goalItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-variant);
+  opacity: 0.5;
+}
+
+.goalItem.completed {
+  opacity: 1;
+  background-color: rgba(var(--primary-rgb), 0.1);
+}
+
+.goalItem.current {
+  opacity: 1;
+  border: 2px solid var(--primary);
+  background-color: var(--surface);
+}
+
+.goalBadge {
+  font-size: var(--font-size-lg);
+}
+
+.goalLabel {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.goalCheck {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.goalProgress {
+  font-size: var(--font-size-sm);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Session list in modal */
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sessionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm);
+  background-color: var(--surface-variant);
+  border-radius: var(--radius-md);
+}
+
+.sessionTime {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sessionDuration {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.addSessionForm {
+  margin-top: var(--space-lg);
+}
+
+@media (max-width: 360px) {
+  .statsGrid {
+    gap: var(--space-sm);
+  }
+
+  .statCard {
+    padding: var(--space-sm);
+  }
+
+  .statValue {
+    font-size: var(--font-size-base);
+  }
+}

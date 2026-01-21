@@ -1,0 +1,84 @@
+.editorModal {
+  max-width: 500px;
+  max-height: 85vh;
+}
+
+.form {
+  background-color: var(--surface-variant);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formActions {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.formActions .btn {
+  flex: 1;
+}
+
+.quoteList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.categorySection {
+  margin-bottom: var(--space-lg);
+}
+
+.categoryTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quoteItem {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background-color: var(--surface-variant);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-sm);
+}
+
+.quoteContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.quoteText {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-style: italic;
+  margin-bottom: var(--space-xs);
+  word-wrap: break-word;
+}
+
+.quoteAuthor {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.quoteActions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.quoteCount {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-md);
+}

@@ -1,0 +1,316 @@
+import { useState } from 'react';
+import { useApp } from '../../context/AppContext';
+import { useStreak } from '../../hooks/useStreak';
+import {
+  formatDuration,
+  formatMonthYear,
+  generateCalendarMonth,
+  getSessionsForMonth,
+  formatDateString,
+  isDateToday,
+  isDateFuture,
+  formatSessionTime
+} from '../../utils/dateUtils';
+import { STREAK_GOALS } from '../../utils/constants';
+import QuoteEditor from './QuoteEditor';
+import styles from './Progress.module.css';
+
+// Day names for calendar header
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function Progress() {
+  const { sessions, deleteSession, addManualSession } = useApp();
+  const streakData = useStreak(sessions);
+
+  // Calendar state
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  // Modal state
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showAddSession, setShowAddSession] = useState(false);
+  const [newSessionDuration, setNewSessionDuration] = useState(10);
+  const [showQuoteEditor, setShowQuoteEditor] = useState(false);
+
+  // Get calendar data
+  const weeks = generateCalendarMonth(viewYear, viewMonth);
+  const monthSessions = getSessionsForMonth(sessions, viewYear, viewMonth);
+
+  // Navigation
+  const goToPrevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear(viewYear - 1);
+    } else {
+      setViewMonth(viewMonth - 1);
+    }
+  };
+
+  const goToNextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear(viewYear + 1);
+    } else {
+      setViewMonth(viewMonth + 1);
+    }
+  };
+
+  // Handle day click
+  const handleDayClick = (date) => {
+    if (!date) return;
+    const dateStr = formatDateString(date);
+    if (isDateFuture(dateStr)) return;
+    setSelectedDate(dateStr);
+  };
+
+  // Handle add manual session
+  const handleAddSession = () => {
+    if (selectedDate && newSessionDuration > 0) {
+      addManualSession(selectedDate, newSessionDuration * 60);
+      setShowAddSession(false);
+      setNewSessionDuration(10);
+    }
+  };
+
+  // Handle delete session
+  const handleDeleteSession = (sessionId) => {
+    if (confirm('Delete this session?')) {
+      deleteSession(sessionId);
+    }
+  };
+
+  // Get sessions for selected date
+  const selectedDateSessions = selectedDate
+    ? sessions.filter(s => s.date === selectedDate)
+    : [];
+
+  return (
+    <div className="screen">
+      {/* Header Stats */}
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <span className={styles.statEmoji}>🔥</span>
+          <span className={styles.statValue}>{streakData.currentStreak}</span>
+          <span className={styles.statLabel}>Day Streak</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statEmoji}>📊</span>
+          <span className={styles.statValue}>{streakData.totalSessions}</span>
+          <span className={styles.statLabel}>Sessions</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statEmoji}>⏱️</span>
+          <span className={styles.statValue}>{formatDuration(streakData.totalTime)}</span>
+          <span className={styles.statLabel}>Total Time</span>
+        </div>
+      </div>
+
+      {/* Calendar */}
+      <div className="card mb-lg">
+        <div className={styles.calendarHeader}>
+          <button
+            className="btn btn--icon btn--secondary"
+            onClick={goToPrevMonth}
+            aria-label="Previous month"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <h2 className={styles.calendarTitle}>{formatMonthYear(viewYear, viewMonth)}</h2>
+          <button
+            className="btn btn--icon btn--secondary"
+            onClick={goToNextMonth}
+            aria-label="Next month"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Day names */}
+        <div className={styles.dayNames}>
+          {DAY_NAMES.map(day => (
+            <div key={day} className={styles.dayName}>{day}</div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className={styles.calendarGrid}>
+          {weeks.map((week, weekIndex) => (
+            <div key={weekIndex} className={styles.week}>
+              {week.map((date, dayIndex) => {
+                if (!date) {
+                  return <div key={dayIndex} className={styles.dayEmpty} />;
+                }
+
+                const dateStr = formatDateString(date);
+                const daySessions = monthSessions[dateStr] || [];
+                const sessionCount = daySessions.length;
+                const isToday = isDateToday(dateStr);
+                const isFuture = isDateFuture(dateStr);
+
+                return (
+                  <button
+                    key={dayIndex}
+                    className={`${styles.day} ${isToday ? styles.today : ''} ${isFuture ? styles.future : ''}`}
+                    onClick={() => handleDayClick(date)}
+                    disabled={isFuture}
+                  >
+                    <span className={styles.dayNumber}>{date.getDate()}</span>
+                    {sessionCount > 0 && (
+                      <div className={styles.sessionDots}>
+                        {sessionCount > 3 ? (
+                          <span className={styles.dotMore}>3+</span>
+                        ) : (
+                          Array(sessionCount).fill(null).map((_, i) => (
+                            <span key={i} className={styles.dot} />
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Goals Section */}
+      <div className="card mb-lg">
+        <h2 className={styles.sectionTitle}>Streak Goals</h2>
+        <div className={styles.goalsList}>
+          {STREAK_GOALS.map(goal => {
+            const isCompleted = streakData.currentStreak >= goal.days;
+            const isCurrent = streakData.nextGoal?.days === goal.days;
+
+            return (
+              <div
+                key={goal.days}
+                className={`${styles.goalItem} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
+              >
+                <span className={styles.goalBadge}>{goal.badge}</span>
+                <span className={styles.goalLabel}>{goal.label}</span>
+                {isCompleted && (
+                  <span className={styles.goalCheck}>✓</span>
+                )}
+                {isCurrent && (
+                  <span className={styles.goalProgress}>
+                    {streakData.currentStreak}/{goal.days}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Edit Quotes Button */}
+      <button
+        className="btn btn--secondary btn--full"
+        onClick={() => setShowQuoteEditor(true)}
+      >
+        Edit Daily Quotes
+      </button>
+
+      {/* Quote Editor Modal */}
+      {showQuoteEditor && (
+        <QuoteEditor onClose={() => setShowQuoteEditor(false)} />
+      )}
+
+      {/* Date Detail Modal */}
+      {selectedDate && (
+        <div className="modal-overlay" onClick={() => setSelectedDate(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">{selectedDate}</h2>
+              <button
+                className="btn btn--icon modal-close"
+                onClick={() => setSelectedDate(null)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            {selectedDateSessions.length === 0 ? (
+              <p className="text-secondary">No sessions on this date</p>
+            ) : (
+              <div className={styles.sessionList}>
+                {selectedDateSessions.map(session => (
+                  <div key={session.id} className={styles.sessionItem}>
+                    <div>
+                      <p className={styles.sessionTime}>
+                        {formatSessionTime(session.timestamp)}
+                      </p>
+                      <p className={styles.sessionDuration}>
+                        {formatDuration(session.duration)}
+                        {session.endedEarly && ' (ended early)'}
+                        {session.manual && ' (manual)'}
+                      </p>
+                    </div>
+                    <button
+                      className="btn btn--icon btn--secondary"
+                      onClick={() => handleDeleteSession(session.id)}
+                      aria-label="Delete session"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!showAddSession ? (
+              <button
+                className="btn btn--secondary btn--full mt-lg"
+                onClick={() => setShowAddSession(true)}
+              >
+                + Add Session
+              </button>
+            ) : (
+              <div className={styles.addSessionForm}>
+                <div className="form-group">
+                  <label className="form-label">Duration (minutes)</label>
+                  <input
+                    type="number"
+                    className="input"
+                    value={newSessionDuration}
+                    onChange={(e) => setNewSessionDuration(parseInt(e.target.value) || 0)}
+                    min="1"
+                    max="1440"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button
+                    className="btn btn--secondary"
+                    onClick={() => setShowAddSession(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn--primary"
+                    onClick={handleAddSession}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Progress;
