@@ -12,7 +12,7 @@
   position: relative;
   width: 120px;
   height: 120px;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .circleSvg {
@@ -23,6 +23,7 @@
 
 .progressCircle {
   transition: stroke-dashoffset 1s ease-out;
+  stroke: var(--success);
 }
 
 .completionCircle.animating .progressCircle {
@@ -35,6 +36,10 @@
   left: 50%;
   transform: translate(-50%, -50%);
   animation: scaleIn 0.5s ease 0.5s both;
+}
+
+.checkmark svg {
+  stroke: var(--success);
 }
 
 @keyframes scaleIn {
@@ -52,6 +57,7 @@
   font-size: var(--font-size-base);
   color: var(--text-secondary);
   margin-bottom: var(--space-lg);
+  font-weight: var(--font-weight-regular);
 }
 
 .celebration {
@@ -60,22 +66,16 @@
   align-items: center;
   gap: var(--space-sm);
   margin-bottom: var(--space-lg);
-  animation: bounce 0.5s ease;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
 }
 
 .celebrationEmoji {
-  font-size: 48px;
+  font-size: 40px;
 }
 
 .celebrationText {
   font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: var(--font-weight-medium);
+  color: var(--success);
 }
 
 .badge {
@@ -85,11 +85,12 @@
 .streakCard {
   background-color: var(--surface);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  padding: var(--space-xl);
   width: 100%;
   max-width: 320px;
-  margin-bottom: var(--space-lg);
-  box-shadow: 0 2px 8px var(--shadow);
+  margin-bottom: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--card-border);
 }
 
 .streakMain {
@@ -106,13 +107,15 @@
 
 .streakNumber {
   font-size: var(--font-size-3xl);
-  font-weight: 700;
-  color: var(--primary);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
 }
 
 .streakLabel {
   font-size: var(--font-size-lg);
   color: var(--text-secondary);
+  font-weight: var(--font-weight-regular);
 }
 
 .goalProgress {
@@ -123,11 +126,12 @@
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin-bottom: var(--space-sm);
+  font-weight: var(--font-weight-regular);
 }
 
 .progressBar {
-  height: 8px;
-  background-color: var(--surface-variant);
+  height: 6px;
+  background-color: var(--border);
   border-radius: var(--radius-full);
   overflow: hidden;
   margin-bottom: var(--space-xs);
@@ -135,23 +139,25 @@
 
 .progressFill {
   height: 100%;
-  background-color: var(--primary);
+  background-color: var(--success);
   border-radius: var(--radius-full);
   transition: width 0.5s ease;
 }
 
 .progressPercent {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
+  font-weight: var(--font-weight-medium);
 }
 
 .message {
   font-size: var(--font-size-base);
   color: var(--text-secondary);
   text-align: center;
-  font-style: italic;
+  font-style: normal;
   max-width: 300px;
   margin-bottom: var(--space-xl);
+  line-height: 1.6;
 }
 
 .actions {

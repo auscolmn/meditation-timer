@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { AppProvider } from './context/AppContext';
+import { useTheme } from './hooks/useTheme';
 import Navigation from './components/Navigation/Navigation';
 import Welcome from './components/Welcome/Welcome';
 import TimerSetup from './components/Timer/TimerSetup';
 import ActiveTimer from './components/Timer/ActiveTimer';
 import Completion from './components/Completion/Completion';
 import Progress from './components/Progress/Progress';
+import Settings from './components/Settings/Settings';
 import './App.css';
 
 // App screens/views
@@ -14,13 +16,17 @@ const SCREENS = {
   TIMER_SETUP: 'timer_setup',
   ACTIVE_TIMER: 'active_timer',
   COMPLETION: 'completion',
-  PROGRESS: 'progress'
+  PROGRESS: 'progress',
+  SETTINGS: 'settings'
 };
 
 function AppContent() {
   const [currentScreen, setCurrentScreen] = useState(SCREENS.WELCOME);
   const [timerConfig, setTimerConfig] = useState(null);
   const [completedSession, setCompletedSession] = useState(null);
+
+  // Initialize theme
+  useTheme();
 
   // Navigation handlers
   const goToTimerSetup = () => setCurrentScreen(SCREENS.TIMER_SETUP);
@@ -85,6 +91,9 @@ function AppContent() {
       case SCREENS.PROGRESS:
         return <Progress />;
 
+      case SCREENS.SETTINGS:
+        return <Settings />;
+
       default:
         return <Welcome onStart={goToTimerSetup} />;
     }
@@ -93,24 +102,23 @@ function AppContent() {
   // Determine active tab for navigation
   const getActiveTab = () => {
     if (currentScreen === SCREENS.PROGRESS) return 'progress';
+    if (currentScreen === SCREENS.SETTINGS) return 'settings';
     return 'timer';
   };
 
   // Handle tab navigation
   const handleTabChange = (tab) => {
+    // Don't navigate away from active timer via tabs
+    if (currentScreen === SCREENS.ACTIVE_TIMER) {
+      return;
+    }
+
     if (tab === 'timer') {
-      // If in active timer or completion, go back to setup
-      if (currentScreen === SCREENS.ACTIVE_TIMER) {
-        // Don't navigate away from active timer via tabs
-        return;
-      }
       setCurrentScreen(SCREENS.TIMER_SETUP);
     } else if (tab === 'progress') {
-      if (currentScreen === SCREENS.ACTIVE_TIMER) {
-        // Don't navigate away from active timer via tabs
-        return;
-      }
       setCurrentScreen(SCREENS.PROGRESS);
+    } else if (tab === 'settings') {
+      setCurrentScreen(SCREENS.SETTINGS);
     }
   };
 

@@ -42,16 +42,16 @@ function Completion({ session, onViewProgress, onMeditateAgain }) {
             cy="50"
             r="45"
             fill="none"
-            stroke="var(--surface-variant)"
-            strokeWidth="8"
+            stroke="var(--border)"
+            strokeWidth="6"
           />
           <circle
             cx="50"
             cy="50"
             r="45"
             fill="none"
-            stroke="var(--primary)"
-            strokeWidth="8"
+            stroke="var(--success)"
+            strokeWidth="6"
             strokeLinecap="round"
             className={styles.progressCircle}
             strokeDasharray="283"

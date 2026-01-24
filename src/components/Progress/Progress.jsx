@@ -12,7 +12,6 @@ import {
   formatSessionTime
 } from '../../utils/dateUtils';
 import { STREAK_GOALS } from '../../utils/constants';
-import QuoteEditor from './QuoteEditor';
 import styles from './Progress.module.css';
 
 // Day names for calendar header
@@ -31,7 +30,6 @@ function Progress() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showAddSession, setShowAddSession] = useState(false);
   const [newSessionDuration, setNewSessionDuration] = useState(10);
-  const [showQuoteEditor, setShowQuoteEditor] = useState(false);
 
   // Get calendar data
   const weeks = generateCalendarMonth(viewYear, viewMonth);
@@ -207,19 +205,6 @@ function Progress() {
           })}
         </div>
       </div>
-
-      {/* Edit Quotes Button */}
-      <button
-        className="btn btn--secondary btn--full"
-        onClick={() => setShowQuoteEditor(true)}
-      >
-        Edit Daily Quotes
-      </button>
-
-      {/* Quote Editor Modal */}
-      {showQuoteEditor && (
-        <QuoteEditor onClose={() => setShowQuoteEditor(false)} />
-      )}
 
       {/* Date Detail Modal */}
       {selectedDate && (

@@ -1,51 +1,114 @@
 .container {
   width: 100%;
   max-width: 400px;
-  animation: fadeIn var(--transition-slow) ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .title {
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--primary);
+  font-size: 58px;
+  font-weight: var(--font-weight-light);
+  color: var(--text-primary);
   margin-bottom: var(--space-2xl);
   text-align: center;
+  letter-spacing: 0.01em;
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .quote {
   background-color: var(--surface);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
-  box-shadow: 0 2px 12px var(--shadow);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--card-border);
   text-align: center;
+  animation: fadeSlideUp 0.8s ease-out 0.2s both;
 }
 
 .quoteText {
-  font-size: var(--font-size-lg);
-  line-height: 1.6;
+  font-size: 20px;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
-  font-style: italic;
+  font-style: normal;
   margin-bottom: var(--space-lg);
+  font-weight: var(--font-weight-regular);
 }
 
 .quoteAuthor {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
 }
 
 .quoteCategory {
   font-size: var(--font-size-xs);
-  color: var(--primary);
-  background-color: rgba(var(--primary-rgb), 0.1);
-  padding: var(--space-xs) var(--space-sm);
+  color: var(--text-secondary);
+  background-color: var(--border-light);
+  padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Streak Section */
+.streakSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xl);
+  padding: var(--space-lg);
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--card-border);
+  animation: fadeSlideUp 0.8s ease-out 0.4s both;
+}
+
+.streakEmoji {
+  font-size: 28px;
+}
+
+.streakCount {
+  font-size: 32px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.streakLabel {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Tappable screen */
+.tappable {
+  cursor: pointer;
+}
+
+/* Tap hint */
+.tapHint {
+  margin-top: var(--space-2xl);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  text-align: center;
+  animation: fadeSlideUp 0.8s ease-out 0.6s both, pulse 2s ease-in-out 1.4s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }

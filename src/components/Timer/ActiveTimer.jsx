@@ -210,8 +210,8 @@ function ActiveTimer({ config, onComplete, onEnd }) {
             cy="50"
             r="45"
             fill="none"
-            stroke="var(--surface-variant)"
-            strokeWidth="8"
+            stroke="var(--border)"
+            strokeWidth="6"
           />
           {/* Progress circle */}
           <circle
@@ -219,8 +219,8 @@ function ActiveTimer({ config, onComplete, onEnd }) {
             cy="50"
             r="45"
             fill="none"
-            stroke="var(--primary)"
-            strokeWidth="8"
+            stroke="var(--success)"
+            strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
