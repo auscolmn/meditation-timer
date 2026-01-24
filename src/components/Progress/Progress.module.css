@@ -2,15 +2,16 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .statCard {
   background-color: var(--surface);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
   text-align: center;
-  box-shadow: 0 1px 4px var(--shadow);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--card-border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -23,13 +24,15 @@
 
 .statValue {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .statLabel {
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Calendar */
@@ -37,12 +40,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
 }
 
 .calendarTitle {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
 }
 
 .dayNames {
@@ -54,8 +57,8 @@
 .dayName {
   text-align: center;
   font-size: var(--font-size-xs);
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
   padding: var(--space-xs);
 }
 
@@ -85,12 +88,12 @@
 }
 
 .day:hover:not(:disabled) {
-  background-color: var(--surface-variant);
+  background-color: var(--border-light);
 }
 
 .day.today {
-  background-color: rgba(var(--primary-rgb), 0.1);
-  border: 2px solid var(--primary);
+  background-color: var(--border-light);
+  border: 1px solid var(--border);
 }
 
 .day.future {
@@ -103,7 +106,7 @@
 
 .dayNumber {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-regular);
   color: var(--text-primary);
 }
 
@@ -114,22 +117,22 @@
 }
 
 .dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background-color: var(--primary);
+  background-color: var(--success);
 }
 
 .dotMore {
   font-size: 8px;
-  color: var(--primary);
-  font-weight: 600;
+  color: var(--success);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Goals */
 .sectionTitle {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   margin-bottom: var(--space-md);
 }
 
@@ -143,20 +146,20 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-md);
-  background-color: var(--surface-variant);
+  background-color: var(--border-light);
   opacity: 0.5;
 }
 
 .goalItem.completed {
   opacity: 1;
-  background-color: rgba(var(--primary-rgb), 0.1);
+  background-color: var(--success-bg);
 }
 
 .goalItem.current {
   opacity: 1;
-  border: 2px solid var(--primary);
+  border: 1px solid var(--border);
   background-color: var(--surface);
 }
 
@@ -167,18 +170,18 @@
 .goalLabel {
   flex: 1;
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-regular);
 }
 
 .goalCheck {
-  color: var(--primary);
-  font-weight: 600;
+  color: var(--success);
+  font-weight: var(--font-weight-medium);
 }
 
 .goalProgress {
   font-size: var(--font-size-sm);
-  color: var(--primary);
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Session list in modal */
@@ -192,13 +195,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm);
-  background-color: var(--surface-variant);
+  padding: var(--space-md);
+  background-color: var(--border-light);
   border-radius: var(--radius-md);
 }
 
 .sessionTime {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--text-primary);
 }
 
@@ -217,7 +220,7 @@
   }
 
   .statCard {
-    padding: var(--space-sm);
+    padding: var(--space-md);
   }
 
   .statValue {

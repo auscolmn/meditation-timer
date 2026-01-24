@@ -5,7 +5,7 @@
   right: 0;
   height: var(--nav-height);
   background-color: var(--surface);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-light);
   display: flex;
   align-items: stretch;
   padding-bottom: var(--safe-area-bottom);
@@ -19,13 +19,13 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   transition: color var(--transition-fast);
   padding: var(--space-sm);
 }
 
 .tab:hover {
-  color: var(--text-primary);
+  color: var(--text-secondary);
 }
 
 .tab.active {
@@ -33,11 +33,11 @@
 }
 
 .tab svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .label {
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }

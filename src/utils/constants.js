@@ -1,3 +1,10 @@
+// Theme options
+export const THEME_OPTIONS = {
+  LIGHT: 'light',
+  DARK: 'dark',
+  AUTO: 'auto'
+};
+
 // localStorage keys
 export const STORAGE_KEYS = {
   QUOTES: 'innercompass_quotes',

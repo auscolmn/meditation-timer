@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
-import SoundUpload from './SoundUpload';
 import styles from './TimerSetup.module.css';
 
 function TimerSetup({ onStart }) {
@@ -188,11 +187,6 @@ function TimerSetup({ onStart }) {
           </select>
         </div>
 
-        <SoundUpload
-          type="bell"
-          onSoundAdded={(soundId) => setBeginningSound(soundId)}
-        />
-
         <div className="form-group">
           <label className="form-label">Background Sound</label>
           <select
@@ -205,11 +199,6 @@ function TimerSetup({ onStart }) {
             ))}
           </select>
         </div>
-
-        <SoundUpload
-          type="background"
-          onSoundAdded={(soundId) => setBackgroundSound(soundId)}
-        />
 
         {backgroundSound !== 'none' && (
           <div className="form-group">

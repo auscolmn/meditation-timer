@@ -1,14 +1,15 @@
 .title {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   text-align: center;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-xl);
   color: var(--text-primary);
+  letter-spacing: -0.015em;
 }
 
 .sectionTitle {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   margin-bottom: var(--space-md);
   color: var(--text-primary);
 }
@@ -36,23 +37,34 @@
 
 .timeInput .input {
   text-align: center;
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  padding: var(--space-md);
+  font-size: 72px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 768px) {
+  .timeInput .input {
+    font-size: 56px;
+  }
 }
 
 .timeLabel {
   display: block;
-  margin-top: var(--space-xs);
+  margin-top: var(--space-sm);
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .volumeSlider {
   width: 100%;
-  height: 8px;
+  height: 6px;
   border-radius: var(--radius-full);
-  background: var(--surface-variant);
+  background: var(--border);
   outline: none;
   cursor: pointer;
   -webkit-appearance: none;
@@ -60,16 +72,16 @@
 
 .volumeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--primary);
   cursor: pointer;
 }
 
 .volumeSlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--primary);
   cursor: pointer;
@@ -86,11 +98,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  padding: var(--space-md);
+  background-color: var(--border-light);
+  border-radius: var(--radius-md);
 }
 
 .intervalItem .input {
   width: 80px;
   text-align: center;
+  font-size: var(--font-size-base);
 }
 
 .intervalItem .select {
@@ -100,21 +116,9 @@
 .intervalLabel {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .beginButton {
-  margin-top: var(--space-lg);
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  padding: var(--space-lg) var(--space-xl);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0);
-  }
+  margin-top: var(--space-xl);
 }
