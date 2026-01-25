@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { useStreak } from '../../hooks/useStreak';
 import styles from './Welcome.module.css';
 
 const AUTO_TRANSITION_SECONDS = 5;
 
 function Welcome({ onStart }) {
-  const { getDailyQuote, sessions } = useApp();
+  const { getDailyQuote } = useApp();
   const quote = getDailyQuote();
-  const streakData = useStreak(sessions);
 
   // Auto-transition to timer setup after 5 seconds
   useEffect(() => {
@@ -38,13 +36,6 @@ function Welcome({ onStart }) {
               <span className={styles.quoteCategory}>{quote.category}</span>
             </footer>
           </blockquote>
-        )}
-
-        {/* Current Streak Display - only show if streak > 0 */}
-        {streakData.currentStreak > 0 && (
-          <p className={styles.streakText}>
-            {streakData.currentStreak} day streak
-          </p>
         )}
 
       </div>

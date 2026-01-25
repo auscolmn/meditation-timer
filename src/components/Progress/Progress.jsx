@@ -261,14 +261,14 @@ function Progress() {
           </div>
         )}
 
-        {/* All Goals - Expandable */}
+        {/* Achievements - Expandable */}
         <button
           type="button"
           className={styles.expandHeader}
           onClick={() => setGoalsExpanded(!goalsExpanded)}
           aria-expanded={goalsExpanded}
         >
-          <span className={styles.expandTitle}>All Goals</span>
+          <span className={styles.expandTitle}>Achievements</span>
           <span className={styles.expandSummary}>
             {streakData.completedGoals.length} of {STREAK_GOALS.length} completed
           </span>
