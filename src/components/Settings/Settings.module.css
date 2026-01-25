@@ -15,6 +15,7 @@
   color: var(--text-primary);
   margin-bottom: var(--space-xl);
   animation: fadeSlideUp 0.8s ease-out;
+  text-align: center;
 }
 
 .animateDelay1 {
@@ -193,4 +194,12 @@
   font-size: var(--font-size-base);
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+/* Tip */
+.tip {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin-top: var(--space-md);
 }
