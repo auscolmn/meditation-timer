@@ -46,7 +46,7 @@
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
   box-shadow: var(--shadow-sm);
-  border: 2px solid var(--card-border);
+  border: 1px solid var(--card-border);
 }
 
 /* Button styles */
@@ -278,7 +278,7 @@
   overflow-y: auto;
   animation: slideUp var(--transition-base) ease;
   box-shadow: var(--shadow-lg);
-  border: 2px solid var(--card-border);
+  border: 1px solid var(--card-border);
 }
 
 .modal-header {

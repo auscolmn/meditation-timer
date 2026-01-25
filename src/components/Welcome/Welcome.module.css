@@ -25,11 +25,6 @@
 }
 
 .quote {
-  background-color: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-sm);
-  border: 2px solid var(--card-border);
   text-align: center;
   animation: fadeSlideUp 0.8s ease-out 0.2s both;
 }
