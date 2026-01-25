@@ -1,4 +1,26 @@
 import { useState } from 'react';
+
+// Chevron icon for expandable sections
+const ChevronIcon = ({ expanded }) => (
+  <svg
+    className={expanded ? 'expanded' : ''}
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{
+      transition: 'transform 0.2s ease',
+      transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)'
+    }}
+  >
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
 import {
@@ -38,6 +60,10 @@ function Progress() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showAddSession, setShowAddSession] = useState(false);
   const [newSessionDuration, setNewSessionDuration] = useState(10);
+
+  // Expandable sections
+  const [statsExpanded, setStatsExpanded] = useState(false);
+  const [goalsExpanded, setGoalsExpanded] = useState(false);
 
   // Get calendar data
   const weeks = generateCalendarMonth(viewYear, viewMonth);
@@ -93,38 +119,49 @@ function Progress() {
 
   return (
     <div className="screen">
-      {/* Header Stats */}
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <span className={styles.statEmoji}>🔥</span>
-          <span className={styles.statValue}>{streakData.currentStreak}</span>
-          <span className={styles.statLabel}>Day Streak</span>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statEmoji}>🏆</span>
-          <span className={styles.statValue}>{streakData.longestStreak}</span>
-          <span className={styles.statLabel}>Best Streak</span>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statEmoji}>📊</span>
-          <span className={styles.statValue}>{streakData.totalSessions}</span>
-          <span className={styles.statLabel}>Sessions</span>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statEmoji}>⏱️</span>
-          <span className={styles.statValue}>{formatDuration(streakData.totalTime)}</span>
-          <span className={styles.statLabel}>Total Time</span>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statEmoji}>⭐</span>
-          <span className={styles.statValue}>{formatDuration(longestSession)}</span>
-          <span className={styles.statLabel}>Longest</span>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statEmoji}>📈</span>
-          <span className={styles.statValue}>{formatDuration(averageSession)}</span>
-          <span className={styles.statLabel}>Average</span>
-        </div>
+      {/* Stats Section */}
+      <div className={`card mb-lg ${styles.statsSection}`}>
+        <button
+          type="button"
+          className={styles.expandHeader}
+          onClick={() => setStatsExpanded(!statsExpanded)}
+          aria-expanded={statsExpanded}
+        >
+          <h2 className={styles.expandTitle}>Statistics</h2>
+          <span className={styles.expandSummary}>
+            {streakData.totalSessions} sessions · {formatDuration(streakData.totalTime)}
+          </span>
+          <ChevronIcon expanded={statsExpanded} />
+        </button>
+
+        {statsExpanded && (
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{streakData.currentStreak}</span>
+              <span className={styles.statLabel}>Day Streak</span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{streakData.longestStreak}</span>
+              <span className={styles.statLabel}>Best Streak</span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{streakData.totalSessions}</span>
+              <span className={styles.statLabel}>Sessions</span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{formatDuration(streakData.totalTime)}</span>
+              <span className={styles.statLabel}>Total Time</span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{formatDuration(longestSession)}</span>
+              <span className={styles.statLabel}>Longest</span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{formatDuration(averageSession)}</span>
+              <span className={styles.statLabel}>Average</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Calendar */}
@@ -200,33 +237,70 @@ function Progress() {
         </div>
       </div>
 
-      {/* Goals Section */}
+      {/* Streak & Goals Section */}
       <div className={`card mb-lg ${styles.animateDelay2}`}>
-        <h2 className={styles.sectionTitle}>Streak Goals</h2>
-        <div className={styles.goalsList}>
-          {STREAK_GOALS.map(goal => {
-            const isCompleted = streakData.currentStreak >= goal.days;
-            const isCurrent = streakData.nextGoal?.days === goal.days;
-
-            return (
-              <div
-                key={goal.days}
-                className={`${styles.goalItem} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
-              >
-                <span className={styles.goalBadge}>{goal.badge}</span>
-                <span className={styles.goalLabel}>{goal.label}</span>
-                {isCompleted && (
-                  <span className={styles.goalCheck}>✓</span>
-                )}
-                {isCurrent && (
-                  <span className={styles.goalProgress}>
-                    {streakData.currentStreak}/{goal.days}
-                  </span>
-                )}
-              </div>
-            );
-          })}
+        {/* Current Streak - Always Visible */}
+        <div className={styles.currentStreak}>
+          <span className={styles.streakNumber}>{streakData.currentStreak}</span>
+          <span className={styles.streakLabel}>day streak</span>
         </div>
+
+        {/* Next Goal Progress - Always Visible */}
+        {streakData.nextGoal && (
+          <div className={styles.nextGoal}>
+            <div className={styles.nextGoalHeader}>
+              <span>Next: {streakData.nextGoal.label}</span>
+              <span>{streakData.currentStreak}/{streakData.nextGoal.days} days</span>
+            </div>
+            <div className={styles.progressBar}>
+              <div
+                className={styles.progressFill}
+                style={{ width: `${streakData.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* All Goals - Expandable */}
+        <button
+          type="button"
+          className={styles.expandHeader}
+          onClick={() => setGoalsExpanded(!goalsExpanded)}
+          aria-expanded={goalsExpanded}
+        >
+          <span className={styles.expandTitle}>All Goals</span>
+          <span className={styles.expandSummary}>
+            {streakData.completedGoals.length} of {STREAK_GOALS.length} completed
+          </span>
+          <ChevronIcon expanded={goalsExpanded} />
+        </button>
+
+        {goalsExpanded && (
+          <div className={styles.goalsList}>
+            {STREAK_GOALS.map(goal => {
+              const isCompleted = streakData.currentStreak >= goal.days;
+              const isCurrent = streakData.nextGoal?.days === goal.days;
+
+              return (
+                <div
+                  key={goal.days}
+                  className={`${styles.goalItem} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
+                >
+                  <span className={styles.goalBadge}>{goal.badge}</span>
+                  <span className={styles.goalLabel}>{goal.label}</span>
+                  {isCompleted && (
+                    <span className={styles.goalCheck}>✓</span>
+                  )}
+                  {isCurrent && (
+                    <span className={styles.goalProgress}>
+                      {streakData.currentStreak}/{goal.days}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Date Detail Modal */}

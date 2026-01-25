@@ -42,14 +42,11 @@ function Welcome({ onStart }) {
 
         {/* Current Streak Display - only show if streak > 0 */}
         {streakData.currentStreak > 0 && (
-          <div className={styles.streakSection}>
-            <span className={styles.streakEmoji}>🔥</span>
-            <span className={styles.streakCount}>{streakData.currentStreak}</span>
-            <span className={styles.streakLabel}>day streak</span>
-          </div>
+          <p className={styles.streakText}>
+            {streakData.currentStreak} day streak
+          </p>
         )}
 
-        <p className={styles.tapHint}>Tap to continue</p>
       </div>
     </div>
   );
