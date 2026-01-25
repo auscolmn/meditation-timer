@@ -58,16 +58,30 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0;
+  padding: var(--space-md) 0 0 0;
+  margin-top: var(--space-md);
   background: none;
   border: none;
+  border-top: 1px solid var(--border-light);
   cursor: pointer;
   text-align: left;
   gap: var(--space-sm);
 }
 
+.expandHeader:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
 .expandHeader:hover .expandIcon {
   color: var(--primary);
+}
+
+.expandLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
 }
 
 .expandSummary {

@@ -195,6 +195,15 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   const circumference = 2 * Math.PI * 45; // radius = 45
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
+  // Handle escape key for modal
+  useEffect(() => {
+    if (!showEndConfirm) return;
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setShowEndConfirm(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showEndConfirm]);
 
   return (
     <div className={`screen screen--centered ${styles.container} ${bellFlash ? styles.flash : ''}`}>
@@ -250,6 +259,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
         <button
           className={`btn btn--large ${isPaused ? 'btn--primary' : 'btn--secondary'}`}
           onClick={togglePause}
+          aria-label={isPaused ? 'Resume meditation' : 'Pause meditation'}
         >
           {isPaused ? 'RESUME' : 'PAUSE'}
         </button>
@@ -257,6 +267,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
         <button
           className="btn btn--large btn--outline"
           onClick={handleEndEarly}
+          aria-label="End meditation session"
         >
           END
         </button>
@@ -264,9 +275,20 @@ function ActiveTimer({ config, onComplete, onEnd }) {
 
       {/* End confirmation modal */}
       {showEndConfirm && (
-        <div className="modal-overlay" onClick={() => setShowEndConfirm(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2 className="modal-title">End Session Early?</h2>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowEndConfirm(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setShowEndConfirm(false)}
+          role="presentation"
+        >
+          <div
+            className="modal"
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="end-modal-title"
+          >
+            <h2 id="end-modal-title" className="modal-title">End Session Early?</h2>
             <p>This will still count as a completed session.</p>
             <div className="modal-actions">
               <button

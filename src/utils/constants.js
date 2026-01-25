@@ -57,20 +57,6 @@ export const DEFAULT_SETTINGS = {
   focusMode: false
 };
 
-// Motivational messages for completion screen
-export const MOTIVATIONAL_MESSAGES = [
-  "Small daily efforts compound into extraordinary results.",
-  "Consistency is the bridge between goals and accomplishment.",
-  "Every session is an investment in your inner peace.",
-  "You're building a habit that will last a lifetime.",
-  "The practice is the reward.",
-  "Each moment of stillness strengthens your foundation.",
-  "Progress isn't always visible, but it's always happening.",
-  "Your commitment to yourself is your greatest asset.",
-  "Peace grows with every breath you take mindfully.",
-  "Today's practice is tomorrow's strength."
-];
-
 // Default quotes (30 starter quotes)
 export const DEFAULT_QUOTES = [
   // Buddhism (8 quotes)

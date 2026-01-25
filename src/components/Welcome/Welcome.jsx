@@ -24,6 +24,7 @@ function Welcome({ onStart }) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onStart()}
+      aria-label="Tap anywhere to start meditation timer"
     >
       <div className={styles.container}>
         <h1 className={styles.title}>Sati</h1>
