@@ -1,8 +1,28 @@
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
   margin-bottom: var(--space-xl);
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
+.animateDelay1 {
+  animation: fadeSlideUp 0.8s ease-out 0.2s both;
+}
+
+.animateDelay2 {
+  animation: fadeSlideUp 0.8s ease-out 0.4s both;
 }
 
 .statCard {
@@ -212,6 +232,12 @@
 
 .addSessionForm {
   margin-top: var(--space-lg);
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 360px) {

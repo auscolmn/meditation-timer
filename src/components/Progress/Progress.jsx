@@ -21,6 +21,14 @@ function Progress() {
   const { sessions, deleteSession, addManualSession } = useApp();
   const streakData = useStreak(sessions);
 
+  // Calculate additional statistics
+  const longestSession = sessions.length > 0
+    ? Math.max(...sessions.map(s => s.duration || 0))
+    : 0;
+  const averageSession = sessions.length > 0
+    ? Math.round(streakData.totalTime / sessions.length)
+    : 0;
+
   // Calendar state
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -93,6 +101,11 @@ function Progress() {
           <span className={styles.statLabel}>Day Streak</span>
         </div>
         <div className={styles.statCard}>
+          <span className={styles.statEmoji}>🏆</span>
+          <span className={styles.statValue}>{streakData.longestStreak}</span>
+          <span className={styles.statLabel}>Best Streak</span>
+        </div>
+        <div className={styles.statCard}>
           <span className={styles.statEmoji}>📊</span>
           <span className={styles.statValue}>{streakData.totalSessions}</span>
           <span className={styles.statLabel}>Sessions</span>
@@ -102,10 +115,20 @@ function Progress() {
           <span className={styles.statValue}>{formatDuration(streakData.totalTime)}</span>
           <span className={styles.statLabel}>Total Time</span>
         </div>
+        <div className={styles.statCard}>
+          <span className={styles.statEmoji}>⭐</span>
+          <span className={styles.statValue}>{formatDuration(longestSession)}</span>
+          <span className={styles.statLabel}>Longest</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statEmoji}>📈</span>
+          <span className={styles.statValue}>{formatDuration(averageSession)}</span>
+          <span className={styles.statLabel}>Average</span>
+        </div>
       </div>
 
       {/* Calendar */}
-      <div className="card mb-lg">
+      <div className={`card mb-lg ${styles.animateDelay1}`}>
         <div className={styles.calendarHeader}>
           <button
             className="btn btn--icon btn--secondary"
@@ -178,7 +201,7 @@ function Progress() {
       </div>
 
       {/* Goals Section */}
-      <div className="card mb-lg">
+      <div className={`card mb-lg ${styles.animateDelay2}`}>
         <h2 className={styles.sectionTitle}>Streak Goals</h2>
         <div className={styles.goalsList}>
           {STREAK_GOALS.map(goal => {
