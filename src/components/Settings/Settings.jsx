@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import ThemeToggle from '../Common/ThemeToggle';
 import SoundUpload from '../Common/SoundUpload';
@@ -6,34 +5,9 @@ import styles from './Settings.module.css';
 
 function Settings() {
   const { customSounds, settings, updateSettings } = useApp();
-  const [notificationStatus, setNotificationStatus] = useState(
-    'Notification' in window ? Notification.permission : 'unsupported'
-  );
 
   const bellSounds = customSounds.filter(s => s.type === 'bell');
   const backgroundSounds = customSounds.filter(s => s.type === 'background');
-
-  // Handle reminder toggle
-  const handleReminderToggle = async () => {
-    if (!settings.reminderEnabled) {
-      // Enabling - request permission first
-      if ('Notification' in window) {
-        const permission = await Notification.requestPermission();
-        setNotificationStatus(permission);
-        if (permission === 'granted') {
-          updateSettings({ reminderEnabled: true });
-        }
-      }
-    } else {
-      // Disabling
-      updateSettings({ reminderEnabled: false });
-    }
-  };
-
-  // Handle reminder time change
-  const handleReminderTimeChange = (e) => {
-    updateSettings({ reminderTime: e.target.value });
-  };
 
   // Handle focus mode toggle
   const handleFocusModeToggle = () => {
@@ -44,60 +18,17 @@ function Settings() {
     <div className="screen">
       <h1 className={styles.title}>Settings</h1>
 
-      {/* Appearance Section */}
+      {/* Appearance */}
       <div className={`card mb-lg ${styles.animateDelay1}`}>
-        <h2 className={styles.sectionTitle}>Appearance</h2>
         <ThemeToggle />
       </div>
 
-      {/* Reminders Section */}
+      {/* Focus Mode */}
       <div className={`card mb-lg ${styles.animateDelay2}`}>
-        <h2 className={styles.sectionTitle}>Daily Reminder</h2>
-        <p className={styles.sectionDescription}>
-          Get a daily notification to remind you to meditate.
-        </p>
-
         <div className={styles.settingRow}>
           <div className={styles.settingInfo}>
-            <span className={styles.settingLabel}>Enable Reminder</span>
-            {notificationStatus === 'denied' && (
-              <span className={styles.settingHint}>Notifications blocked in browser</span>
-            )}
-            {notificationStatus === 'unsupported' && (
-              <span className={styles.settingHint}>Notifications not supported</span>
-            )}
-          </div>
-          <button
-            className={`${styles.toggle} ${settings.reminderEnabled ? styles.toggleOn : ''}`}
-            onClick={handleReminderToggle}
-            disabled={notificationStatus === 'denied' || notificationStatus === 'unsupported'}
-            aria-label="Toggle reminder"
-          >
-            <span className={styles.toggleKnob} />
-          </button>
-        </div>
-
-        {settings.reminderEnabled && (
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>Reminder Time</span>
-            <input
-              type="time"
-              className={styles.timeInput}
-              value={settings.reminderTime || '09:00'}
-              onChange={handleReminderTimeChange}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Focus Mode Section */}
-      <div className={`card mb-lg ${styles.animateDelay3}`}>
-        <h2 className={styles.sectionTitle}>Focus Mode</h2>
-
-        <div className={styles.settingRow}>
-          <div className={styles.settingInfo}>
-            <span className={styles.settingLabel}>Hide Timer</span>
-            <span className={styles.settingHint}>Hide timer countdown during meditation</span>
+            <span className={styles.settingLabel}>Focus Mode</span>
+            <span className={styles.settingHint}>Hide timer during meditation</span>
           </div>
           <button
             className={`${styles.toggle} ${settings.focusMode ? styles.toggleOn : ''}`}
@@ -110,7 +41,7 @@ function Settings() {
       </div>
 
       {/* Custom Sounds Section */}
-      <div className={`card mb-lg ${styles.animateDelay4}`}>
+      <div className={`card mb-lg ${styles.animateDelay3}`}>
         <h2 className={styles.sectionTitle}>Custom Sounds</h2>
         <p className={styles.sectionDescription}>
           Upload your own sounds to use during meditation. Supported formats: MP3, WAV, OGG (max 5MB).
@@ -146,7 +77,7 @@ function Settings() {
       </div>
 
       {/* About Section */}
-      <div className={`card mb-lg ${styles.animateDelay5}`}>
+      <div className={`card mb-lg ${styles.animateDelay4}`}>
         <h2 className={styles.sectionTitle}>About</h2>
         <div className={styles.aboutInfo}>
           <p className={styles.appName}>Sati</p>

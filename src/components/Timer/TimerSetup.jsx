@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
@@ -42,25 +42,26 @@ function TimerSetup({ onStart }) {
   const [error, setError] = useState('');
 
   // Expandable sections
+  const [durationExpanded, setDurationExpanded] = useState(false);
   const [soundsExpanded, setSoundsExpanded] = useState(false);
   const [intervalsExpanded, setIntervalsExpanded] = useState(false);
 
-  // Get all available sounds (default + custom)
-  const bellSounds = [
+  // Get all available sounds (default + custom) - memoized
+  const bellSounds = useMemo(() => [
     DEFAULT_SOUNDS.none,
     DEFAULT_SOUNDS.bell,
     DEFAULT_SOUNDS.chime,
     DEFAULT_SOUNDS['tibetan-bell'],
     DEFAULT_SOUNDS['tibetan-bowl'],
     ...customSounds.filter(s => s.type === 'bell')
-  ];
+  ], [customSounds]);
 
-  const backgroundSounds = [
+  const backgroundSounds = useMemo(() => [
     DEFAULT_SOUNDS.none,
     DEFAULT_SOUNDS.waterfall,
     DEFAULT_SOUNDS.rain,
     ...customSounds.filter(s => s.type === 'background')
-  ];
+  ], [customSounds]);
 
   // Quick-start presets
   const presets = [
@@ -229,44 +230,75 @@ function TimerSetup({ onStart }) {
           ))}
         </div>
 
-        <div className={styles.durationInputs}>
-          <div className={styles.timeInput}>
-            <input
-              type="number"
-              className="input"
-              value={hours}
-              onChange={handleNumberInput(setHours, 23)}
-              min="0"
-              max="23"
-              aria-label="Hours"
-            />
-            <span className={styles.timeLabel}>Hours</span>
+        {/* Custom time - expandable */}
+        <button
+          type="button"
+          className={styles.expandHeader}
+          onClick={() => setDurationExpanded(!durationExpanded)}
+          aria-expanded={durationExpanded}
+        >
+          <span className={styles.expandLabel}>Custom</span>
+          <span className={styles.expandSummary}>
+            {hours > 0 || seconds > 0 ? `${hours}h ${minutes}m ${seconds}s` : ''}
+          </span>
+          <svg
+            className={`${styles.expandIcon} ${durationExpanded ? styles.expanded : ''}`}
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        {durationExpanded && (
+          <div className={styles.expandContent}>
+            <div className={styles.durationInputs}>
+              <div className={styles.timeInput}>
+                <input
+                  type="number"
+                  className="input"
+                  value={hours}
+                  onChange={handleNumberInput(setHours, 23)}
+                  min="0"
+                  max="23"
+                  aria-label="Hours"
+                />
+                <span className={styles.timeLabel}>Hours</span>
+              </div>
+              <div className={styles.timeInput}>
+                <input
+                  type="number"
+                  className="input"
+                  value={minutes}
+                  onChange={handleNumberInput(setMinutes, 59)}
+                  min="0"
+                  max="59"
+                  aria-label="Minutes"
+                />
+                <span className={styles.timeLabel}>Minutes</span>
+              </div>
+              <div className={styles.timeInput}>
+                <input
+                  type="number"
+                  className="input"
+                  value={seconds}
+                  onChange={handleNumberInput(setSeconds, 59)}
+                  min="0"
+                  max="59"
+                  aria-label="Seconds"
+                />
+                <span className={styles.timeLabel}>Seconds</span>
+              </div>
+            </div>
           </div>
-          <div className={styles.timeInput}>
-            <input
-              type="number"
-              className="input"
-              value={minutes}
-              onChange={handleNumberInput(setMinutes, 59)}
-              min="0"
-              max="59"
-              aria-label="Minutes"
-            />
-            <span className={styles.timeLabel}>Minutes</span>
-          </div>
-          <div className={styles.timeInput}>
-            <input
-              type="number"
-              className="input"
-              value={seconds}
-              onChange={handleNumberInput(setSeconds, 59)}
-              min="0"
-              max="59"
-              aria-label="Seconds"
-            />
-            <span className={styles.timeLabel}>Seconds</span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Sounds */}

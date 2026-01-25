@@ -1,26 +1,4 @@
-import { useState } from 'react';
-
-// Chevron icon for expandable sections
-const ChevronIcon = ({ expanded }) => (
-  <svg
-    className={expanded ? 'expanded' : ''}
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{
-      transition: 'transform 0.2s ease',
-      transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)'
-    }}
-  >
-    <polyline points="6 9 12 15 18 9"/>
-  </svg>
-);
+import { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
 import {
@@ -36,6 +14,24 @@ import {
 import { STREAK_GOALS } from '../../utils/constants';
 import styles from './Progress.module.css';
 
+// Chevron icon for expandable sections
+const ChevronIcon = ({ expanded }) => (
+  <svg
+    className={`${styles.expandIcon} ${expanded ? styles.expanded : ''}`}
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
+
 // Day names for calendar header
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -43,13 +39,15 @@ function Progress() {
   const { sessions, deleteSession, addManualSession } = useApp();
   const streakData = useStreak(sessions);
 
-  // Calculate additional statistics
-  const longestSession = sessions.length > 0
-    ? Math.max(...sessions.map(s => s.duration || 0))
-    : 0;
-  const averageSession = sessions.length > 0
-    ? Math.round(streakData.totalTime / sessions.length)
-    : 0;
+  // Calculate additional statistics (memoized)
+  const { longestSession, averageSession } = useMemo(() => ({
+    longestSession: sessions.length > 0
+      ? Math.max(...sessions.map(s => s.duration || 0))
+      : 0,
+    averageSession: sessions.length > 0
+      ? Math.round(streakData.totalTime / sessions.length)
+      : 0
+  }), [sessions, streakData.totalTime]);
 
   // Calendar state
   const today = new Date();
@@ -60,6 +58,7 @@ function Progress() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showAddSession, setShowAddSession] = useState(false);
   const [newSessionDuration, setNewSessionDuration] = useState(10);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   // Expandable sections
   const [statsExpanded, setStatsExpanded] = useState(false);
@@ -107,10 +106,27 @@ function Progress() {
 
   // Handle delete session
   const handleDeleteSession = (sessionId) => {
-    if (confirm('Delete this session?')) {
-      deleteSession(sessionId);
+    setDeleteConfirmId(sessionId);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmId) {
+      deleteSession(deleteConfirmId);
+      setDeleteConfirmId(null);
     }
   };
+
+  // Handle escape key for modals
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        if (deleteConfirmId) setDeleteConfirmId(null);
+        else if (selectedDate) setSelectedDate(null);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [deleteConfirmId, selectedDate]);
 
   // Get sessions for selected date
   const selectedDateSessions = selectedDate
@@ -198,10 +214,10 @@ function Progress() {
         {/* Calendar grid */}
         <div className={styles.calendarGrid}>
           {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} className={styles.week}>
+            <div key={`${viewYear}-${viewMonth}-week-${weekIndex}`} className={styles.week}>
               {week.map((date, dayIndex) => {
                 if (!date) {
-                  return <div key={dayIndex} className={styles.dayEmpty} />;
+                  return <div key={`empty-${weekIndex}-${dayIndex}`} className={styles.dayEmpty} />;
                 }
 
                 const dateStr = formatDateString(date);
@@ -212,7 +228,7 @@ function Progress() {
 
                 return (
                   <button
-                    key={dayIndex}
+                    key={dateStr}
                     className={`${styles.day} ${isToday ? styles.today : ''} ${isFuture ? styles.future : ''}`}
                     onClick={() => handleDayClick(date)}
                     disabled={isFuture}
@@ -305,13 +321,20 @@ function Progress() {
 
       {/* Date Detail Modal */}
       {selectedDate && (
-        <div className="modal-overlay" onClick={() => setSelectedDate(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={() => setSelectedDate(null)} role="presentation">
+          <div
+            className="modal"
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="date-modal-title"
+          >
             <div className="modal-header">
-              <h2 className="modal-title">{selectedDate}</h2>
+              <h2 id="date-modal-title" className="modal-title">{selectedDate}</h2>
               <button
                 className="btn btn--icon modal-close"
                 onClick={() => setSelectedDate(null)}
+                aria-label="Close modal"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"/>
@@ -388,6 +411,36 @@ function Progress() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="modal-overlay" onClick={() => setDeleteConfirmId(null)} role="presentation">
+          <div
+            className="modal"
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-modal-title"
+          >
+            <h2 id="delete-modal-title" className="modal-title">Delete Session?</h2>
+            <p>This action cannot be undone.</p>
+            <div className="modal-actions">
+              <button
+                className="btn btn--secondary"
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn--primary"
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
