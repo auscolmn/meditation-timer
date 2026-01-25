@@ -1,11 +1,19 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
 import styles from './TimerSetup.module.css';
 
+// Play icon SVG
+const PlayIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <polygon points="5 3 19 12 5 21 5 3"/>
+  </svg>
+);
+
 function TimerSetup({ onStart }) {
   const { settings, updateSettings, customSounds } = useApp();
+  const previewAudioRef = useRef(null);
 
   // Duration state
   const [hours, setHours] = useState(settings.lastDuration?.hours || 0);
@@ -40,6 +48,40 @@ function TimerSetup({ onStart }) {
     DEFAULT_SOUNDS.rain,
     ...customSounds.filter(s => s.type === 'background')
   ];
+
+  // Quick-start presets
+  const presets = [
+    { label: '5 min', minutes: 5 },
+    { label: '10 min', minutes: 10 },
+    { label: '15 min', minutes: 15 },
+    { label: '20 min', minutes: 20 },
+  ];
+
+  // Preview sound
+  const previewSound = (soundId) => {
+    if (soundId === 'none' || !previewAudioRef.current) return;
+
+    const defaultSound = DEFAULT_SOUNDS[soundId];
+    let src = defaultSound?.src;
+
+    if (!src) {
+      const customSound = customSounds.find(s => s.id === soundId);
+      src = customSound?.dataUrl;
+    }
+
+    if (src) {
+      previewAudioRef.current.src = src;
+      previewAudioRef.current.play().catch(console.error);
+    }
+  };
+
+  // Apply preset duration
+  const applyPreset = (preset) => {
+    setHours(0);
+    setMinutes(preset.minutes);
+    setSeconds(0);
+    setError('');
+  };
 
   // Validate and handle start
   const handleStart = () => {
@@ -112,11 +154,29 @@ function TimerSetup({ onStart }) {
 
   return (
     <div className="screen">
+      {/* Hidden audio for previews */}
+      <audio ref={previewAudioRef} />
+
       <h1 className={styles.title}>Set Your Timer</h1>
 
       {/* Duration */}
-      <div className="card mb-lg">
+      <div className={`card mb-lg ${styles.animateDelay1}`}>
         <h2 className={styles.sectionTitle}>Duration</h2>
+
+        {/* Quick-start presets */}
+        <div className={styles.presets}>
+          {presets.map(preset => (
+            <button
+              key={preset.minutes}
+              type="button"
+              className={`${styles.presetButton} ${minutes === preset.minutes && hours === 0 && seconds === 0 ? styles.presetActive : ''}`}
+              onClick={() => applyPreset(preset)}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+
         <div className={styles.durationInputs}>
           <div className={styles.timeInput}>
             <input
@@ -158,46 +218,79 @@ function TimerSetup({ onStart }) {
       </div>
 
       {/* Sounds */}
-      <div className="card mb-lg">
+      <div className={`card mb-lg ${styles.animateDelay2}`}>
         <h2 className={styles.sectionTitle}>Sounds</h2>
 
         <div className="form-group">
           <label className="form-label">Beginning Sound</label>
-          <select
-            className="select"
-            value={beginningSound}
-            onChange={(e) => setBeginningSound(e.target.value)}
-          >
-            {bellSounds.map(sound => (
-              <option key={sound.id} value={sound.id}>{sound.name}</option>
-            ))}
-          </select>
+          <div className={styles.soundRow}>
+            <select
+              className="select"
+              value={beginningSound}
+              onChange={(e) => setBeginningSound(e.target.value)}
+            >
+              {bellSounds.map(sound => (
+                <option key={sound.id} value={sound.id}>{sound.name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className={styles.previewButton}
+              onClick={() => previewSound(beginningSound)}
+              disabled={beginningSound === 'none'}
+              aria-label="Preview sound"
+            >
+              <PlayIcon />
+            </button>
+          </div>
         </div>
 
         <div className="form-group">
           <label className="form-label">Ending Sound</label>
-          <select
-            className="select"
-            value={endingSound}
-            onChange={(e) => setEndingSound(e.target.value)}
-          >
-            {bellSounds.map(sound => (
-              <option key={sound.id} value={sound.id}>{sound.name}</option>
-            ))}
-          </select>
+          <div className={styles.soundRow}>
+            <select
+              className="select"
+              value={endingSound}
+              onChange={(e) => setEndingSound(e.target.value)}
+            >
+              {bellSounds.map(sound => (
+                <option key={sound.id} value={sound.id}>{sound.name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className={styles.previewButton}
+              onClick={() => previewSound(endingSound)}
+              disabled={endingSound === 'none'}
+              aria-label="Preview sound"
+            >
+              <PlayIcon />
+            </button>
+          </div>
         </div>
 
         <div className="form-group">
           <label className="form-label">Background Sound</label>
-          <select
-            className="select"
-            value={backgroundSound}
-            onChange={(e) => setBackgroundSound(e.target.value)}
-          >
-            {backgroundSounds.map(sound => (
-              <option key={sound.id} value={sound.id}>{sound.name}</option>
-            ))}
-          </select>
+          <div className={styles.soundRow}>
+            <select
+              className="select"
+              value={backgroundSound}
+              onChange={(e) => setBackgroundSound(e.target.value)}
+            >
+              {backgroundSounds.map(sound => (
+                <option key={sound.id} value={sound.id}>{sound.name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className={styles.previewButton}
+              onClick={() => previewSound(backgroundSound)}
+              disabled={backgroundSound === 'none'}
+              aria-label="Preview sound"
+            >
+              <PlayIcon />
+            </button>
+          </div>
         </div>
 
         {backgroundSound !== 'none' && (
@@ -216,7 +309,7 @@ function TimerSetup({ onStart }) {
       </div>
 
       {/* Interval Bells */}
-      <div className="card mb-lg">
+      <div className={`card mb-lg ${styles.animateDelay3}`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Interval Bells</h2>
           <button
@@ -275,7 +368,7 @@ function TimerSetup({ onStart }) {
 
       {/* Begin button */}
       <button
-        className={`btn btn--primary btn--large btn--full ${styles.beginButton}`}
+        className={`btn btn--primary btn--large btn--full ${styles.beginButton} ${styles.animateDelay4}`}
         onClick={handleStart}
       >
         BEGIN

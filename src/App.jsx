@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppProvider } from './context/AppContext';
 import { useTheme } from './hooks/useTheme';
 import Navigation from './components/Navigation/Navigation';
@@ -24,41 +24,60 @@ function AppContent() {
   const [currentScreen, setCurrentScreen] = useState(SCREENS.WELCOME);
   const [timerConfig, setTimerConfig] = useState(null);
   const [completedSession, setCompletedSession] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [pendingScreen, setPendingScreen] = useState(null);
 
   // Initialize theme
   useTheme();
 
+  // Handle screen transitions
+  const transitionToScreen = (screen) => {
+    setIsTransitioning(true);
+    setPendingScreen(screen);
+  };
+
+  useEffect(() => {
+    if (isTransitioning && pendingScreen) {
+      const timer = setTimeout(() => {
+        setCurrentScreen(pendingScreen);
+        setPendingScreen(null);
+        setIsTransitioning(false);
+      }, 150); // Match CSS transition duration
+      return () => clearTimeout(timer);
+    }
+  }, [isTransitioning, pendingScreen]);
+
   // Navigation handlers
-  const goToTimerSetup = () => setCurrentScreen(SCREENS.TIMER_SETUP);
-  const goToProgress = () => setCurrentScreen(SCREENS.PROGRESS);
-  const goToWelcome = () => setCurrentScreen(SCREENS.WELCOME);
+  const goToTimerSetup = () => transitionToScreen(SCREENS.TIMER_SETUP);
+  const goToProgress = () => transitionToScreen(SCREENS.PROGRESS);
+  const goToWelcome = () => transitionToScreen(SCREENS.WELCOME);
 
   // Start meditation session
   const startMeditation = (config) => {
     setTimerConfig(config);
-    setCurrentScreen(SCREENS.ACTIVE_TIMER);
+    transitionToScreen(SCREENS.ACTIVE_TIMER);
   };
 
   // Complete meditation session
   const completeMeditation = (session) => {
     setCompletedSession(session);
-    setCurrentScreen(SCREENS.COMPLETION);
+    transitionToScreen(SCREENS.COMPLETION);
   };
 
   // End session early (go back to setup)
   const endSessionEarly = (session) => {
     if (session) {
       setCompletedSession(session);
-      setCurrentScreen(SCREENS.COMPLETION);
+      transitionToScreen(SCREENS.COMPLETION);
     } else {
-      setCurrentScreen(SCREENS.TIMER_SETUP);
+      transitionToScreen(SCREENS.TIMER_SETUP);
     }
   };
 
   // Meditate again after completion
   const meditateAgain = () => {
     setCompletedSession(null);
-    setCurrentScreen(SCREENS.TIMER_SETUP);
+    transitionToScreen(SCREENS.TIMER_SETUP);
   };
 
   // Render current screen
@@ -114,11 +133,11 @@ function AppContent() {
     }
 
     if (tab === 'timer') {
-      setCurrentScreen(SCREENS.TIMER_SETUP);
+      transitionToScreen(SCREENS.TIMER_SETUP);
     } else if (tab === 'progress') {
-      setCurrentScreen(SCREENS.PROGRESS);
+      transitionToScreen(SCREENS.PROGRESS);
     } else if (tab === 'settings') {
-      setCurrentScreen(SCREENS.SETTINGS);
+      transitionToScreen(SCREENS.SETTINGS);
     }
   };
 
@@ -128,7 +147,7 @@ function AppContent() {
 
   return (
     <div className="app">
-      <main className="app-main">
+      <main className={`app-main ${isTransitioning ? 'transitioning' : ''}`}>
         {renderScreen()}
       </main>
       {showNavigation && (

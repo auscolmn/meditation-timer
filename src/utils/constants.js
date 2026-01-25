@@ -51,7 +51,10 @@ export const DEFAULT_SETTINGS = {
   lastEndingSound: 'gong',
   lastBackgroundSound: 'none',
   backgroundVolume: 50,
-  lastIntervalBells: []
+  lastIntervalBells: [],
+  reminderEnabled: false,
+  reminderTime: '09:00',
+  focusMode: false
 };
 
 // Motivational messages for completion screen

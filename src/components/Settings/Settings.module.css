@@ -1,8 +1,40 @@
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .title {
   font-size: 28px;
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin-bottom: var(--space-xl);
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
+.animateDelay1 {
+  animation: fadeSlideUp 0.8s ease-out 0.2s both;
+}
+
+.animateDelay2 {
+  animation: fadeSlideUp 0.8s ease-out 0.4s both;
+}
+
+.animateDelay3 {
+  animation: fadeSlideUp 0.8s ease-out 0.6s both;
+}
+
+.animateDelay4 {
+  animation: fadeSlideUp 0.8s ease-out 0.8s both;
+}
+
+.animateDelay5 {
+  animation: fadeSlideUp 0.8s ease-out 1s both;
 }
 
 .sectionTitle {
@@ -49,6 +81,94 @@
   color: var(--text-tertiary);
   font-style: italic;
   margin-top: var(--space-md);
+}
+
+/* Setting rows */
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.settingRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settingRow:first-of-type {
+  padding-top: 0;
+}
+
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.settingLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.settingHint {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+/* Toggle switch */
+.toggle {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  background-color: var(--border);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle.toggleOn {
+  background-color: var(--success);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background-color: var(--surface-raised);
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle.toggleOn .toggleKnob {
+  transform: translateX(22px);
+}
+
+/* Time input */
+.timeInput {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+}
+
+.timeInput:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 /* About Section */
