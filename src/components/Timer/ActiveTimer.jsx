@@ -195,23 +195,6 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   const circumference = 2 * Math.PI * 45; // radius = 45
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
-  // Get upcoming interval bells
-  const elapsedTime = config.duration - timeRemaining;
-  const upcomingBells = (config.intervalBells || [])
-    .filter(bell => bell.time > elapsedTime)
-    .sort((a, b) => a.time - b.time)
-    .slice(0, 3); // Show max 3 upcoming
-
-  // Format bell time relative to now
-  const formatBellTime = (bellTime) => {
-    const secondsUntil = bellTime - elapsedTime;
-    const mins = Math.floor(secondsUntil / 60);
-    const secs = secondsUntil % 60;
-    if (mins > 0) {
-      return `${mins}m ${secs}s`;
-    }
-    return `${secs}s`;
-  };
 
   return (
     <div className={`screen screen--centered ${styles.container} ${bellFlash ? styles.flash : ''}`}>
@@ -247,9 +230,11 @@ function ActiveTimer({ config, onComplete, onEnd }) {
           />
         </svg>
 
-        <div className={styles.timeText}>
-          {settings.focusMode ? '•••' : formatTimeDisplay(timeRemaining, config.duration >= 3600)}
-        </div>
+        {!settings.focusMode && (
+          <div className={styles.timeText}>
+            {formatTimeDisplay(timeRemaining, config.duration >= 3600)}
+          </div>
+        )}
       </div>
 
       {/* Background sound indicator */}
@@ -259,18 +244,6 @@ function ActiveTimer({ config, onComplete, onEnd }) {
         </p>
       )}
 
-      {/* Upcoming interval bells */}
-      {upcomingBells.length > 0 && (
-        <div className={styles.upcomingBells}>
-          <span className={styles.bellIcon}>🔔</span>
-          <span className={styles.bellLabel}>
-            {upcomingBells.length === 1
-              ? `Bell in ${formatBellTime(upcomingBells[0].time)}`
-              : `Next bells: ${upcomingBells.map(b => formatBellTime(b.time)).join(', ')}`
-            }
-          </span>
-        </div>
-      )}
 
       {/* Controls */}
       <div className={styles.controls}>

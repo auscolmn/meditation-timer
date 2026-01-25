@@ -41,6 +41,10 @@ function TimerSetup({ onStart }) {
   // Validation error
   const [error, setError] = useState('');
 
+  // Expandable sections
+  const [soundsExpanded, setSoundsExpanded] = useState(false);
+  const [intervalsExpanded, setIntervalsExpanded] = useState(false);
+
   // Get all available sounds (default + custom)
   const bellSounds = [
     DEFAULT_SOUNDS.none,
@@ -209,7 +213,7 @@ function TimerSetup({ onStart }) {
 
       {/* Duration */}
       <div className={`card mb-lg ${styles.animateDelay1}`}>
-        <h2 className={styles.sectionTitle}>Duration</h2>
+        <h2 className={`${styles.sectionTitle} mb-md`}>Duration</h2>
 
         {/* Quick-start presets */}
         <div className={styles.presets}>
@@ -267,146 +271,203 @@ function TimerSetup({ onStart }) {
 
       {/* Sounds */}
       <div className={`card mb-lg ${styles.animateDelay2}`}>
-        <h2 className={styles.sectionTitle}>Sounds</h2>
+        <button
+          type="button"
+          className={styles.expandHeader}
+          onClick={() => setSoundsExpanded(!soundsExpanded)}
+          aria-expanded={soundsExpanded}
+        >
+          <h2 className={styles.sectionTitle}>Sounds</h2>
+          <span className={styles.expandSummary}>
+            {DEFAULT_SOUNDS[beginningSound]?.name || 'None'} / {DEFAULT_SOUNDS[endingSound]?.name || 'None'}
+          </span>
+          <svg
+            className={`${styles.expandIcon} ${soundsExpanded ? styles.expanded : ''}`}
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
 
-        <div className="form-group">
-          <label className="form-label">Beginning Sound</label>
-          <div className={styles.soundRow}>
-            <select
-              className="select"
-              value={beginningSound}
-              onChange={(e) => setBeginningSound(e.target.value)}
-            >
-              {bellSounds.map(sound => (
-                <option key={sound.id} value={sound.id}>{sound.name}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className={`${styles.previewButton} ${playingSound === beginningSound ? styles.playing : ''}`}
-              onClick={() => previewSound(beginningSound)}
-              disabled={beginningSound === 'none'}
-              aria-label={playingSound === beginningSound ? "Stop preview" : "Preview sound"}
-            >
-              {playingSound === beginningSound ? <PauseIcon /> : <PlayIcon />}
-            </button>
-          </div>
-        </div>
+        {soundsExpanded && (
+          <div className={styles.expandContent}>
+            <div className="form-group">
+              <label className="form-label">Beginning Sound</label>
+              <div className={styles.soundRow}>
+                <select
+                  className="select"
+                  value={beginningSound}
+                  onChange={(e) => setBeginningSound(e.target.value)}
+                >
+                  {bellSounds.map(sound => (
+                    <option key={sound.id} value={sound.id}>{sound.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className={`${styles.previewButton} ${playingSound === beginningSound ? styles.playing : ''}`}
+                  onClick={() => previewSound(beginningSound)}
+                  disabled={beginningSound === 'none'}
+                  aria-label={playingSound === beginningSound ? "Stop preview" : "Preview sound"}
+                >
+                  {playingSound === beginningSound ? <PauseIcon /> : <PlayIcon />}
+                </button>
+              </div>
+            </div>
 
-        <div className="form-group">
-          <label className="form-label">Ending Sound</label>
-          <div className={styles.soundRow}>
-            <select
-              className="select"
-              value={endingSound}
-              onChange={(e) => setEndingSound(e.target.value)}
-            >
-              {bellSounds.map(sound => (
-                <option key={sound.id} value={sound.id}>{sound.name}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className={`${styles.previewButton} ${playingSound === endingSound ? styles.playing : ''}`}
-              onClick={() => previewSound(endingSound)}
-              disabled={endingSound === 'none'}
-              aria-label={playingSound === endingSound ? "Stop preview" : "Preview sound"}
-            >
-              {playingSound === endingSound ? <PauseIcon /> : <PlayIcon />}
-            </button>
-          </div>
-        </div>
+            <div className="form-group">
+              <label className="form-label">Ending Sound</label>
+              <div className={styles.soundRow}>
+                <select
+                  className="select"
+                  value={endingSound}
+                  onChange={(e) => setEndingSound(e.target.value)}
+                >
+                  {bellSounds.map(sound => (
+                    <option key={sound.id} value={sound.id}>{sound.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className={`${styles.previewButton} ${playingSound === endingSound ? styles.playing : ''}`}
+                  onClick={() => previewSound(endingSound)}
+                  disabled={endingSound === 'none'}
+                  aria-label={playingSound === endingSound ? "Stop preview" : "Preview sound"}
+                >
+                  {playingSound === endingSound ? <PauseIcon /> : <PlayIcon />}
+                </button>
+              </div>
+            </div>
 
-        <div className="form-group">
-          <label className="form-label">Background Sound</label>
-          <div className={styles.soundRow}>
-            <select
-              className="select"
-              value={backgroundSound}
-              onChange={(e) => setBackgroundSound(e.target.value)}
-            >
-              {backgroundSounds.map(sound => (
-                <option key={sound.id} value={sound.id}>{sound.name}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className={`${styles.previewButton} ${playingSound === backgroundSound ? styles.playing : ''}`}
-              onClick={() => previewSound(backgroundSound)}
-              disabled={backgroundSound === 'none'}
-              aria-label={playingSound === backgroundSound ? "Stop preview" : "Preview sound"}
-            >
-              {playingSound === backgroundSound ? <PauseIcon /> : <PlayIcon />}
-            </button>
-          </div>
-        </div>
+            <div className="form-group">
+              <label className="form-label">Background Sound</label>
+              <div className={styles.soundRow}>
+                <select
+                  className="select"
+                  value={backgroundSound}
+                  onChange={(e) => setBackgroundSound(e.target.value)}
+                >
+                  {backgroundSounds.map(sound => (
+                    <option key={sound.id} value={sound.id}>{sound.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className={`${styles.previewButton} ${playingSound === backgroundSound ? styles.playing : ''}`}
+                  onClick={() => previewSound(backgroundSound)}
+                  disabled={backgroundSound === 'none'}
+                  aria-label={playingSound === backgroundSound ? "Stop preview" : "Preview sound"}
+                >
+                  {playingSound === backgroundSound ? <PauseIcon /> : <PlayIcon />}
+                </button>
+              </div>
+            </div>
 
         {backgroundSound !== 'none' && (
-          <div className="form-group">
-            <label className="form-label">Background Volume: {backgroundVolume}%</label>
-            <input
-              type="range"
-              className={styles.volumeSlider}
-              value={backgroundVolume}
-              onChange={(e) => setBackgroundVolume(parseInt(e.target.value))}
-              min="0"
-              max="100"
-            />
+              <div className="form-group">
+                <label className="form-label">Background Volume: {backgroundVolume}%</label>
+                <input
+                  type="range"
+                  className={styles.volumeSlider}
+                  value={backgroundVolume}
+                  onChange={(e) => setBackgroundVolume(parseInt(e.target.value))}
+                  min="0"
+                  max="100"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Interval Bells */}
       <div className={`card mb-lg ${styles.animateDelay3}`}>
-        <div className={styles.sectionHeader}>
+        <button
+          type="button"
+          className={styles.expandHeader}
+          onClick={() => setIntervalsExpanded(!intervalsExpanded)}
+          aria-expanded={intervalsExpanded}
+        >
           <h2 className={styles.sectionTitle}>Interval Bells</h2>
-          <button
-            className="btn btn--secondary"
-            onClick={addIntervalBell}
-            type="button"
+          <span className={styles.expandSummary}>
+            {intervalBells.length === 0 ? 'None' : `${intervalBells.length} bell${intervalBells.length > 1 ? 's' : ''}`}
+          </span>
+          <svg
+            className={`${styles.expandIcon} ${intervalsExpanded ? styles.expanded : ''}`}
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            + Add
-          </button>
-        </div>
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
 
-        {intervalBells.length === 0 ? (
-          <p className="text-secondary">No interval bells set</p>
-        ) : (
-          <div className={styles.intervalList}>
-            {intervalBells.map((bell, index) => (
-              <div key={index} className={styles.intervalItem}>
-                <input
-                  type="number"
-                  className="input"
-                  value={Math.floor(bell.time / 60)}
-                  onChange={(e) => updateIntervalBell(index, 'time', parseInt(e.target.value || 0) * 60)}
-                  min="0"
-                  placeholder="Minutes"
-                  aria-label="Interval time in minutes"
-                />
-                <span className={styles.intervalLabel}>min</span>
-                <select
-                  className="select"
-                  value={bell.sound}
-                  onChange={(e) => updateIntervalBell(index, 'sound', e.target.value)}
-                >
-                  {bellSounds.filter(s => s.id !== 'none').map(sound => (
-                    <option key={sound.id} value={sound.id}>{sound.name}</option>
-                  ))}
-                </select>
-                <button
-                  className="btn btn--icon btn--secondary"
-                  onClick={() => removeIntervalBell(index)}
-                  aria-label="Remove interval bell"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 6h18"/>
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                  </svg>
-                </button>
+        {intervalsExpanded && (
+          <div className={styles.expandContent}>
+            <div className={styles.intervalHeader}>
+              <button
+                className="btn btn--secondary"
+                onClick={addIntervalBell}
+                type="button"
+              >
+                + Add Bell
+              </button>
+            </div>
+
+            {intervalBells.length === 0 ? (
+              <p className="text-secondary">No interval bells set</p>
+            ) : (
+              <div className={styles.intervalList}>
+                {intervalBells.map((bell, index) => (
+                  <div key={index} className={styles.intervalItem}>
+                    <input
+                      type="number"
+                      className="input"
+                      value={Math.floor(bell.time / 60)}
+                      onChange={(e) => updateIntervalBell(index, 'time', parseInt(e.target.value || 0) * 60)}
+                      min="0"
+                      placeholder="Minutes"
+                      aria-label="Interval time in minutes"
+                    />
+                    <span className={styles.intervalLabel}>min</span>
+                    <select
+                      className="select"
+                      value={bell.sound}
+                      onChange={(e) => updateIntervalBell(index, 'sound', e.target.value)}
+                    >
+                      {bellSounds.filter(s => s.id !== 'none').map(sound => (
+                        <option key={sound.id} value={sound.id}>{sound.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="btn btn--icon btn--secondary"
+                      onClick={() => removeIntervalBell(index)}
+                      aria-label="Remove interval bell"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>

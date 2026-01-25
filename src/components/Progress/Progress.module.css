@@ -9,37 +9,123 @@
   }
 }
 
+/* Expandable sections */
+.expandHeader {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-md) 0;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border-light);
+  cursor: pointer;
+  text-align: left;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.expandHeader:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.expandTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.expandSummary {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  text-align: right;
+  margin-right: var(--space-sm);
+}
+
+.statsSection {
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
-  margin-bottom: var(--space-xl);
-  animation: fadeSlideUp 0.8s ease-out;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-light);
 }
 
 .animateDelay1 {
-  animation: fadeSlideUp 0.8s ease-out 0.2s both;
+  animation: fadeSlideUp 0.8s ease-out 0.1s both;
 }
 
 .animateDelay2 {
-  animation: fadeSlideUp 0.8s ease-out 0.4s both;
+  animation: fadeSlideUp 0.8s ease-out 0.2s both;
+}
+
+/* Current Streak Display */
+.currentStreak {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) 0;
+}
+
+.streakNumber {
+  font-size: 56px;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.streakLabel {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Next Goal Progress */
+.nextGoal {
+  padding: var(--space-md);
+  background-color: var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+.nextGoalHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.progressBar {
+  height: 6px;
+  background-color: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--success);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
 }
 
 .statCard {
-  background-color: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  background-color: var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
   text-align: center;
-  box-shadow: var(--shadow-sm);
-  border: 2px solid var(--card-border);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-xs);
-}
-
-.statEmoji {
-  font-size: var(--font-size-xl);
 }
 
 .statValue {
@@ -150,16 +236,12 @@
 }
 
 /* Goals */
-.sectionTitle {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--space-md);
-}
 
 .goalsList {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  margin-top: var(--space-md);
 }
 
 .goalItem {

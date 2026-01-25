@@ -45,30 +45,10 @@
 .backgroundIndicator {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  margin-bottom: var(--space-md);
-  font-weight: var(--font-weight-medium);
-}
-
-.upcomingBells {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  background-color: var(--surface);
-  border-radius: var(--radius-full);
   margin-bottom: var(--space-xl);
-  border: 1px solid var(--border);
-}
-
-.bellIcon {
-  font-size: var(--font-size-sm);
-}
-
-.bellLabel {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
   font-weight: var(--font-weight-medium);
 }
+
 
 .controls {
   display: flex;
