@@ -18,9 +18,9 @@ export const STORAGE_KEYS = {
 // Default sounds available in the app
 export const DEFAULT_SOUNDS = {
   bell: { id: 'bell', name: 'Bell', src: '/sounds/bell.mp3', type: 'bell' },
-  gong: { id: 'gong', name: 'Gong', src: '/sounds/gong.mp3', type: 'bell' },
-  'tibetan-bowl': { id: 'tibetan-bowl', name: 'Tibetan Bowl', src: '/sounds/tibetan-bowl.mp3', type: 'bell' },
   chime: { id: 'chime', name: 'Chime', src: '/sounds/chime.mp3', type: 'bell' },
+  'tibetan-bell': { id: 'tibetan-bell', name: 'Tibetan Bell', src: '/sounds/tibetan-bell.mp3', type: 'bell' },
+  'tibetan-bowl': { id: 'tibetan-bowl', name: 'Tibetan Bowl', src: '/sounds/tibetan-bowl.mp3', type: 'bell' },
   waterfall: { id: 'waterfall', name: 'Waterfall', src: '/sounds/waterfall.mp3', type: 'background' },
   rain: { id: 'rain', name: 'Rain', src: '/sounds/rain.mp3', type: 'background' },
   none: { id: 'none', name: 'None', src: null, type: 'none' }
@@ -48,7 +48,7 @@ export const QUOTE_CATEGORIES = ['Buddhism', 'Taoism', 'Stoicism', 'Other'];
 export const DEFAULT_SETTINGS = {
   lastDuration: { hours: 0, minutes: 10, seconds: 0 },
   lastBeginningSound: 'bell',
-  lastEndingSound: 'gong',
+  lastEndingSound: 'tibetan-bell',
   lastBackgroundSound: 'none',
   backgroundVolume: 50,
   lastIntervalBells: [],

@@ -215,6 +215,12 @@
   cursor: not-allowed;
 }
 
+.previewButton.playing {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface-raised);
+}
+
 .beginButton {
   margin-top: var(--space-xl);
 }

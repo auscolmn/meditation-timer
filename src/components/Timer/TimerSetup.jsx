@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
@@ -11,9 +11,18 @@ const PlayIcon = () => (
   </svg>
 );
 
+// Pause icon SVG
+const PauseIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <rect x="6" y="4" width="4" height="16"/>
+    <rect x="14" y="4" width="4" height="16"/>
+  </svg>
+);
+
 function TimerSetup({ onStart }) {
   const { settings, updateSettings, customSounds } = useApp();
   const previewAudioRef = useRef(null);
+  const [playingSound, setPlayingSound] = useState(null);
 
   // Duration state
   const [hours, setHours] = useState(settings.lastDuration?.hours || 0);
@@ -36,9 +45,9 @@ function TimerSetup({ onStart }) {
   const bellSounds = [
     DEFAULT_SOUNDS.none,
     DEFAULT_SOUNDS.bell,
-    DEFAULT_SOUNDS.gong,
-    DEFAULT_SOUNDS['tibetan-bowl'],
     DEFAULT_SOUNDS.chime,
+    DEFAULT_SOUNDS['tibetan-bell'],
+    DEFAULT_SOUNDS['tibetan-bowl'],
     ...customSounds.filter(s => s.type === 'bell')
   ];
 
@@ -57,9 +66,35 @@ function TimerSetup({ onStart }) {
     { label: '20 min', minutes: 20 },
   ];
 
-  // Preview sound
+  // Update preview volume when slider changes (for background sounds)
+  useEffect(() => {
+    if (previewAudioRef.current && playingSound) {
+      const defaultSound = DEFAULT_SOUNDS[playingSound];
+      const customSound = customSounds.find(s => s.id === playingSound);
+      const isBackgroundSound = defaultSound?.type === 'background' || customSound?.type === 'background';
+      if (isBackgroundSound) {
+        previewAudioRef.current.volume = backgroundVolume / 100;
+      }
+    }
+  }, [backgroundVolume, playingSound, customSounds]);
+
+  // Preview sound (toggle play/pause)
   const previewSound = (soundId) => {
     if (soundId === 'none' || !previewAudioRef.current) return;
+
+    // If this sound is already playing, pause it
+    if (playingSound === soundId) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current.currentTime = 0;
+      setPlayingSound(null);
+      return;
+    }
+
+    // Stop any currently playing sound
+    if (playingSound) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current.currentTime = 0;
+    }
 
     const defaultSound = DEFAULT_SOUNDS[soundId];
     let src = defaultSound?.src;
@@ -71,7 +106,20 @@ function TimerSetup({ onStart }) {
 
     if (src) {
       previewAudioRef.current.src = src;
+
+      // Apply volume for background sounds
+      const defaultSound = DEFAULT_SOUNDS[soundId];
+      const customSound = customSounds.find(s => s.id === soundId);
+      const isBackgroundSound = defaultSound?.type === 'background' || customSound?.type === 'background';
+      previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : 1;
+
       previewAudioRef.current.play().catch(console.error);
+      setPlayingSound(soundId);
+
+      // Listen for when the sound ends
+      previewAudioRef.current.onended = () => {
+        setPlayingSound(null);
+      };
     }
   };
 
@@ -235,12 +283,12 @@ function TimerSetup({ onStart }) {
             </select>
             <button
               type="button"
-              className={styles.previewButton}
+              className={`${styles.previewButton} ${playingSound === beginningSound ? styles.playing : ''}`}
               onClick={() => previewSound(beginningSound)}
               disabled={beginningSound === 'none'}
-              aria-label="Preview sound"
+              aria-label={playingSound === beginningSound ? "Stop preview" : "Preview sound"}
             >
-              <PlayIcon />
+              {playingSound === beginningSound ? <PauseIcon /> : <PlayIcon />}
             </button>
           </div>
         </div>
@@ -259,12 +307,12 @@ function TimerSetup({ onStart }) {
             </select>
             <button
               type="button"
-              className={styles.previewButton}
+              className={`${styles.previewButton} ${playingSound === endingSound ? styles.playing : ''}`}
               onClick={() => previewSound(endingSound)}
               disabled={endingSound === 'none'}
-              aria-label="Preview sound"
+              aria-label={playingSound === endingSound ? "Stop preview" : "Preview sound"}
             >
-              <PlayIcon />
+              {playingSound === endingSound ? <PauseIcon /> : <PlayIcon />}
             </button>
           </div>
         </div>
@@ -283,12 +331,12 @@ function TimerSetup({ onStart }) {
             </select>
             <button
               type="button"
-              className={styles.previewButton}
+              className={`${styles.previewButton} ${playingSound === backgroundSound ? styles.playing : ''}`}
               onClick={() => previewSound(backgroundSound)}
               disabled={backgroundSound === 'none'}
-              aria-label="Preview sound"
+              aria-label={playingSound === backgroundSound ? "Stop preview" : "Preview sound"}
             >
-              <PlayIcon />
+              {playingSound === backgroundSound ? <PauseIcon /> : <PlayIcon />}
             </button>
           </div>
         </div>
