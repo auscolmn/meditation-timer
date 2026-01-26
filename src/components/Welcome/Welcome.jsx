@@ -32,10 +32,7 @@ function Welcome({ onStart }) {
         {quote && (
           <blockquote className={styles.quote}>
             <p className={styles.quoteText}>"{quote.text}"</p>
-            <footer className={styles.quoteAuthor}>
-              — {quote.author}
-              <span className={styles.quoteCategory}>{quote.category}</span>
-            </footer>
+            <footer className={styles.quoteAuthor}>— {quote.author}</footer>
           </blockquote>
         )}
 

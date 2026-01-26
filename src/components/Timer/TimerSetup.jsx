@@ -34,6 +34,7 @@ function TimerSetup({ onStart }) {
   const [endingSound, setEndingSound] = useState(settings.lastEndingSound || 'gong');
   const [backgroundSound, setBackgroundSound] = useState(settings.lastBackgroundSound || 'none');
   const [backgroundVolume, setBackgroundVolume] = useState(settings.backgroundVolume || 50);
+  const [bellVolume, setBellVolume] = useState(settings.bellVolume || 80);
 
   // Interval bells state
   const [intervalBells, setIntervalBells] = useState(settings.lastIntervalBells || []);
@@ -71,17 +72,15 @@ function TimerSetup({ onStart }) {
     { label: '20 min', minutes: 20 },
   ];
 
-  // Update preview volume when slider changes (for background sounds)
+  // Update preview volume when slider changes
   useEffect(() => {
     if (previewAudioRef.current && playingSound) {
       const defaultSound = DEFAULT_SOUNDS[playingSound];
       const customSound = customSounds.find(s => s.id === playingSound);
       const isBackgroundSound = defaultSound?.type === 'background' || customSound?.type === 'background';
-      if (isBackgroundSound) {
-        previewAudioRef.current.volume = backgroundVolume / 100;
-      }
+      previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : bellVolume / 100;
     }
-  }, [backgroundVolume, playingSound, customSounds]);
+  }, [backgroundVolume, bellVolume, playingSound, customSounds]);
 
   // Preview sound (toggle play/pause)
   const previewSound = (soundId) => {
@@ -112,11 +111,11 @@ function TimerSetup({ onStart }) {
     if (src) {
       previewAudioRef.current.src = src;
 
-      // Apply volume for background sounds
+      // Apply appropriate volume
       const defaultSound = DEFAULT_SOUNDS[soundId];
       const customSound = customSounds.find(s => s.id === soundId);
       const isBackgroundSound = defaultSound?.type === 'background' || customSound?.type === 'background';
-      previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : 1;
+      previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : bellVolume / 100;
 
       previewAudioRef.current.play().catch(console.error);
       setPlayingSound(soundId);
@@ -165,6 +164,7 @@ function TimerSetup({ onStart }) {
       lastEndingSound: endingSound,
       lastBackgroundSound: backgroundSound,
       backgroundVolume,
+      bellVolume,
       lastIntervalBells: intervalBells
     });
 
@@ -175,6 +175,7 @@ function TimerSetup({ onStart }) {
       endingSound,
       backgroundSound,
       backgroundVolume,
+      bellVolume,
       intervalBells: [...intervalBells].sort((a, b) => a.time - b.time)
     });
   };
@@ -378,6 +379,20 @@ function TimerSetup({ onStart }) {
                 </button>
               </div>
             </div>
+
+            {(beginningSound !== 'none' || endingSound !== 'none') && (
+              <div className="form-group">
+                <label className="form-label">Bell Volume: {bellVolume}%</label>
+                <input
+                  type="range"
+                  className={styles.volumeSlider}
+                  value={bellVolume}
+                  onChange={(e) => setBellVolume(parseInt(e.target.value))}
+                  min="0"
+                  max="100"
+                />
+              </div>
+            )}
 
             <div className="form-group">
               <label className="form-label">Background Sound</label>
