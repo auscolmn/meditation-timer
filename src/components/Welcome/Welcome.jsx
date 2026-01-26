@@ -1,12 +1,16 @@
 import { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../hooks/useTheme';
 import styles from './Welcome.module.css';
 
 const AUTO_TRANSITION_SECONDS = 5;
 
 function Welcome({ onStart }) {
   const { getDailyQuote } = useApp();
+  const { effectiveTheme } = useTheme();
   const quote = getDailyQuote();
+
+  const logoSrc = effectiveTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
 
   // Auto-transition to timer setup after 5 seconds
   useEffect(() => {
@@ -27,6 +31,7 @@ function Welcome({ onStart }) {
       aria-label="Tap anywhere to start meditation timer"
     >
       <div className={styles.container}>
+        <img src={logoSrc} alt="Sati logo" className={styles.logo} />
         <h1 className={styles.title}>Sati</h1>
 
         {quote && (
