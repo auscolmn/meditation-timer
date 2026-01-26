@@ -83,7 +83,7 @@ function Settings() {
           <p className={styles.appName}>Sati</p>
           <p className={styles.appVersion}>Version 1.0.0</p>
           <p className={styles.appDescription}>
-            A meditation timer app to help you build a consistent practice.
+            A simple meditation timer app to help you build a consistent practice. Built with love for the benefit of all beings.
           </p>
         </div>
       </div>
