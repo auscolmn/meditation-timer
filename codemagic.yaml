@@ -28,10 +28,11 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
+    # publishing:
+    #   app_store_connect:
+    #     auth: integration
+    #     submit_to_testflight: true
+    #   NOTE: Uncomment after setting up App Store Connect integration in Codemagic
 
   android-build:
     name: Android Build
