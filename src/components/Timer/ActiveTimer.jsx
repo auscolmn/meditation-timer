@@ -13,11 +13,15 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   const [bellFlash, setBellFlash] = useState(false);
 
   // Refs for audio elements
-  const backgroundAudioRef = useRef(null);
   const bellAudioRef = useRef(null);
   const wakeLockRef = useRef(null);
   const intervalRef = useRef(null);
   const playedBellsRef = useRef(new Set());
+
+  // Web Audio API refs for seamless background looping
+  const audioContextRef = useRef(null);
+  const audioSourceRef = useRef(null);
+  const gainNodeRef = useRef(null);
 
   // Get sound source by ID
   const getSoundSrc = useCallback((soundId) => {
@@ -34,12 +38,13 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     if (!src || !bellAudioRef.current) return;
 
     bellAudioRef.current.src = src;
+    bellAudioRef.current.volume = (config.bellVolume || 80) / 100;
     bellAudioRef.current.play().catch(console.error);
 
     // Visual feedback
     setBellFlash(true);
     setTimeout(() => setBellFlash(false), 500);
-  }, [getSoundSrc]);
+  }, [getSoundSrc, config.bellVolume]);
 
   // Request wake lock
   useEffect(() => {
@@ -61,24 +66,65 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     };
   }, []);
 
-  // Start background sound
+  // Start background sound with Web Audio API for seamless looping
   useEffect(() => {
-    if (config.backgroundSound !== 'none' && backgroundAudioRef.current) {
-      const src = getSoundSrc(config.backgroundSound);
-      if (src) {
-        backgroundAudioRef.current.src = src;
-        backgroundAudioRef.current.volume = config.backgroundVolume / 100;
-        backgroundAudioRef.current.loop = true;
-        backgroundAudioRef.current.play().catch(console.error);
-      }
-    }
+    if (config.backgroundSound === 'none') return;
 
-    return () => {
-      if (backgroundAudioRef.current) {
-        backgroundAudioRef.current.pause();
+    const src = getSoundSrc(config.backgroundSound);
+    if (!src) return;
+
+    let isCancelled = false;
+
+    const startBackgroundAudio = async () => {
+      try {
+        // Create audio context
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioContextRef.current = new AudioContext();
+
+        // Fetch and decode audio
+        const response = await fetch(src);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+
+        if (isCancelled) return;
+
+        // Create gain node for volume control
+        gainNodeRef.current = audioContextRef.current.createGain();
+        gainNodeRef.current.gain.value = config.backgroundVolume / 100;
+        gainNodeRef.current.connect(audioContextRef.current.destination);
+
+        // Create and start source
+        audioSourceRef.current = audioContextRef.current.createBufferSource();
+        audioSourceRef.current.buffer = audioBuffer;
+        audioSourceRef.current.loop = true;
+        audioSourceRef.current.connect(gainNodeRef.current);
+        audioSourceRef.current.start(0);
+      } catch (err) {
+        console.error('Error starting background audio:', err);
       }
     };
-  }, [config.backgroundSound, config.backgroundVolume, getSoundSrc]);
+
+    startBackgroundAudio();
+
+    return () => {
+      isCancelled = true;
+      if (audioSourceRef.current) {
+        try {
+          audioSourceRef.current.stop();
+        } catch (e) { /* ignore */ }
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+      }
+    };
+  }, [config.backgroundSound, getSoundSrc]);
+
+  // Update background volume
+  useEffect(() => {
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.value = config.backgroundVolume / 100;
+    }
+  }, [config.backgroundVolume]);
 
   // Play beginning bell
   useEffect(() => {
@@ -127,8 +173,8 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     }
 
     // Stop background audio
-    if (backgroundAudioRef.current) {
-      backgroundAudioRef.current.pause();
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
     }
 
     // Release wake lock
@@ -150,11 +196,11 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   const togglePause = () => {
     setIsPaused(prev => {
       const newPaused = !prev;
-      if (backgroundAudioRef.current) {
+      if (audioContextRef.current) {
         if (newPaused) {
-          backgroundAudioRef.current.pause();
+          audioContextRef.current.suspend();
         } else {
-          backgroundAudioRef.current.play().catch(console.error);
+          audioContextRef.current.resume();
         }
       }
       return newPaused;
@@ -170,8 +216,8 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     clearInterval(intervalRef.current);
 
     // Stop audio
-    if (backgroundAudioRef.current) {
-      backgroundAudioRef.current.pause();
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
     }
 
     // Release wake lock
@@ -207,8 +253,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
 
   return (
     <div className={`screen screen--centered ${styles.container} ${bellFlash ? styles.flash : ''}`}>
-      {/* Hidden audio elements */}
-      <audio ref={backgroundAudioRef} />
+      {/* Hidden audio element for bells */}
       <audio ref={bellAudioRef} />
 
       {/* Progress ring */}
@@ -246,10 +291,10 @@ function ActiveTimer({ config, onComplete, onEnd }) {
         )}
       </div>
 
-      {/* Background sound indicator */}
-      {config.backgroundSound !== 'none' && (
+      {/* Interval bells indicator */}
+      {config.intervalBells?.length > 0 && (
         <p className={styles.backgroundIndicator}>
-          {DEFAULT_SOUNDS[config.backgroundSound]?.name || 'Background'} playing
+          {config.intervalBells.length} interval bell{config.intervalBells.length !== 1 ? 's' : ''}
         </p>
       )}
 

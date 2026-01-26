@@ -51,9 +51,8 @@ export const DEFAULT_SETTINGS = {
   lastEndingSound: 'tibetan-bell',
   lastBackgroundSound: 'none',
   backgroundVolume: 50,
+  bellVolume: 80,
   lastIntervalBells: [],
-  reminderEnabled: false,
-  reminderTime: '09:00',
   focusMode: false
 };
 
