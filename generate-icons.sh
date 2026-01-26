@@ -65,6 +65,12 @@ magick "$LOGO" -resize 288x288 -gravity center -background none -extent 432x432 
 
 echo "  Created 15 Android icons in android/app/src/main/res/"
 
+# iOS Icons
+echo "Creating iOS icons..."
+magick "$LOGO" -resize 1024x1024 ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+
+echo "  Created iOS icon in ios/App/App/Assets.xcassets/"
+
 echo ""
 echo "Done! All icons generated successfully."
 echo ""
