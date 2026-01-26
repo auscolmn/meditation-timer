@@ -3,6 +3,15 @@
   max-width: 400px;
 }
 
+.logo {
+  width: 240px;
+  height: 240px;
+  margin: 0 auto var(--space-xl) auto;
+  display: block;
+  border-radius: var(--radius-xl);
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
 .title {
   font-size: 58px;
   font-weight: var(--font-weight-light);
