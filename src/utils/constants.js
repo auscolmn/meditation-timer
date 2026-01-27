@@ -53,8 +53,17 @@ export const DEFAULT_SETTINGS = {
   backgroundVolume: 50,
   bellVolume: 80,
   lastIntervalBells: [],
-  focusMode: false
+  focusMode: false,
+  preparationTime: 0
 };
+
+// Preparation time presets (in seconds)
+export const PREPARATION_PRESETS = [
+  { label: 'None', seconds: 0 },
+  { label: '5s', seconds: 5 },
+  { label: '10s', seconds: 10 },
+  { label: '15s', seconds: 15 }
+];
 
 // Default quotes (30 starter quotes)
 export const DEFAULT_QUOTES = [

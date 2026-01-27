@@ -7,7 +7,12 @@ import styles from './ActiveTimer.module.css';
 function ActiveTimer({ config, onComplete, onEnd }) {
   const { addSession, customSounds, settings } = useApp();
 
-  const [timeRemaining, setTimeRemaining] = useState(config.duration);
+  // Preparation phase state
+  const [isPreparing, setIsPreparing] = useState(config.preparationTime > 0);
+  const [prepTimeRemaining, setPrepTimeRemaining] = useState(config.preparationTime || 0);
+
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [bellPlayed, setBellPlayed] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [bellFlash, setBellFlash] = useState(false);
@@ -126,35 +131,26 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     }
   }, [config.backgroundVolume]);
 
-  // Play beginning bell
+  // Play beginning bell (after preparation phase ends, or immediately if no preparation)
   useEffect(() => {
-    if (config.beginningSound !== 'none') {
+    if (config.beginningSound !== 'none' && !isPreparing) {
       // Small delay to ensure audio context is ready
       setTimeout(() => playBell(config.beginningSound), 100);
     }
-  }, [config.beginningSound, playBell]);
+  }, [config.beginningSound, playBell, isPreparing]);
 
-  // Timer countdown
+  // Preparation countdown
   useEffect(() => {
-    if (isPaused) return;
+    if (!isPreparing || isPaused) return;
 
     intervalRef.current = setInterval(() => {
-      setTimeRemaining(prev => {
+      setPrepTimeRemaining(prev => {
         const newTime = prev - 1;
 
-        // Check for interval bells
-        const elapsedTime = config.duration - newTime;
-        config.intervalBells?.forEach(bell => {
-          if (bell.time === elapsedTime && !playedBellsRef.current.has(bell.time)) {
-            playedBellsRef.current.add(bell.time);
-            playBell(bell.sound);
-          }
-        });
-
-        // Timer complete
+        // Preparation complete - transition to meditation
         if (newTime <= 0) {
           clearInterval(intervalRef.current);
-          handleTimerComplete();
+          setIsPreparing(false);
           return 0;
         }
 
@@ -163,34 +159,39 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-  }, [isPaused, config.duration, config.intervalBells, playBell]);
+  }, [isPreparing, isPaused]);
 
-  // Handle timer completion
-  const handleTimerComplete = () => {
-    // Play ending sound
-    if (config.endingSound !== 'none') {
-      playBell(config.endingSound);
-    }
+  // Timer count-up (only runs after preparation is complete)
+  useEffect(() => {
+    if (isPaused || isPreparing) return;
 
-    // Stop background audio
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(() => {});
-    }
+    intervalRef.current = setInterval(() => {
+      setElapsedTime(prev => {
+        const newTime = prev + 1;
 
-    // Release wake lock
-    if (wakeLockRef.current) {
-      wakeLockRef.current.release();
-    }
+        // Check for interval bells
+        config.intervalBells?.forEach(bell => {
+          if (bell.time === newTime && !playedBellsRef.current.has(bell.time)) {
+            playedBellsRef.current.add(bell.time);
+            playBell(bell.sound);
+          }
+        });
 
-    // Save session
-    const session = addSession({
-      duration: config.duration,
-      completed: true,
-      endedEarly: false
-    });
+        // Play ending bell when duration is reached (but don't stop)
+        if (newTime === config.duration && !bellPlayed) {
+          setBellPlayed(true);
+          if (config.endingSound !== 'none') {
+            playBell(config.endingSound);
+          }
+        }
 
-    onComplete(session);
-  };
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalRef.current);
+  }, [isPaused, isPreparing, config.duration, config.intervalBells, config.endingSound, playBell, bellPlayed]);
+
 
   // Handle pause/resume
   const togglePause = () => {
@@ -207,12 +208,12 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     });
   };
 
-  // Handle end session early
-  const handleEndEarly = () => {
+  // Handle end session
+  const handleEndSession = () => {
     setShowEndConfirm(true);
   };
 
-  const confirmEndEarly = () => {
+  const confirmEndSession = () => {
     clearInterval(intervalRef.current);
 
     // Stop audio
@@ -225,20 +226,30 @@ function ActiveTimer({ config, onComplete, onEnd }) {
       wakeLockRef.current.release();
     }
 
-    // Save session (counts as completed even if ended early)
-    const actualDuration = config.duration - timeRemaining;
+    // If still in preparation phase, don't save a session
+    if (isPreparing) {
+      onEnd(null);
+      return;
+    }
+
+    // Save session with actual elapsed time
     const session = addSession({
-      duration: actualDuration,
+      duration: elapsedTime,
       completed: true,
-      endedEarly: true
+      endedEarly: elapsedTime < config.duration
     });
 
-    onEnd(session);
+    onComplete(session);
   };
 
   // Calculate progress percentage
-  const progress = ((config.duration - timeRemaining) / config.duration) * 100;
   const circumference = 2 * Math.PI * 45; // radius = 45
+
+  // During preparation, show preparation progress; during meditation, show meditation progress
+  // Cap at 100% once duration is reached
+  const progress = isPreparing
+    ? ((config.preparationTime - prepTimeRemaining) / config.preparationTime) * 100
+    : Math.min((elapsedTime / config.duration) * 100, 100);
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   // Handle escape key for modal
@@ -252,9 +263,14 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   }, [showEndConfirm]);
 
   return (
-    <div className={`screen screen--centered ${styles.container} ${bellFlash ? styles.flash : ''}`}>
+    <div className={`screen screen--centered ${styles.container} ${bellFlash ? styles.flash : ''} ${isPreparing ? styles.preparing : ''}`}>
       {/* Hidden audio element for bells */}
       <audio ref={bellAudioRef} />
+
+      {/* Preparation label */}
+      {isPreparing && (
+        <p className={styles.preparingLabel}>Settling in...</p>
+      )}
 
       {/* Progress ring */}
       <div className={styles.timerDisplay}>
@@ -274,7 +290,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
             cy="50"
             r="45"
             fill="none"
-            stroke="var(--success)"
+            stroke={isPreparing ? "var(--text-tertiary)" : "var(--success)"}
             strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -286,13 +302,15 @@ function ActiveTimer({ config, onComplete, onEnd }) {
 
         {!settings.focusMode && (
           <div className={styles.timeText}>
-            {formatTimeDisplay(timeRemaining, config.duration >= 3600)}
+            {isPreparing
+              ? prepTimeRemaining
+              : formatTimeDisplay(elapsedTime, elapsedTime >= 3600 || config.duration >= 3600)}
           </div>
         )}
       </div>
 
-      {/* Interval bells indicator */}
-      {config.intervalBells?.length > 0 && (
+      {/* Interval bells indicator (only show during meditation, not preparation) */}
+      {!isPreparing && config.intervalBells?.length > 0 && (
         <p className={styles.backgroundIndicator}>
           {config.intervalBells.length} interval bell{config.intervalBells.length !== 1 ? 's' : ''}
         </p>
@@ -311,7 +329,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
 
         <button
           className="btn btn--large btn--outline"
-          onClick={handleEndEarly}
+          onClick={handleEndSession}
           aria-label="End meditation session"
         >
           END
@@ -333,20 +351,26 @@ function ActiveTimer({ config, onComplete, onEnd }) {
             aria-modal="true"
             aria-labelledby="end-modal-title"
           >
-            <h2 id="end-modal-title" className="modal-title">End Session Early?</h2>
-            <p>This will still count as a completed session.</p>
+            <h2 id="end-modal-title" className="modal-title">
+              {isPreparing ? 'Cancel Session?' : 'End Session?'}
+            </h2>
+            <p>
+              {isPreparing
+                ? 'The meditation has not started yet.'
+                : `You've meditated for ${formatTimeDisplay(elapsedTime, elapsedTime >= 3600)}.`}
+            </p>
             <div className="modal-actions">
               <button
                 className="btn btn--secondary"
                 onClick={() => setShowEndConfirm(false)}
               >
-                Cancel
+                Continue
               </button>
               <button
                 className="btn btn--primary"
-                onClick={confirmEndEarly}
+                onClick={confirmEndSession}
               >
-                End Session
+                {isPreparing ? 'Cancel' : 'End Session'}
               </button>
             </div>
           </div>

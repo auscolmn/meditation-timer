@@ -280,6 +280,66 @@
   color: var(--surface-raised);
 }
 
+/* Preparation time section */
+.preparationSection {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-light);
+}
+
+.preparationHint {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin-top: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.preparationPresets {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.prepPresetButton {
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.prepPresetButton:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.prepPresetButton.prepPresetActive {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface-raised);
+}
+
+.customPrepInput {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.customPrepInput .input {
+  width: 80px;
+  text-align: center;
+}
+
+.prepInputLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
 .beginButton {
   margin-top: var(--space-xl);
 }
