@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
-import { DEFAULT_SOUNDS } from '../../utils/constants';
+import { DEFAULT_SOUNDS, PREPARATION_PRESETS } from '../../utils/constants';
 import styles from './TimerSetup.module.css';
 
 // Play icon SVG
@@ -28,6 +28,12 @@ function TimerSetup({ onStart }) {
   const [hours, setHours] = useState(settings.lastDuration?.hours || 0);
   const [minutes, setMinutes] = useState(settings.lastDuration?.minutes || 10);
   const [seconds, setSeconds] = useState(settings.lastDuration?.seconds || 0);
+
+  // Preparation time state (settle-in time before meditation starts)
+  const [preparationTime, setPreparationTime] = useState(settings.preparationTime || 0);
+  const [customPrepTime, setCustomPrepTime] = useState(
+    !PREPARATION_PRESETS.some(p => p.seconds === (settings.preparationTime || 0))
+  );
 
   // Sound state
   const [beginningSound, setBeginningSound] = useState(settings.lastBeginningSound || 'bell');
@@ -165,7 +171,8 @@ function TimerSetup({ onStart }) {
       lastBackgroundSound: backgroundSound,
       backgroundVolume,
       bellVolume,
-      lastIntervalBells: intervalBells
+      lastIntervalBells: intervalBells,
+      preparationTime
     });
 
     // Start meditation
@@ -176,7 +183,8 @@ function TimerSetup({ onStart }) {
       backgroundSound,
       backgroundVolume,
       bellVolume,
-      intervalBells: [...intervalBells].sort((a, b) => a.time - b.time)
+      intervalBells: [...intervalBells].sort((a, b) => a.time - b.time),
+      preparationTime
     });
   };
 
@@ -297,6 +305,48 @@ function TimerSetup({ onStart }) {
                 />
                 <span className={styles.timeLabel}>Seconds</span>
               </div>
+            </div>
+
+            {/* Preparation Time (settle-in) */}
+            <div className={styles.preparationSection}>
+              <label className="form-label">Preparation Time</label>
+              <p className={styles.preparationHint}>Time to settle in before meditation begins</p>
+              <div className={styles.preparationPresets}>
+                {PREPARATION_PRESETS.map(preset => (
+                  <button
+                    key={preset.seconds}
+                    type="button"
+                    className={`${styles.prepPresetButton} ${!customPrepTime && preparationTime === preset.seconds ? styles.prepPresetActive : ''}`}
+                    onClick={() => {
+                      setPreparationTime(preset.seconds);
+                      setCustomPrepTime(false);
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className={`${styles.prepPresetButton} ${customPrepTime ? styles.prepPresetActive : ''}`}
+                  onClick={() => setCustomPrepTime(true)}
+                >
+                  Custom
+                </button>
+              </div>
+              {customPrepTime && (
+                <div className={styles.customPrepInput}>
+                  <input
+                    type="number"
+                    className="input"
+                    value={preparationTime}
+                    onChange={(e) => setPreparationTime(Math.max(0, Math.min(120, parseInt(e.target.value) || 0)))}
+                    min="0"
+                    max="120"
+                    aria-label="Custom preparation time in seconds"
+                  />
+                  <span className={styles.prepInputLabel}>seconds</span>
+                </div>
+              )}
             </div>
           </div>
         )}
