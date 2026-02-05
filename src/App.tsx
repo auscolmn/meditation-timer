@@ -9,9 +9,10 @@ import Completion from './components/Completion/Completion';
 import Progress from './components/Progress/Progress';
 import Settings from './components/Settings/Settings';
 import './App.css';
+import type { Screen, TimerConfig, Session, NavigationTab } from './types';
 
 // App screens/views
-const SCREENS = {
+const SCREENS: Record<string, Screen> = {
   WELCOME: 'welcome',
   TIMER_SETUP: 'timer_setup',
   ACTIVE_TIMER: 'active_timer',
@@ -21,17 +22,17 @@ const SCREENS = {
 };
 
 function AppContent() {
-  const [currentScreen, setCurrentScreen] = useState(SCREENS.WELCOME);
-  const [timerConfig, setTimerConfig] = useState(null);
-  const [completedSession, setCompletedSession] = useState(null);
+  const [currentScreen, setCurrentScreen] = useState<Screen>(SCREENS.WELCOME);
+  const [timerConfig, setTimerConfig] = useState<TimerConfig | null>(null);
+  const [completedSession, setCompletedSession] = useState<Session | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [pendingScreen, setPendingScreen] = useState(null);
+  const [pendingScreen, setPendingScreen] = useState<Screen | null>(null);
 
   // Initialize theme
   useTheme();
 
   // Handle screen transitions
-  const transitionToScreen = (screen) => {
+  const transitionToScreen = (screen: Screen) => {
     setIsTransitioning(true);
     setPendingScreen(screen);
   };
@@ -45,27 +46,27 @@ function AppContent() {
       }, 150); // Match CSS transition duration
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [isTransitioning, pendingScreen]);
 
   // Navigation handlers
   const goToTimerSetup = () => transitionToScreen(SCREENS.TIMER_SETUP);
   const goToProgress = () => transitionToScreen(SCREENS.PROGRESS);
-  const goToWelcome = () => transitionToScreen(SCREENS.WELCOME);
 
   // Start meditation session
-  const startMeditation = (config) => {
+  const startMeditation = (config: TimerConfig) => {
     setTimerConfig(config);
     transitionToScreen(SCREENS.ACTIVE_TIMER);
   };
 
   // Complete meditation session
-  const completeMeditation = (session) => {
+  const completeMeditation = (session: Session) => {
     setCompletedSession(session);
     transitionToScreen(SCREENS.COMPLETION);
   };
 
   // End session early (go back to setup)
-  const endSessionEarly = (session) => {
+  const endSessionEarly = (session: Session | null) => {
     if (session) {
       setCompletedSession(session);
       transitionToScreen(SCREENS.COMPLETION);
@@ -92,7 +93,7 @@ function AppContent() {
       case SCREENS.ACTIVE_TIMER:
         return (
           <ActiveTimer
-            config={timerConfig}
+            config={timerConfig!}
             onComplete={completeMeditation}
             onEnd={endSessionEarly}
           />
@@ -119,14 +120,14 @@ function AppContent() {
   };
 
   // Determine active tab for navigation
-  const getActiveTab = () => {
+  const getActiveTab = (): NavigationTab => {
     if (currentScreen === SCREENS.PROGRESS) return 'progress';
     if (currentScreen === SCREENS.SETTINGS) return 'settings';
     return 'timer';
   };
 
   // Handle tab navigation
-  const handleTabChange = (tab) => {
+  const handleTabChange = (tab: NavigationTab) => {
     // Don't navigate away from active timer via tabs
     if (currentScreen === SCREENS.ACTIVE_TIMER) {
       return;

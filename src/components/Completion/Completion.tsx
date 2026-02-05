@@ -2,11 +2,18 @@ import { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
 import { formatDuration } from '../../utils/dateUtils';
+import type { Session } from '../../types';
 import styles from './Completion.module.css';
 
-function Completion({ session, onViewProgress, onMeditateAgain }) {
-  const { sessions } = useApp();
-  const streakData = useStreak(sessions);
+interface CompletionProps {
+  session: Session | null;
+  onViewProgress: () => void;
+  onMeditateAgain: () => void;
+}
+
+function Completion({ session, onMeditateAgain }: CompletionProps) {
+  const { sessions, streakFreezes } = useApp();
+  const streakData = useStreak(sessions, streakFreezes);
   const [showAnimation, setShowAnimation] = useState(true);
 
   // Check if a new goal was just achieved

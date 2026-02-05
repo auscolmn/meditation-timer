@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+type SetValue<T> = (value: T | ((prev: T) => T)) => void;
+
 /**
  * Custom hook for syncing state with localStorage
- * @param {string} key - localStorage key
- * @param {*} initialValue - Default value if key doesn't exist
- * @returns {[*, Function, Function, string|null]} [value, setValue, removeValue, error]
  */
-export function useLocalStorage(key, initialValue) {
-  const [error, setError] = useState(null);
+export function useLocalStorage<T>(
+  key: string,
+  initialValue: T
+): [T, SetValue<T>, () => void, string | null] {
+  const [error, setError] = useState<string | null>(null);
 
   // Get initial value from localStorage or use provided initial value
-  const [storedValue, setStoredValue] = useState(() => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = localStorage.getItem(key);
       return item !== null ? JSON.parse(item) : initialValue;
@@ -27,7 +29,7 @@ export function useLocalStorage(key, initialValue) {
   }, [storedValue]);
 
   // Update localStorage when state changes
-  const setValue = useCallback((value) => {
+  const setValue = useCallback<SetValue<T>>((value) => {
     try {
       setError(null);
       // Allow value to be a function (like useState)
@@ -37,7 +39,7 @@ export function useLocalStorage(key, initialValue) {
     } catch (err) {
       console.error(`Error setting localStorage key "${key}":`, err);
       // Handle quota exceeded error
-      if (err.name === 'QuotaExceededError' || err.code === 22) {
+      if (err instanceof DOMException && (err.name === 'QuotaExceededError' || err.code === 22)) {
         setError('Storage quota exceeded. Please delete some data.');
       } else {
         setError('Failed to save data.');
@@ -59,7 +61,7 @@ export function useLocalStorage(key, initialValue) {
 
   // Sync with other tabs/windows
   useEffect(() => {
-    const handleStorageChange = (e) => {
+    const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key && e.newValue !== null) {
         try {
           setStoredValue(JSON.parse(e.newValue));

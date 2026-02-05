@@ -1,23 +1,22 @@
 import { useMemo } from 'react';
 import { calculateStreak, getLongestStreak, getTotalMeditationTime } from '../utils/dateUtils';
 import { STREAK_GOALS } from '../utils/constants';
+import type { Session, StreakStats, StreakGoal, StreakFreeze } from '../types';
 
 /**
  * Custom hook for calculating streak statistics
- * @param {Array} sessions - Array of session objects
- * @returns {Object} Streak statistics
  */
-export function useStreak(sessions) {
+export function useStreak(sessions: Session[], freezes: StreakFreeze[] = []): StreakStats {
   return useMemo(() => {
-    const currentStreak = calculateStreak(sessions);
+    const currentStreak = calculateStreak(sessions, freezes);
     const longestStreak = getLongestStreak(sessions);
     const totalSessions = sessions.length;
     const totalTime = getTotalMeditationTime(sessions);
 
     // Find current and next goals
-    let currentGoal = null;
-    let nextGoal = null;
-    const completedGoals = [];
+    let currentGoal: StreakGoal | null = null;
+    let nextGoal: StreakGoal | null = null;
+    const completedGoals: StreakGoal[] = [];
 
     for (const goal of STREAK_GOALS) {
       if (currentStreak >= goal.days) {
@@ -58,7 +57,7 @@ export function useStreak(sessions) {
       daysToNextGoal,
       allGoalsCompleted: !nextGoal
     };
-  }, [sessions]);
+  }, [sessions, freezes]);
 }
 
 export default useStreak;

@@ -1,6 +1,7 @@
 import { useApp } from '../../context/AppContext';
 import ThemeToggle from '../Common/ThemeToggle';
 import SoundUpload from '../Common/SoundUpload';
+import DataManagement from './DataManagement';
 import styles from './Settings.module.css';
 
 function Settings() {
@@ -76,8 +77,13 @@ function Settings() {
         </p>
       </div>
 
-      {/* About Section */}
+      {/* Data Management Section */}
       <div className={`card mb-lg ${styles.animateDelay4}`}>
+        <DataManagement />
+      </div>
+
+      {/* About Section */}
+      <div className={`card mb-lg ${styles.animateDelay5}`}>
         <h2 className={styles.sectionTitle}>About</h2>
         <div className={styles.aboutInfo}>
           <p className={styles.appName}>Sati</p>

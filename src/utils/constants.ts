@@ -1,5 +1,7 @@
+import type { Theme, DefaultSound, StreakGoal, PreparationPreset, Quote, Settings } from '../types';
+
 // Theme options
-export const THEME_OPTIONS = {
+export const THEME_OPTIONS: Record<'LIGHT' | 'DARK' | 'AUTO', Theme> = {
   LIGHT: 'light',
   DARK: 'dark',
   AUTO: 'auto'
@@ -12,11 +14,13 @@ export const STORAGE_KEYS = {
   CUSTOM_SOUNDS: 'innercompass_custom_sounds',
   SETTINGS: 'innercompass_settings',
   LAST_QUOTE_DATE: 'innercompass_last_quote_date',
-  DAILY_QUOTE_INDEX: 'innercompass_daily_quote_index'
-};
+  DAILY_QUOTE_INDEX: 'innercompass_daily_quote_index',
+  PRESETS: 'innercompass_presets',
+  STREAK_FREEZES: 'innercompass_streak_freezes'
+} as const;
 
 // Default sounds available in the app
-export const DEFAULT_SOUNDS = {
+export const DEFAULT_SOUNDS: Record<string, DefaultSound> = {
   bell: { id: 'bell', name: 'Bell', src: '/sounds/bell.mp3', type: 'bell' },
   chime: { id: 'chime', name: 'Chime', src: '/sounds/chime.mp3', type: 'bell' },
   'tibetan-bell': { id: 'tibetan-bell', name: 'Tibetan Bell', src: '/sounds/tibetan-bell.mp3', type: 'bell' },
@@ -27,7 +31,7 @@ export const DEFAULT_SOUNDS = {
 };
 
 // Streak goals with their badges
-export const STREAK_GOALS = [
+export const STREAK_GOALS: StreakGoal[] = [
   { days: 3, badge: '⭐', label: '3 days' },
   { days: 7, badge: '⭐⭐', label: '7 days' },
   { days: 10, badge: '🏆', label: '10 days' },
@@ -42,10 +46,10 @@ export const STREAK_GOALS = [
 ];
 
 // Quote categories
-export const QUOTE_CATEGORIES = ['Buddhism', 'Taoism', 'Stoicism', 'Other'];
+export const QUOTE_CATEGORIES = ['Buddhism', 'Taoism', 'Stoicism', 'Other'] as const;
 
 // Default settings
-export const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS: Settings = {
   lastDuration: { hours: 0, minutes: 10, seconds: 0 },
   lastBeginningSound: 'bell',
   lastEndingSound: 'tibetan-bell',
@@ -54,11 +58,14 @@ export const DEFAULT_SETTINGS = {
   bellVolume: 80,
   lastIntervalBells: [],
   focusMode: false,
-  preparationTime: 0
+  preparationTime: 0,
+  freezesAvailable: 2,
+  freezesPerMonth: 2,
+  lastFreezeGrantMonth: ''
 };
 
 // Preparation time presets (in seconds)
-export const PREPARATION_PRESETS = [
+export const PREPARATION_PRESETS: PreparationPreset[] = [
   { label: 'None', seconds: 0 },
   { label: '5s', seconds: 5 },
   { label: '10s', seconds: 10 },
@@ -66,7 +73,7 @@ export const PREPARATION_PRESETS = [
 ];
 
 // Default quotes (30 starter quotes)
-export const DEFAULT_QUOTES = [
+export const DEFAULT_QUOTES: Quote[] = [
   // Buddhism (8 quotes)
   {
     id: 'q1',

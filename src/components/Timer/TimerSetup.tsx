@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, ChangeEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS, PREPARATION_PRESETS } from '../../utils/constants';
+import PresetManager from './PresetManager';
+import type { TimerConfig, DefaultSound, CustomSound, IntervalBell, TimerPreset } from '../../types';
 import styles from './TimerSetup.module.css';
 
 // Play icon SVG
@@ -19,10 +21,19 @@ const PauseIcon = () => (
   </svg>
 );
 
-function TimerSetup({ onStart }) {
+interface TimerSetupProps {
+  onStart: (config: TimerConfig) => void;
+}
+
+interface DurationPreset {
+  label: string;
+  minutes: number;
+}
+
+function TimerSetup({ onStart }: TimerSetupProps) {
   const { settings, updateSettings, customSounds } = useApp();
-  const previewAudioRef = useRef(null);
-  const [playingSound, setPlayingSound] = useState(null);
+  const previewAudioRef = useRef<HTMLAudioElement>(null);
+  const [playingSound, setPlayingSound] = useState<string | null>(null);
 
   // Duration state
   const [hours, setHours] = useState(settings.lastDuration?.hours || 0);
@@ -43,7 +54,7 @@ function TimerSetup({ onStart }) {
   const [bellVolume, setBellVolume] = useState(settings.bellVolume || 80);
 
   // Interval bells state
-  const [intervalBells, setIntervalBells] = useState(settings.lastIntervalBells || []);
+  const [intervalBells, setIntervalBells] = useState<IntervalBell[]>(settings.lastIntervalBells || []);
 
   // Validation error
   const [error, setError] = useState('');
@@ -54,7 +65,7 @@ function TimerSetup({ onStart }) {
   const [intervalsExpanded, setIntervalsExpanded] = useState(false);
 
   // Get all available sounds (default + custom) - memoized
-  const bellSounds = useMemo(() => [
+  const bellSounds = useMemo((): (DefaultSound | CustomSound)[] => [
     DEFAULT_SOUNDS.none,
     DEFAULT_SOUNDS.bell,
     DEFAULT_SOUNDS.chime,
@@ -63,7 +74,7 @@ function TimerSetup({ onStart }) {
     ...customSounds.filter(s => s.type === 'bell')
   ], [customSounds]);
 
-  const backgroundSounds = useMemo(() => [
+  const backgroundSounds = useMemo((): (DefaultSound | CustomSound)[] => [
     DEFAULT_SOUNDS.none,
     DEFAULT_SOUNDS.waterfall,
     DEFAULT_SOUNDS.rain,
@@ -71,7 +82,7 @@ function TimerSetup({ onStart }) {
   ], [customSounds]);
 
   // Quick-start presets
-  const presets = [
+  const presets: DurationPreset[] = [
     { label: '5 min', minutes: 5 },
     { label: '10 min', minutes: 10 },
     { label: '15 min', minutes: 15 },
@@ -89,7 +100,7 @@ function TimerSetup({ onStart }) {
   }, [backgroundVolume, bellVolume, playingSound, customSounds]);
 
   // Preview sound (toggle play/pause)
-  const previewSound = (soundId) => {
+  const previewSound = (soundId: string) => {
     if (soundId === 'none' || !previewAudioRef.current) return;
 
     // If this sound is already playing, pause it
@@ -111,16 +122,16 @@ function TimerSetup({ onStart }) {
 
     if (!src) {
       const customSound = customSounds.find(s => s.id === soundId);
-      src = customSound?.dataUrl;
+      src = customSound?.dataUrl || null;
     }
 
     if (src) {
       previewAudioRef.current.src = src;
 
       // Apply appropriate volume
-      const defaultSound = DEFAULT_SOUNDS[soundId];
-      const customSound = customSounds.find(s => s.id === soundId);
-      const isBackgroundSound = defaultSound?.type === 'background' || customSound?.type === 'background';
+      const defaultSoundForVolume = DEFAULT_SOUNDS[soundId];
+      const customSoundForVolume = customSounds.find(s => s.id === soundId);
+      const isBackgroundSound = defaultSoundForVolume?.type === 'background' || customSoundForVolume?.type === 'background';
       previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : bellVolume / 100;
 
       previewAudioRef.current.play().catch(console.error);
@@ -134,7 +145,7 @@ function TimerSetup({ onStart }) {
   };
 
   // Apply preset duration
-  const applyPreset = (preset) => {
+  const applyPreset = (preset: DurationPreset) => {
     setHours(0);
     setMinutes(preset.minutes);
     setSeconds(0);
@@ -196,21 +207,37 @@ function TimerSetup({ onStart }) {
   };
 
   // Remove interval bell
-  const removeIntervalBell = (index) => {
+  const removeIntervalBell = (index: number) => {
     setIntervalBells(intervalBells.filter((_, i) => i !== index));
   };
 
   // Update interval bell
-  const updateIntervalBell = (index, field, value) => {
+  const updateIntervalBell = (index: number, field: keyof IntervalBell, value: string | number) => {
     const updated = [...intervalBells];
     updated[index] = { ...updated[index], [field]: value };
     setIntervalBells(updated);
   };
 
   // Handle number input
-  const handleNumberInput = (setter, max) => (e) => {
+  const handleNumberInput = (setter: (value: number) => void, max: number) => (e: ChangeEvent<HTMLInputElement>) => {
     const value = Math.max(0, Math.min(max, parseInt(e.target.value) || 0));
     setter(value);
+    setError('');
+  };
+
+  // Handle loading a preset
+  const handleLoadPreset = (preset: TimerPreset) => {
+    setHours(preset.duration.hours);
+    setMinutes(preset.duration.minutes);
+    setSeconds(preset.duration.seconds);
+    setPreparationTime(preset.preparationTime);
+    setCustomPrepTime(!PREPARATION_PRESETS.some(p => p.seconds === preset.preparationTime));
+    setBeginningSound(preset.beginningSound);
+    setEndingSound(preset.endingSound);
+    setBackgroundSound(preset.backgroundSound);
+    setBackgroundVolume(preset.backgroundVolume);
+    setBellVolume(preset.bellVolume);
+    setIntervalBells(preset.intervalBells);
     setError('');
   };
 
@@ -221,8 +248,23 @@ function TimerSetup({ onStart }) {
 
       <h1 className={styles.title}>Set Your Timer</h1>
 
-      {/* Duration */}
+      {/* Presets */}
       <div className={`card mb-lg ${styles.animateDelay1}`}>
+        <PresetManager
+          duration={{ hours, minutes, seconds }}
+          preparationTime={preparationTime}
+          beginningSound={beginningSound}
+          endingSound={endingSound}
+          backgroundSound={backgroundSound}
+          backgroundVolume={backgroundVolume}
+          bellVolume={bellVolume}
+          intervalBells={intervalBells}
+          onLoadPreset={handleLoadPreset}
+        />
+      </div>
+
+      {/* Duration */}
+      <div className={`card mb-lg ${styles.animateDelay2}`}>
         <h2 className={`${styles.sectionTitle} mb-md`}>Duration</h2>
 
         {/* Quick-start presets */}
@@ -353,7 +395,7 @@ function TimerSetup({ onStart }) {
       </div>
 
       {/* Sounds */}
-      <div className={`card mb-lg ${styles.animateDelay2}`}>
+      <div className={`card mb-lg ${styles.animateDelay3}`}>
         <button
           type="button"
           className={styles.expandHeader}
@@ -486,7 +528,7 @@ function TimerSetup({ onStart }) {
       </div>
 
       {/* Interval Bells */}
-      <div className={`card mb-lg ${styles.animateDelay3}`}>
+      <div className={`card mb-lg ${styles.animateDelay4}`}>
         <button
           type="button"
           className={styles.expandHeader}
@@ -535,7 +577,7 @@ function TimerSetup({ onStart }) {
                       type="number"
                       className="input"
                       value={Math.floor(bell.time / 60)}
-                      onChange={(e) => updateIntervalBell(index, 'time', parseInt(e.target.value || 0) * 60)}
+                      onChange={(e) => updateIntervalBell(index, 'time', parseInt(e.target.value || '0') * 60)}
                       min="0"
                       placeholder="Minutes"
                       aria-label="Interval time in minutes"
@@ -574,7 +616,7 @@ function TimerSetup({ onStart }) {
 
       {/* Begin button */}
       <button
-        className={`btn btn--primary btn--large btn--full ${styles.beginButton} ${styles.animateDelay4}`}
+        className={`btn btn--primary btn--large btn--full ${styles.beginButton} ${styles.animateDelay5}`}
         onClick={handleStart}
       >
         BEGIN

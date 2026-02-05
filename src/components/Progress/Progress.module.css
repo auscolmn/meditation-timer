@@ -245,6 +245,16 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* Frozen day indicator */
+.day.frozen {
+  background-color: var(--info-bg, rgba(33, 150, 243, 0.1));
+}
+
+.freezeIcon {
+  color: var(--info);
+  flex-shrink: 0;
+}
+
 /* Goals */
 
 .goalsList {
