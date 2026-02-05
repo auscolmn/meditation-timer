@@ -1,5 +1,6 @@
 import { useTheme } from '../../hooks/useTheme';
 import { THEME_OPTIONS } from '../../utils/constants';
+import type { Theme } from '../../types';
 import styles from './ThemeToggle.module.css';
 
 // Icons
@@ -32,10 +33,16 @@ const AutoIcon = () => (
   </svg>
 );
 
+interface ThemeOption {
+  value: Theme;
+  icon: React.ReactNode;
+  label: string;
+}
+
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  const options = [
+  const options: ThemeOption[] = [
     { value: THEME_OPTIONS.LIGHT, icon: <SunIcon />, label: 'Light' },
     { value: THEME_OPTIONS.AUTO, icon: <AutoIcon />, label: 'Auto' },
     { value: THEME_OPTIONS.DARK, icon: <MoonIcon />, label: 'Dark' },

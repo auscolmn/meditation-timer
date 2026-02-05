@@ -1,10 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatTimeDisplay, getTodayString } from '../../utils/dateUtils';
+import { formatTimeDisplay } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
+import type { TimerConfig, Session } from '../../types';
 import styles from './ActiveTimer.module.css';
 
-function ActiveTimer({ config, onComplete, onEnd }) {
+interface ActiveTimerProps {
+  config: TimerConfig;
+  onComplete: (session: Session) => void;
+  onEnd: (session: Session | null) => void;
+}
+
+function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   const { addSession, customSounds, settings } = useApp();
 
   // Preparation phase state
@@ -18,18 +25,18 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   const [bellFlash, setBellFlash] = useState(false);
 
   // Refs for audio elements
-  const bellAudioRef = useRef(null);
-  const wakeLockRef = useRef(null);
-  const intervalRef = useRef(null);
-  const playedBellsRef = useRef(new Set());
+  const bellAudioRef = useRef<HTMLAudioElement>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const playedBellsRef = useRef<Set<number>>(new Set());
 
   // Web Audio API refs for seamless background looping
-  const audioContextRef = useRef(null);
-  const audioSourceRef = useRef(null);
-  const gainNodeRef = useRef(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
 
   // Get sound source by ID
-  const getSoundSrc = useCallback((soundId) => {
+  const getSoundSrc = useCallback((soundId: string): string | null => {
     if (soundId === 'none') return null;
     const defaultSound = DEFAULT_SOUNDS[soundId];
     if (defaultSound) return defaultSound.src;
@@ -38,7 +45,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   }, [customSounds]);
 
   // Play a bell sound
-  const playBell = useCallback((soundId) => {
+  const playBell = useCallback((soundId: string) => {
     const src = getSoundSrc(soundId);
     if (!src || !bellAudioRef.current) return;
 
@@ -83,8 +90,8 @@ function ActiveTimer({ config, onComplete, onEnd }) {
     const startBackgroundAudio = async () => {
       try {
         // Create audio context
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioContextRef.current = new AudioContext();
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass();
 
         // Fetch and decode audio
         const response = await fetch(src);
@@ -116,12 +123,13 @@ function ActiveTimer({ config, onComplete, onEnd }) {
       if (audioSourceRef.current) {
         try {
           audioSourceRef.current.stop();
-        } catch (e) { /* ignore */ }
+        } catch { /* ignore */ }
       }
       if (audioContextRef.current) {
         audioContextRef.current.close().catch(() => {});
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Volume changes handled by separate effect
   }, [config.backgroundSound, getSoundSrc]);
 
   // Update background volume
@@ -149,7 +157,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
 
         // Preparation complete - transition to meditation
         if (newTime <= 0) {
-          clearInterval(intervalRef.current);
+          if (intervalRef.current) clearInterval(intervalRef.current);
           setIsPreparing(false);
           return 0;
         }
@@ -158,7 +166,9 @@ function ActiveTimer({ config, onComplete, onEnd }) {
       });
     }, 1000);
 
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [isPreparing, isPaused]);
 
   // Timer count-up (only runs after preparation is complete)
@@ -189,7 +199,9 @@ function ActiveTimer({ config, onComplete, onEnd }) {
       });
     }, 1000);
 
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [isPaused, isPreparing, config.duration, config.intervalBells, config.endingSound, playBell, bellPlayed]);
 
 
@@ -214,7 +226,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   };
 
   const confirmEndSession = () => {
-    clearInterval(intervalRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
     // Stop audio
     if (audioContextRef.current) {
@@ -255,7 +267,7 @@ function ActiveTimer({ config, onComplete, onEnd }) {
   // Handle escape key for modal
   useEffect(() => {
     if (!showEndConfirm) return;
-    const handleEscape = (e) => {
+    const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setShowEndConfirm(false);
     };
     document.addEventListener('keydown', handleEscape);

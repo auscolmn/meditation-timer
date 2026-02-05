@@ -1,11 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, KeyboardEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../hooks/useTheme';
 import styles from './Welcome.module.css';
 
 const AUTO_TRANSITION_SECONDS = 5;
 
-function Welcome({ onStart }) {
+interface WelcomeProps {
+  onStart: () => void;
+}
+
+function Welcome({ onStart }: WelcomeProps) {
   const { getDailyQuote } = useApp();
   const { effectiveTheme } = useTheme();
   const quote = getDailyQuote();
@@ -21,13 +25,17 @@ function Welcome({ onStart }) {
     return () => clearTimeout(timer);
   }, [onStart]);
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') onStart();
+  };
+
   return (
     <div
       className={`screen screen--centered ${styles.tappable}`}
       onClick={onStart}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && onStart()}
+      onKeyDown={handleKeyDown}
       aria-label="Tap anywhere to start meditation timer"
     >
       <div className={styles.container}>

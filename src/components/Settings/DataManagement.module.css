@@ -1,0 +1,82 @@
+.container {
+  /* Container styles inherited from card */
+}
+
+.sectionTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.stats {
+  margin-top: var(--space-lg);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* Modal styles */
+.error {
+  color: var(--error);
+  margin-bottom: var(--space-md);
+}
+
+.preview {
+  margin-bottom: var(--space-md);
+}
+
+.previewWarning {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-md);
+}
+
+.previewList {
+  list-style: disc;
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+}
+
+.previewList li {
+  margin-bottom: var(--space-xs);
+}
+
+.previewNote {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  font-style: italic;
+}

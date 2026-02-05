@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, ChangeEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
 import {
@@ -12,10 +12,22 @@ import {
   formatSessionTime
 } from '../../utils/dateUtils';
 import { STREAK_GOALS } from '../../utils/constants';
+import StreakFreeze from './StreakFreeze';
+import Charts from './Charts';
 import styles from './Progress.module.css';
 
+// Snowflake icon for frozen days
+const SnowflakeIcon = () => (
+  <svg className={styles.freezeIcon} xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="2" x2="12" y2="22"/>
+    <line x1="2" y1="12" x2="22" y2="12"/>
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+    <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/>
+  </svg>
+);
+
 // Chevron icon for expandable sections
-const ChevronIcon = ({ expanded }) => (
+const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
   <svg
     className={`${styles.expandIcon} ${expanded ? styles.expanded : ''}`}
     xmlns="http://www.w3.org/2000/svg"
@@ -36,8 +48,11 @@ const ChevronIcon = ({ expanded }) => (
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function Progress() {
-  const { sessions, deleteSession, addManualSession } = useApp();
-  const streakData = useStreak(sessions);
+  const { sessions, deleteSession, addManualSession, streakFreezes } = useApp();
+  const streakData = useStreak(sessions, streakFreezes);
+
+  // Create a set of frozen dates for quick lookup
+  const frozenDates = useMemo(() => new Set(streakFreezes.map(f => f.date)), [streakFreezes]);
 
   // Calculate additional statistics (memoized)
   const { longestSession, averageSession } = useMemo(() => ({
@@ -55,10 +70,10 @@ function Progress() {
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   // Modal state
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showAddSession, setShowAddSession] = useState(false);
   const [newSessionDuration, setNewSessionDuration] = useState(10);
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Expandable sections
   const [statsExpanded, setStatsExpanded] = useState(false);
@@ -88,7 +103,7 @@ function Progress() {
   };
 
   // Handle day click
-  const handleDayClick = (date) => {
+  const handleDayClick = (date: Date | null) => {
     if (!date) return;
     const dateStr = formatDateString(date);
     if (isDateFuture(dateStr)) return;
@@ -105,7 +120,7 @@ function Progress() {
   };
 
   // Handle delete session
-  const handleDeleteSession = (sessionId) => {
+  const handleDeleteSession = (sessionId: string) => {
     setDeleteConfirmId(sessionId);
   };
 
@@ -118,7 +133,7 @@ function Progress() {
 
   // Handle escape key for modals
   useEffect(() => {
-    const handleEscape = (e) => {
+    const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (deleteConfirmId) setDeleteConfirmId(null);
         else if (selectedDate) setSelectedDate(null);
@@ -223,19 +238,24 @@ function Progress() {
                 const dateStr = formatDateString(date);
                 const daySessions = monthSessions[dateStr] || [];
                 const sessionCount = daySessions.length;
-                const isToday = isDateToday(dateStr);
+                const todayCheck = isDateToday(dateStr);
                 const isFuture = isDateFuture(dateStr);
+                const isFrozen = frozenDates.has(dateStr);
 
                 return (
                   <button
                     key={dateStr}
-                    className={`${styles.day} ${isToday ? styles.today : ''} ${isFuture ? styles.future : ''}`}
+                    className={`${styles.day} ${todayCheck ? styles.today : ''} ${isFuture ? styles.future : ''} ${isFrozen ? styles.frozen : ''}`}
                     onClick={() => handleDayClick(date)}
                     disabled={isFuture}
                   >
                     <span className={styles.dayNumber}>{date.getDate()}</span>
+                    {isFrozen && sessionCount === 0 && (
+                      <SnowflakeIcon />
+                    )}
                     {sessionCount > 0 && (
                       <div className={styles.sessionDots}>
+                        {isFrozen && <SnowflakeIcon />}
                         {sessionCount > 3 ? (
                           <span className={styles.dotMore}>3+</span>
                         ) : (
@@ -317,6 +337,12 @@ function Progress() {
             })}
           </div>
         )}
+
+        {/* Streak Freeze */}
+        <StreakFreeze />
+
+        {/* Charts */}
+        <Charts />
       </div>
 
       {/* Date Detail Modal */}
@@ -390,7 +416,7 @@ function Progress() {
                     type="number"
                     className="input"
                     value={newSessionDuration}
-                    onChange={(e) => setNewSessionDuration(parseInt(e.target.value) || 0)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewSessionDuration(parseInt(e.target.value) || 0)}
                     min="1"
                     max="1440"
                   />

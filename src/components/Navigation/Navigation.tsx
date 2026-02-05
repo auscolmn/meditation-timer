@@ -1,3 +1,4 @@
+import type { NavigationTab } from '../../types';
 import styles from './Navigation.module.css';
 
 // Timer icon SVG
@@ -26,7 +27,12 @@ const SettingsIcon = () => (
   </svg>
 );
 
-function Navigation({ activeTab, onTabChange }) {
+interface NavigationProps {
+  activeTab: NavigationTab;
+  onTabChange: (tab: NavigationTab) => void;
+}
+
+function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
     <nav className={styles.nav} role="navigation" aria-label="Main navigation">
       <button

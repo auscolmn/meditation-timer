@@ -35,6 +35,10 @@
   animation: fadeSlideUp 0.8s ease-out 0.8s both;
 }
 
+.animateDelay5 {
+  animation: fadeSlideUp 0.8s ease-out 1s both;
+}
+
 .sectionTitle {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);

@@ -1,13 +1,18 @@
-import { useRef } from 'react';
+import { useRef, ChangeEvent, MouseEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MAX_SOUND_FILE_SIZE, SUPPORTED_AUDIO_FORMATS } from '../../utils/constants';
 import styles from './SoundUpload.module.css';
 
-function SoundUpload({ type, onSoundAdded }) {
-  const { addCustomSound, customSounds, deleteCustomSound } = useApp();
-  const fileInputRef = useRef(null);
+interface SoundUploadProps {
+  type: 'bell' | 'background';
+  onSoundAdded?: (soundId: string) => void;
+}
 
-  const handleFileSelect = async (e) => {
+function SoundUpload({ type, onSoundAdded }: SoundUploadProps) {
+  const { addCustomSound, customSounds, deleteCustomSound } = useApp();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -52,16 +57,16 @@ function SoundUpload({ type, onSoundAdded }) {
     }
   };
 
-  const fileToDataUrl = (file) => {
+  const fileToDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
+      reader.onload = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
-  const handleDelete = (soundId, e) => {
+  const handleDelete = (soundId: string, e: MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this custom sound?')) {
       deleteCustomSound(soundId);
