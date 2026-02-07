@@ -38,8 +38,7 @@ const createValidExportData = (): ExportData => ({
       {
         id: 'q1',
         text: 'Test quote',
-        author: 'Test Author',
-        category: 'Buddhism'
+        author: 'Test Author'
       }
     ],
     customSounds: [],
