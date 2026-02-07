@@ -1,9 +1,6 @@
 // Theme types
 export type Theme = 'light' | 'dark' | 'auto';
 
-// Quote categories
-export type QuoteCategory = 'Buddhism' | 'Taoism' | 'Stoicism' | 'Other';
-
 // Sound types
 export type SoundType = 'bell' | 'background' | 'none';
 
@@ -63,7 +60,6 @@ export interface Quote {
   id: string;
   text: string;
   author: string;
-  category: QuoteCategory;
 }
 
 // Default sound definition

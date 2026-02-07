@@ -81,8 +81,7 @@ function validateQuotes(quotes: unknown): quotes is Quote[] {
     typeof q === 'object' && q !== null &&
     typeof q.id === 'string' &&
     typeof q.text === 'string' &&
-    typeof q.author === 'string' &&
-    typeof q.category === 'string'
+    typeof q.author === 'string'
   );
 }
 
