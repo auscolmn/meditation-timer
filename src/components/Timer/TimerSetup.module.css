@@ -400,5 +400,5 @@
 
 /* Add bottom padding to content so last card isn't hidden */
 .contentPadding {
-  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
 }
