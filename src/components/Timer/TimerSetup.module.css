@@ -241,6 +241,39 @@
   font-weight: var(--font-weight-medium);
 }
 
+.intervalPrefix {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  min-width: 36px;
+}
+
+.repeatToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.repeatToggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.repeatToggle.repeatActive {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface-raised);
+}
+
 /* Sound row with preview button */
 .soundRow {
   display: flex;
@@ -344,6 +377,28 @@
   color: var(--text-secondary);
 }
 
+/* Fixed bottom button container - positioned above nav */
+.bottomButtonContainer {
+  position: fixed;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-md) var(--space-lg);
+  background: linear-gradient(to top, var(--background) 70%, transparent);
+  z-index: 40;
+  pointer-events: none;
+}
+
 .beginButton {
-  margin-top: var(--space-xl);
+  width: 100%;
+  max-width: calc(600px - var(--space-lg) * 2);
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+}
+
+/* Add bottom padding to content so last card isn't hidden */
+.contentPadding {
+  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
 }
