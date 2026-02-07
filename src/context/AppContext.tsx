@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useCallback, useMemo, useState, ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, DEFAULT_QUOTES, DEFAULT_SETTINGS } from '../utils/constants';
 import { getTodayString, formatDateString } from '../utils/dateUtils';
@@ -11,7 +11,8 @@ import type {
   TimerPreset,
   StreakFreeze,
   ExportData,
-  AppContextValue
+  AppContextValue,
+  DraftTimerSettings
 } from '../types';
 
 // Create the context
@@ -46,6 +47,9 @@ export function AppProvider({ children }: AppProviderProps) {
   // Daily quote tracking
   const [lastQuoteDate, setLastQuoteDate] = useLocalStorage<string | null>(STORAGE_KEYS.LAST_QUOTE_DATE, null);
   const [dailyQuoteIndex, setDailyQuoteIndex] = useLocalStorage<number>(STORAGE_KEYS.DAILY_QUOTE_INDEX, 0);
+
+  // Draft timer settings (persists during navigation, not in localStorage)
+  const [draftTimerSettings, setDraftTimerSettings] = useState<DraftTimerSettings | null>(null);
 
   // Session actions
   const addSession = useCallback((session: Omit<Session, 'id' | 'date' | 'timestamp'>): Session => {
@@ -232,6 +236,7 @@ export function AppProvider({ children }: AppProviderProps) {
     customSounds,
     presets,
     streakFreezes,
+    draftTimerSettings,
 
     // Session actions
     addSession,
@@ -265,7 +270,10 @@ export function AppProvider({ children }: AppProviderProps) {
 
     // Data management
     exportAllData,
-    importAllData
+    importAllData,
+
+    // Draft timer settings
+    setDraftTimerSettings
   }), [
     sessions,
     settings,
@@ -273,6 +281,7 @@ export function AppProvider({ children }: AppProviderProps) {
     customSounds,
     presets,
     streakFreezes,
+    draftTimerSettings,
     addSession,
     deleteSession,
     addManualSession,

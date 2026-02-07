@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS, PREPARATION_PRESETS } from '../../utils/constants';
 import PresetManager from './PresetManager';
-import type { TimerConfig, DefaultSound, CustomSound, IntervalBell, TimerPreset } from '../../types';
+import type { TimerConfig, DefaultSound, CustomSound, IntervalBell, TimerPreset, DraftTimerSettings } from '../../types';
 import styles from './TimerSetup.module.css';
 
 // Play icon SVG
@@ -31,30 +31,42 @@ interface DurationPreset {
 }
 
 function TimerSetup({ onStart }: TimerSetupProps) {
-  const { settings, updateSettings, customSounds } = useApp();
+  const { settings, updateSettings, customSounds, draftTimerSettings, setDraftTimerSettings } = useApp();
   const previewAudioRef = useRef<HTMLAudioElement>(null);
   const [playingSound, setPlayingSound] = useState<string | null>(null);
 
+  // Use draft settings if available, otherwise fall back to last saved settings
+  const initialSettings = draftTimerSettings || {
+    duration: settings.lastDuration || { hours: 0, minutes: 10, seconds: 0 },
+    preparationTime: settings.preparationTime || 0,
+    beginningSound: settings.lastBeginningSound || 'bell',
+    endingSound: settings.lastEndingSound || 'gong',
+    backgroundSound: settings.lastBackgroundSound || 'none',
+    backgroundVolume: settings.backgroundVolume || 50,
+    bellVolume: settings.bellVolume || 80,
+    intervalBells: settings.lastIntervalBells || []
+  };
+
   // Duration state
-  const [hours, setHours] = useState(settings.lastDuration?.hours || 0);
-  const [minutes, setMinutes] = useState(settings.lastDuration?.minutes || 10);
-  const [seconds, setSeconds] = useState(settings.lastDuration?.seconds || 0);
+  const [hours, setHours] = useState(initialSettings.duration.hours);
+  const [minutes, setMinutes] = useState(initialSettings.duration.minutes);
+  const [seconds, setSeconds] = useState(initialSettings.duration.seconds);
 
   // Preparation time state (settle-in time before meditation starts)
-  const [preparationTime, setPreparationTime] = useState(settings.preparationTime || 0);
+  const [preparationTime, setPreparationTime] = useState(initialSettings.preparationTime);
   const [customPrepTime, setCustomPrepTime] = useState(
-    !PREPARATION_PRESETS.some(p => p.seconds === (settings.preparationTime || 0))
+    !PREPARATION_PRESETS.some(p => p.seconds === initialSettings.preparationTime)
   );
 
   // Sound state
-  const [beginningSound, setBeginningSound] = useState(settings.lastBeginningSound || 'bell');
-  const [endingSound, setEndingSound] = useState(settings.lastEndingSound || 'gong');
-  const [backgroundSound, setBackgroundSound] = useState(settings.lastBackgroundSound || 'none');
-  const [backgroundVolume, setBackgroundVolume] = useState(settings.backgroundVolume || 50);
-  const [bellVolume, setBellVolume] = useState(settings.bellVolume || 80);
+  const [beginningSound, setBeginningSound] = useState(initialSettings.beginningSound);
+  const [endingSound, setEndingSound] = useState(initialSettings.endingSound);
+  const [backgroundSound, setBackgroundSound] = useState(initialSettings.backgroundSound);
+  const [backgroundVolume, setBackgroundVolume] = useState(initialSettings.backgroundVolume);
+  const [bellVolume, setBellVolume] = useState(initialSettings.bellVolume);
 
   // Interval bells state
-  const [intervalBells, setIntervalBells] = useState<IntervalBell[]>(settings.lastIntervalBells || []);
+  const [intervalBells, setIntervalBells] = useState<IntervalBell[]>(initialSettings.intervalBells);
 
   // Validation error
   const [error, setError] = useState('');
@@ -63,6 +75,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
   const [durationExpanded, setDurationExpanded] = useState(false);
   const [soundsExpanded, setSoundsExpanded] = useState(false);
   const [intervalsExpanded, setIntervalsExpanded] = useState(false);
+  const [presetsExpanded, setPresetsExpanded] = useState(false);
 
   // Get all available sounds (default + custom) - memoized
   const bellSounds = useMemo((): (DefaultSound | CustomSound)[] => [
@@ -98,6 +111,21 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : bellVolume / 100;
     }
   }, [backgroundVolume, bellVolume, playingSound, customSounds]);
+
+  // Save draft settings whenever any setting changes
+  useEffect(() => {
+    const draft: DraftTimerSettings = {
+      duration: { hours, minutes, seconds },
+      preparationTime,
+      beginningSound,
+      endingSound,
+      backgroundSound,
+      backgroundVolume,
+      bellVolume,
+      intervalBells
+    };
+    setDraftTimerSettings(draft);
+  }, [hours, minutes, seconds, preparationTime, beginningSound, endingSound, backgroundSound, backgroundVolume, bellVolume, intervalBells, setDraftTimerSettings]);
 
   // Preview sound (toggle play/pause)
   const previewSound = (soundId: string) => {
@@ -168,9 +196,33 @@ function TimerSetup({ onStart }: TimerSetupProps) {
 
     // Validate interval bells
     for (const bell of intervalBells) {
-      if (bell.time >= totalSeconds) {
-        setError('Interval bells must be before the end of the session');
-        return;
+      if (bell.repeat) {
+        // Repeating bells must have interval > 0
+        if (bell.time <= 0) {
+          setError('Repeating interval must be greater than 0');
+          return;
+        }
+      } else {
+        // Single bells must be before the end
+        if (bell.time >= totalSeconds) {
+          setError('Interval bells must be before the end of the session');
+          return;
+        }
+      }
+    }
+
+    // Expand repeating bells into individual time points
+    const expandedBells: IntervalBell[] = [];
+    for (const bell of intervalBells) {
+      if (bell.repeat && bell.time > 0) {
+        // Generate bells at each interval until the end (but not at the end)
+        let time = bell.time;
+        while (time < totalSeconds) {
+          expandedBells.push({ time, sound: bell.sound });
+          time += bell.time;
+        }
+      } else if (!bell.repeat && bell.time > 0 && bell.time < totalSeconds) {
+        expandedBells.push({ time: bell.time, sound: bell.sound });
       }
     }
 
@@ -186,7 +238,10 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       preparationTime
     });
 
-    // Start meditation
+    // Clear draft settings since we're starting
+    setDraftTimerSettings(null);
+
+    // Start meditation with expanded bells
     onStart({
       duration: totalSeconds,
       beginningSound,
@@ -194,7 +249,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       backgroundSound,
       backgroundVolume,
       bellVolume,
-      intervalBells: [...intervalBells].sort((a, b) => a.time - b.time),
+      intervalBells: expandedBells.sort((a, b) => a.time - b.time),
       preparationTime
     });
   };
@@ -212,7 +267,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
   };
 
   // Update interval bell
-  const updateIntervalBell = (index: number, field: keyof IntervalBell, value: string | number) => {
+  const updateIntervalBell = (index: number, field: keyof IntervalBell, value: string | number | boolean) => {
     const updated = [...intervalBells];
     updated[index] = { ...updated[index], [field]: value };
     setIntervalBells(updated);
@@ -242,29 +297,14 @@ function TimerSetup({ onStart }: TimerSetupProps) {
   };
 
   return (
-    <div className="screen">
+    <div className={`screen ${styles.contentPadding}`}>
       {/* Hidden audio for previews */}
       <audio ref={previewAudioRef} />
 
       <h1 className={styles.title}>Set Your Timer</h1>
 
-      {/* Presets */}
-      <div className={`card mb-lg ${styles.animateDelay1}`}>
-        <PresetManager
-          duration={{ hours, minutes, seconds }}
-          preparationTime={preparationTime}
-          beginningSound={beginningSound}
-          endingSound={endingSound}
-          backgroundSound={backgroundSound}
-          backgroundVolume={backgroundVolume}
-          bellVolume={bellVolume}
-          intervalBells={intervalBells}
-          onLoadPreset={handleLoadPreset}
-        />
-      </div>
-
       {/* Duration */}
-      <div className={`card mb-lg ${styles.animateDelay2}`}>
+      <div className={`card mb-lg ${styles.animateDelay1}`}>
         <h2 className={`${styles.sectionTitle} mb-md`}>Duration</h2>
 
         {/* Quick-start presets */}
@@ -395,7 +435,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       </div>
 
       {/* Sounds */}
-      <div className={`card mb-lg ${styles.animateDelay3}`}>
+      <div className={`card mb-lg ${styles.animateDelay2}`}>
         <button
           type="button"
           className={styles.expandHeader}
@@ -528,7 +568,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       </div>
 
       {/* Interval Bells */}
-      <div className={`card mb-lg ${styles.animateDelay4}`}>
+      <div className={`card mb-lg ${styles.animateDelay3}`}>
         <button
           type="button"
           className={styles.expandHeader}
@@ -573,14 +613,36 @@ function TimerSetup({ onStart }: TimerSetupProps) {
               <div className={styles.intervalList}>
                 {intervalBells.map((bell, index) => (
                   <div key={index} className={styles.intervalItem}>
+                    <button
+                      type="button"
+                      className={`${styles.repeatToggle} ${bell.repeat ? styles.repeatActive : ''}`}
+                      onClick={() => updateIntervalBell(index, 'repeat', !bell.repeat)}
+                      aria-label={bell.repeat ? "Switch to single bell" : "Switch to repeating bell"}
+                      title={bell.repeat ? "Repeating" : "Single"}
+                    >
+                      {bell.repeat ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17 2l4 4-4 4"/>
+                          <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
+                          <path d="M7 22l-4-4 4-4"/>
+                          <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                      )}
+                    </button>
+                    <span className={styles.intervalPrefix}>{bell.repeat ? 'every' : 'at'}</span>
                     <input
                       type="number"
                       className="input"
                       value={Math.floor(bell.time / 60)}
                       onChange={(e) => updateIntervalBell(index, 'time', parseInt(e.target.value || '0') * 60)}
-                      min="0"
+                      min="1"
                       placeholder="Minutes"
-                      aria-label="Interval time in minutes"
+                      aria-label={bell.repeat ? "Repeat interval in minutes" : "Bell time in minutes"}
                     />
                     <span className={styles.intervalLabel}>min</span>
                     <select
@@ -611,16 +673,63 @@ function TimerSetup({ onStart }: TimerSetupProps) {
         )}
       </div>
 
+      {/* Presets */}
+      <div className={`card mb-lg ${styles.animateDelay4}`}>
+        <button
+          type="button"
+          className={styles.expandHeader}
+          onClick={() => setPresetsExpanded(!presetsExpanded)}
+          aria-expanded={presetsExpanded}
+        >
+          <h2 className={styles.sectionTitle}>Presets</h2>
+          <span className={styles.expandSummary}>
+            Save & load configurations
+          </span>
+          <svg
+            className={`${styles.expandIcon} ${presetsExpanded ? styles.expanded : ''}`}
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        {presetsExpanded && (
+          <div className={styles.expandContent}>
+            <PresetManager
+              duration={{ hours, minutes, seconds }}
+              preparationTime={preparationTime}
+              beginningSound={beginningSound}
+              endingSound={endingSound}
+              backgroundSound={backgroundSound}
+              backgroundVolume={backgroundVolume}
+              bellVolume={bellVolume}
+              intervalBells={intervalBells}
+              onLoadPreset={handleLoadPreset}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Error message */}
       {error && <p className="form-error text-center mb-md">{error}</p>}
 
-      {/* Begin button */}
-      <button
-        className={`btn btn--primary btn--large btn--full ${styles.beginButton} ${styles.animateDelay5}`}
-        onClick={handleStart}
-      >
-        BEGIN
-      </button>
+      {/* Fixed Begin button */}
+      <div className={`${styles.bottomButtonContainer} ${styles.animateDelay5}`}>
+        <button
+          className={`btn btn--primary btn--large ${styles.beginButton}`}
+          onClick={handleStart}
+        >
+          BEGIN
+        </button>
+      </div>
     </div>
   );
 }

@@ -27,8 +27,9 @@ export interface Duration {
 
 // Interval bell configuration
 export interface IntervalBell {
-  time: number;           // seconds from start
+  time: number;           // seconds from start (for single) or interval (for repeating)
   sound: string;          // sound ID
+  repeat?: boolean;       // if true, repeat every `time` seconds
 }
 
 // Settings object - user preferences
@@ -113,6 +114,18 @@ export interface TimerPreset {
   createdAt: string;
 }
 
+// Draft timer settings - persists during navigation
+export interface DraftTimerSettings {
+  duration: Duration;
+  preparationTime: number;
+  beginningSound: string;
+  endingSound: string;
+  backgroundSound: string;
+  backgroundVolume: number;
+  bellVolume: number;
+  intervalBells: IntervalBell[];
+}
+
 // Streak freeze record
 export interface StreakFreeze {
   id: string;
@@ -158,6 +171,7 @@ export interface AppContextValue {
   customSounds: CustomSound[];
   presets: TimerPreset[];
   streakFreezes: StreakFreeze[];
+  draftTimerSettings: DraftTimerSettings | null;
 
   // Session actions
   addSession: (session: Omit<Session, 'id' | 'date' | 'timestamp'>) => Session;
@@ -192,6 +206,9 @@ export interface AppContextValue {
   // Data management
   exportAllData: () => ExportData;
   importAllData: (data: ExportData) => void;
+
+  // Draft timer settings
+  setDraftTimerSettings: (settings: DraftTimerSettings | null) => void;
 }
 
 // Navigation tab types
