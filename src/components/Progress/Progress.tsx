@@ -48,8 +48,11 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function Progress() {
-  const { sessions, deleteSession, addManualSession, streakFreezes } = useApp();
+  const { sessions, deleteSession, addManualSession, streakFreezes, settings } = useApp();
   const streakData = useStreak(sessions, streakFreezes);
+
+  // Hide stats/streak based on minimalism setting
+  const hideStats = settings.hideStreakStats;
 
   // Create a set of frozen dates for quick lookup
   const frozenDates = useMemo(() => new Set(streakFreezes.map(f => f.date)), [streakFreezes]);
@@ -150,50 +153,52 @@ function Progress() {
 
   return (
     <div className="screen">
-      {/* Stats Section */}
-      <div className={`card mb-lg ${styles.statsSection}`}>
-        <button
-          type="button"
-          className={styles.expandHeader}
-          onClick={() => setStatsExpanded(!statsExpanded)}
-          aria-expanded={statsExpanded}
-        >
-          <h2 className={styles.expandTitle}>Statistics</h2>
-          <span className={styles.expandSummary}>
-            {streakData.totalSessions} sessions · {formatDuration(streakData.totalTime)}
-          </span>
-          <ChevronIcon expanded={statsExpanded} />
-        </button>
+      {/* Stats Section - hidden when hideStats is enabled */}
+      {!hideStats && (
+        <div className={`card mb-lg ${styles.statsSection}`}>
+          <button
+            type="button"
+            className={styles.expandHeader}
+            onClick={() => setStatsExpanded(!statsExpanded)}
+            aria-expanded={statsExpanded}
+          >
+            <h2 className={styles.expandTitle}>Statistics</h2>
+            <span className={styles.expandSummary}>
+              {streakData.totalSessions} sessions · {formatDuration(streakData.totalTime)}
+            </span>
+            <ChevronIcon expanded={statsExpanded} />
+          </button>
 
-        {statsExpanded && (
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{streakData.currentStreak}</span>
-              <span className={styles.statLabel}>Day Streak</span>
+          {statsExpanded && (
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <span className={styles.statValue}>{streakData.currentStreak}</span>
+                <span className={styles.statLabel}>Day Streak</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statValue}>{streakData.longestStreak}</span>
+                <span className={styles.statLabel}>Best Streak</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statValue}>{streakData.totalSessions}</span>
+                <span className={styles.statLabel}>Sessions</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statValue}>{formatDuration(streakData.totalTime)}</span>
+                <span className={styles.statLabel}>Total Time</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statValue}>{formatDuration(longestSession)}</span>
+                <span className={styles.statLabel}>Longest</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statValue}>{formatDuration(averageSession)}</span>
+                <span className={styles.statLabel}>Average</span>
+              </div>
             </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{streakData.longestStreak}</span>
-              <span className={styles.statLabel}>Best Streak</span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{streakData.totalSessions}</span>
-              <span className={styles.statLabel}>Sessions</span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{formatDuration(streakData.totalTime)}</span>
-              <span className={styles.statLabel}>Total Time</span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{formatDuration(longestSession)}</span>
-              <span className={styles.statLabel}>Longest</span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statValue}>{formatDuration(averageSession)}</span>
-              <span className={styles.statLabel}>Average</span>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Calendar */}
       <div className={`card mb-lg ${styles.animateDelay1}`}>
@@ -273,77 +278,79 @@ function Progress() {
         </div>
       </div>
 
-      {/* Streak & Goals Section */}
-      <div className={`card mb-lg ${styles.animateDelay2}`}>
-        {/* Current Streak - Always Visible */}
-        <div className={styles.currentStreak}>
-          <span className={styles.streakNumber}>{streakData.currentStreak}</span>
-          <span className={styles.streakLabel}>day streak</span>
-        </div>
-
-        {/* Next Goal Progress - Always Visible */}
-        {streakData.nextGoal && (
-          <div className={styles.nextGoal}>
-            <div className={styles.nextGoalHeader}>
-              <span>Next: {streakData.nextGoal.label}</span>
-              <span>{streakData.currentStreak}/{streakData.nextGoal.days} days</span>
-            </div>
-            <div className={styles.progressBar}>
-              <div
-                className={styles.progressFill}
-                style={{ width: `${streakData.progressPercent}%` }}
-              />
-            </div>
+      {/* Streak & Goals Section - hidden when hideStats is enabled */}
+      {!hideStats && (
+        <div className={`card mb-lg ${styles.animateDelay2}`}>
+          {/* Current Streak - Always Visible */}
+          <div className={styles.currentStreak}>
+            <span className={styles.streakNumber}>{streakData.currentStreak}</span>
+            <span className={styles.streakLabel}>day streak</span>
           </div>
-        )}
 
-        {/* Achievements - Expandable */}
-        <button
-          type="button"
-          className={styles.expandHeader}
-          onClick={() => setGoalsExpanded(!goalsExpanded)}
-          aria-expanded={goalsExpanded}
-        >
-          <span className={styles.expandTitle}>Achievements</span>
-          <span className={styles.expandSummary}>
-            {streakData.completedGoals.length} of {STREAK_GOALS.length} completed
-          </span>
-          <ChevronIcon expanded={goalsExpanded} />
-        </button>
-
-        {goalsExpanded && (
-          <div className={styles.goalsList}>
-            {STREAK_GOALS.map(goal => {
-              const isCompleted = streakData.currentStreak >= goal.days;
-              const isCurrent = streakData.nextGoal?.days === goal.days;
-
-              return (
+          {/* Next Goal Progress - Always Visible */}
+          {streakData.nextGoal && (
+            <div className={styles.nextGoal}>
+              <div className={styles.nextGoalHeader}>
+                <span>Next: {streakData.nextGoal.label}</span>
+                <span>{streakData.currentStreak}/{streakData.nextGoal.days} days</span>
+              </div>
+              <div className={styles.progressBar}>
                 <div
-                  key={goal.days}
-                  className={`${styles.goalItem} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
-                >
-                  <span className={styles.goalBadge}>{goal.badge}</span>
-                  <span className={styles.goalLabel}>{goal.label}</span>
-                  {isCompleted && (
-                    <span className={styles.goalCheck}>✓</span>
-                  )}
-                  {isCurrent && (
-                    <span className={styles.goalProgress}>
-                      {streakData.currentStreak}/{goal.days}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                  className={styles.progressFill}
+                  style={{ width: `${streakData.progressPercent}%` }}
+                />
+              </div>
+            </div>
+          )}
 
-        {/* Streak Freeze */}
-        <StreakFreeze />
+          {/* Achievements - Expandable */}
+          <button
+            type="button"
+            className={styles.expandHeader}
+            onClick={() => setGoalsExpanded(!goalsExpanded)}
+            aria-expanded={goalsExpanded}
+          >
+            <span className={styles.expandTitle}>Achievements</span>
+            <span className={styles.expandSummary}>
+              {streakData.completedGoals.length} of {STREAK_GOALS.length} completed
+            </span>
+            <ChevronIcon expanded={goalsExpanded} />
+          </button>
 
-        {/* Charts */}
-        <Charts />
-      </div>
+          {goalsExpanded && (
+            <div className={styles.goalsList}>
+              {STREAK_GOALS.map(goal => {
+                const isCompleted = streakData.currentStreak >= goal.days;
+                const isCurrent = streakData.nextGoal?.days === goal.days;
+
+                return (
+                  <div
+                    key={goal.days}
+                    className={`${styles.goalItem} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
+                  >
+                    <span className={styles.goalBadge}>{goal.badge}</span>
+                    <span className={styles.goalLabel}>{goal.label}</span>
+                    {isCompleted && (
+                      <span className={styles.goalCheck}>✓</span>
+                    )}
+                    {isCurrent && (
+                      <span className={styles.goalProgress}>
+                        {streakData.currentStreak}/{goal.days}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Streak Freeze */}
+          <StreakFreeze />
+
+          {/* Charts */}
+          <Charts />
+        </div>
+      )}
 
       {/* Date Detail Modal */}
       {selectedDate && (

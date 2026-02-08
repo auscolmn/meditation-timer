@@ -45,6 +45,19 @@ export interface Settings {
   freezesAvailable?: number;
   freezesPerMonth?: number;
   lastFreezeGrantMonth?: string;  // YYYY-MM
+  // Customization: Timer Setup visibility
+  showDurationCard?: boolean;
+  showSoundsCard?: boolean;
+  showIntervalsCard?: boolean;
+  showPresetsCard?: boolean;
+  // Customization: Quick Start
+  quickStartEnabled?: boolean;
+  // Customization: Minimalism
+  hideStreakStats?: boolean;
+  minimalCompletionScreen?: boolean;
+  hideNavDuringTimer?: boolean;
+  // Customization: Custom duration presets (minutes)
+  customDurationPresets?: number[];
 }
 
 // Custom sound uploaded by user
