@@ -151,6 +151,23 @@ function Progress() {
     ? sessions.filter(s => s.date === selectedDate)
     : [];
 
+  // Generate zen insight message for selected date
+  const getInsightMessage = () => {
+    if (!selectedDate || selectedDateSessions.length === 0) {
+      return "A day of rest.";
+    }
+
+    const totalSeconds = selectedDateSessions.reduce((sum, s) => sum + s.duration, 0);
+    const totalMinutes = Math.round(totalSeconds / 60);
+    const sessionCount = selectedDateSessions.length;
+
+    if (sessionCount === 1) {
+      return `On this day, you found ${totalMinutes} minute${totalMinutes !== 1 ? 's' : ''} of stillness.`;
+    } else {
+      return `You returned to stillness ${sessionCount} times, for ${totalMinutes} minutes total.`;
+    }
+  };
+
   return (
     <div className="screen">
       {/* Stats Section - hidden when hideStats is enabled */}
@@ -247,10 +264,12 @@ function Progress() {
                 const isFuture = isDateFuture(dateStr);
                 const isFrozen = frozenDates.has(dateStr);
 
+                const hasSession = sessionCount > 0;
+
                 return (
                   <button
                     key={dateStr}
-                    className={`${styles.day} ${todayCheck ? styles.today : ''} ${isFuture ? styles.future : ''} ${isFrozen ? styles.frozen : ''}`}
+                    className={`${styles.day} ${todayCheck ? styles.today : ''} ${isFuture ? styles.future : ''} ${isFrozen ? styles.frozen : ''} ${hasSession ? styles.hasSession : ''}`}
                     onClick={() => handleDayClick(date)}
                     disabled={isFuture}
                   >
@@ -376,8 +395,11 @@ function Progress() {
               </button>
             </div>
 
+            {/* Zen insight message */}
+            <p className={styles.insightMessage}>{getInsightMessage()}</p>
+
             {selectedDateSessions.length === 0 ? (
-              <p className="text-secondary">No sessions on this date</p>
+              <p className="text-secondary"></p>
             ) : (
               <div className={styles.sessionList}>
                 {selectedDateSessions.map(session => (

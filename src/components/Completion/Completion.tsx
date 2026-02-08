@@ -61,7 +61,7 @@ function Completion({ session, onMeditateAgain }: CompletionProps) {
             cy="50"
             r="45"
             fill="none"
-            stroke="var(--border)"
+            stroke="var(--border-light)"
             strokeWidth="8"
             strokeLinecap="round"
           />

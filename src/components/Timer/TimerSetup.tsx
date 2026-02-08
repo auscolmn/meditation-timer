@@ -107,6 +107,12 @@ function TimerSetup({ onStart }: TimerSetupProps) {
   const showIntervals = settings.showIntervalsCard !== false;
   const showPresets = settings.showPresetsCard !== false;
 
+  // Find active preset index for segmented control (-1 if custom duration)
+  const activePresetIndex = useMemo(() => {
+    if (hours !== 0 || seconds !== 0) return -1;
+    return customPresets.findIndex(m => m === minutes);
+  }, [hours, minutes, seconds, customPresets]);
+
   // Update preview volume when slider changes
   useEffect(() => {
     if (previewAudioRef.current && playingSound) {
@@ -312,13 +318,23 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       {showDuration && <div className={`card mb-lg ${styles.animateDelay1}`}>
         <h2 className={`${styles.sectionTitle} mb-md`}>Duration</h2>
 
-        {/* Quick-start presets */}
-        <div className={styles.presets}>
-          {presets.map(preset => (
+        {/* Segmented control for duration presets */}
+        <div className={styles.segmentedControl}>
+          {/* Sliding pill indicator */}
+          {activePresetIndex >= 0 && (
+            <div
+              className={styles.segmentPill}
+              style={{
+                width: `calc(${100 / presets.length}% - 8px)`,
+                transform: `translateX(calc(${activePresetIndex * 100}% + 4px))`
+              }}
+            />
+          )}
+          {presets.map((preset, index) => (
             <button
               key={preset.minutes}
               type="button"
-              className={`${styles.presetButton} ${minutes === preset.minutes && hours === 0 && seconds === 0 ? styles.presetActive : ''}`}
+              className={`${styles.segmentButton} ${activePresetIndex === index ? styles.segmentActive : ''}`}
               onClick={() => applyPreset(preset)}
             >
               {preset.label}

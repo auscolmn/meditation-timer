@@ -7,40 +7,44 @@
   padding: 0;
 }
 
-/* CSS Custom Properties - Subtle Earth Color Palette */
+/* CSS Custom Properties - Morning Linen (Light) & Midnight Forest (Dark) */
 :root {
-  /* Primary Colors - Earthy Clay */
-  --primary: #8B6F5C;           /* Earthy clay - main interactive elements */
-  --primary-light: #A6887A;     /* Light clay - hover states */
-  --primary-lighter: #C4AFA3;   /* Lighter clay - disabled states */
+  /* Primary Colors - Deep Umber */
+  --primary: #433E37;           /* Deep umber - main interactive elements */
+  --primary-light: #5A544B;     /* Lighter umber - hover states */
+  --primary-lighter: #8E887E;   /* Muted - disabled states */
 
-  /* Success/Completion */
-  --success: #5C7A5C;           /* Muted sage green - streaks, completed sessions */
-  --success-light: #7A9A7A;     /* Light sage - success backgrounds */
+  /* Success/Accent - Sage Green */
+  --success: #5F6F52;           /* Sage green - streaks, completed sessions */
+  --success-light: #A9B388;     /* Muted olive - success backgrounds */
   --success-bg: #F0F4F0;        /* Very light sage - subtle backgrounds */
 
   /* Backgrounds */
-  --background: #F5F5F0;        /* Warm off-white - main background */
-  --surface: #FAFAF8;           /* Warm white - cards, surfaces */
+  --background: #F9F8F4;        /* Warm alabaster - main background */
+  --surface: #FFFFFF;           /* White - cards, surfaces */
   --surface-raised: #FFFFFF;    /* Pure white - elevated elements */
 
   /* Text */
-  --text-primary: #2B2B2B;      /* Almost black - main text */
-  --text-secondary: #7A7A7A;    /* Medium gray - secondary text */
-  --text-tertiary: #ABABAB;     /* Light gray - placeholder text */
+  --text-primary: #433E37;      /* Deep umber - main text (softer than black) */
+  --text-secondary: #8E887E;    /* Dusty silt - secondary text */
+  --text-tertiary: #B5AFA6;     /* Light silt - placeholder text */
 
   /* Borders & Dividers */
-  --border: #E5E5E0;            /* Subtle warm border */
-  --border-light: #F0F0EB;      /* Very subtle border */
+  --border: #E5E2DA;            /* Warm parchment border */
+  --border-light: #F0EDE6;      /* Very subtle border */
 
   /* Accent - Soft Sand */
   --sand: #E8E0D5;              /* Soft sand - active states */
   --sand-dark: #D5CBBC;         /* Darker sand - hover on active */
 
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(67, 62, 55, 0.08);
+
   /* Shadows (warm, earthy tones for soft depth) */
-  --shadow-sm: 0 2px 8px -2px rgba(84, 78, 62, 0.08);
-  --shadow-md: 0 6px 20px -6px rgba(84, 78, 62, 0.12);
-  --shadow-lg: 0 10px 30px -10px rgba(84, 78, 62, 0.15);
+  --shadow-sm: 0 2px 8px -2px rgba(67, 62, 55, 0.08);
+  --shadow-md: 0 6px 20px -6px rgba(67, 62, 55, 0.12);
+  --shadow-lg: 0 10px 30px -10px rgba(67, 62, 55, 0.15);
 
   /* Spacing Scale (generous for breathing room) */
   --space-xs: 4px;
@@ -88,33 +92,37 @@
   --nav-height: 64px;
 }
 
-/* Dark mode - manual toggle */
+/* Dark mode - Midnight Forest */
 [data-theme="dark"] {
-  --primary: #C4AFA3;           /* Lighter clay for dark mode */
-  --primary-light: #D4C4BA;     /* Even lighter on hover */
-  --primary-lighter: #8B6F5C;   /* Muted for disabled */
+  --primary: #E5E2DA;           /* Muted parchment - inverted for glow effect */
+  --primary-light: #F0EDE6;     /* Lighter on hover */
+  --primary-lighter: #9E9990;   /* Muted for disabled */
 
-  --success: #7A9A7A;
-  --success-light: #5C7A5C;
+  --success: #8B9D77;           /* Brightened sage for contrast */
+  --success-light: #5F6F52;     /* Deep forest */
   --success-bg: #2A3A2A;
 
-  --background: #1A1A18;
-  --surface: #242422;
-  --surface-raised: #2E2E2C;
+  --background: #1A1917;        /* Warm obsidian */
+  --surface: #242321;           /* Slightly raised surface */
+  --surface-raised: #2E2D2A;    /* Elevated elements */
 
-  --text-primary: #F5F5F0;
-  --text-secondary: #9A9A9A;
-  --text-tertiary: #6B6B6B;
+  --text-primary: #E5E2DA;      /* Muted parchment */
+  --text-secondary: #9E9990;    /* Warm slate */
+  --text-tertiary: #6B6862;     /* Muted slate */
 
-  --border: #3A3A38;
-  --border-light: #2E2E2C;
+  --border: #3A3836;            /* Warm dark border */
+  --border-light: #2E2D2A;      /* Very subtle border */
 
   --sand: #4A453D;              /* Muted sand for dark mode */
   --sand-dark: #5A544A;         /* Slightly lighter on hover */
 
-  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  /* Glassmorphism */
+  --glass-bg: rgba(36, 35, 33, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.05);
+
+  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 40px -15px rgba(0, 0, 0, 0.6);
 }
 
 /* Base styles */
