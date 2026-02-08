@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import { useTheme } from './hooks/useTheme';
+import { timeToSeconds } from './utils/dateUtils';
 import Navigation from './components/Navigation/Navigation';
 import Welcome from './components/Welcome/Welcome';
 import TimerSetup from './components/Timer/TimerSetup';
@@ -28,6 +29,9 @@ function AppContent() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [pendingScreen, setPendingScreen] = useState<Screen | null>(null);
 
+  // Get settings for Quick Start and nav hiding
+  const { settings } = useApp();
+
   // Initialize theme
   useTheme();
 
@@ -50,7 +54,24 @@ function AppContent() {
   }, [isTransitioning, pendingScreen]);
 
   // Navigation handlers
-  const goToTimerSetup = () => transitionToScreen(SCREENS.TIMER_SETUP);
+  const goToTimerSetup = () => {
+    // Quick Start: skip setup and start immediately with last settings
+    if (settings.quickStartEnabled && settings.lastDuration) {
+      const config: TimerConfig = {
+        duration: timeToSeconds(settings.lastDuration),
+        preparationTime: settings.preparationTime || 0,
+        beginningSound: settings.lastBeginningSound || 'bell1',
+        endingSound: settings.lastEndingSound || 'bell1',
+        backgroundSound: settings.lastBackgroundSound || 'none',
+        bellVolume: settings.bellVolume ?? 80,
+        backgroundVolume: settings.backgroundVolume ?? 50,
+        intervalBells: settings.lastIntervalBells || []
+      };
+      startMeditation(config);
+    } else {
+      transitionToScreen(SCREENS.TIMER_SETUP);
+    }
+  };
   const goToProgress = () => transitionToScreen(SCREENS.PROGRESS);
 
   // Start meditation session
@@ -142,9 +163,11 @@ function AppContent() {
     }
   };
 
-  // Hide navigation during active timer
+  // Hide navigation during active timer and completion
+  // Also hide on timer setup if hideNavDuringTimer is enabled
   const showNavigation = currentScreen !== SCREENS.ACTIVE_TIMER &&
-                         currentScreen !== SCREENS.COMPLETION;
+                         currentScreen !== SCREENS.COMPLETION &&
+                         !(settings.hideNavDuringTimer && currentScreen === SCREENS.TIMER_SETUP);
 
   return (
     <div className="app">

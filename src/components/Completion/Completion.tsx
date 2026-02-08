@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
 import { formatDuration } from '../../utils/dateUtils';
@@ -12,9 +12,12 @@ interface CompletionProps {
 }
 
 function Completion({ session, onMeditateAgain }: CompletionProps) {
-  const { sessions, streakFreezes } = useApp();
+  const { sessions, streakFreezes, settings, getDailyQuote } = useApp();
   const streakData = useStreak(sessions, streakFreezes);
   const [showAnimation, setShowAnimation] = useState(true);
+
+  // Get quote for minimal mode (memoized to stay stable)
+  const quote = useMemo(() => getDailyQuote(), [getDailyQuote]);
 
   // Check if a new goal was just achieved
   const goalJustAchieved = streakData.completedGoals.find(
@@ -26,6 +29,26 @@ function Completion({ session, onMeditateAgain }: CompletionProps) {
     const timer = setTimeout(() => setShowAnimation(false), 1500);
     return () => clearTimeout(timer);
   }, []);
+
+  // Minimal completion screen - show only quote
+  if (settings.minimalCompletionScreen) {
+    return (
+      <div className={`screen screen--centered ${styles.container} ${styles.minimalContainer}`}>
+        {quote && (
+          <div className={styles.quoteBlock}>
+            <p className={styles.quoteText}>"{quote.text}"</p>
+            <p className={styles.quoteAuthor}>— {quote.author}</p>
+          </div>
+        )}
+        <button
+          className={`btn btn--primary btn--large ${styles.continueBtn}`}
+          onClick={onMeditateAgain}
+        >
+          Continue
+        </button>
+      </div>
+    );
+  }
 
 
   return (

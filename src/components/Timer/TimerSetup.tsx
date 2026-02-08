@@ -94,13 +94,18 @@ function TimerSetup({ onStart }: TimerSetupProps) {
     ...customSounds.filter(s => s.type === 'background')
   ], [customSounds]);
 
-  // Quick-start presets
-  const presets: DurationPreset[] = [
-    { label: '5 min', minutes: 5 },
-    { label: '10 min', minutes: 10 },
-    { label: '15 min', minutes: 15 },
-    { label: '20 min', minutes: 20 },
-  ];
+  // Quick-start presets from settings
+  const customPresets = settings.customDurationPresets ?? [5, 10, 15, 20];
+  const presets: DurationPreset[] = customPresets.map(m => ({
+    label: `${m} min`,
+    minutes: m
+  }));
+
+  // Visibility settings
+  const showDuration = settings.showDurationCard !== false;
+  const showSounds = settings.showSoundsCard !== false;
+  const showIntervals = settings.showIntervalsCard !== false;
+  const showPresets = settings.showPresetsCard !== false;
 
   // Update preview volume when slider changes
   useEffect(() => {
@@ -304,7 +309,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       <h1 className={styles.title}>Set Your Timer</h1>
 
       {/* Duration */}
-      <div className={`card mb-lg ${styles.animateDelay1}`}>
+      {showDuration && <div className={`card mb-lg ${styles.animateDelay1}`}>
         <h2 className={`${styles.sectionTitle} mb-md`}>Duration</h2>
 
         {/* Quick-start presets */}
@@ -432,10 +437,10 @@ function TimerSetup({ onStart }: TimerSetupProps) {
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Sounds */}
-      <div className={`card mb-lg ${styles.animateDelay2}`}>
+      {showSounds && <div className={`card mb-lg ${styles.animateDelay2}`}>
         <button
           type="button"
           className={styles.expandHeader}
@@ -565,10 +570,10 @@ function TimerSetup({ onStart }: TimerSetupProps) {
             )}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Interval Bells */}
-      <div className={`card mb-lg ${styles.animateDelay3}`}>
+      {showIntervals && <div className={`card mb-lg ${styles.animateDelay3}`}>
         <button
           type="button"
           className={styles.expandHeader}
@@ -671,10 +676,10 @@ function TimerSetup({ onStart }: TimerSetupProps) {
             )}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Presets */}
-      <div className={`card mb-lg ${styles.animateDelay4}`}>
+      {showPresets && <div className={`card mb-lg ${styles.animateDelay4}`}>
         <button
           type="button"
           className={styles.expandHeader}
@@ -716,20 +721,18 @@ function TimerSetup({ onStart }: TimerSetupProps) {
             />
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Error message */}
       {error && <p className="form-error text-center mb-md">{error}</p>}
 
-      {/* Fixed Begin button */}
-      <div className={`${styles.bottomButtonContainer} ${styles.animateDelay5}`}>
-        <button
-          className={`btn btn--primary btn--large ${styles.beginButton}`}
-          onClick={handleStart}
-        >
-          BEGIN
-        </button>
-      </div>
+      {/* Begin button */}
+      <button
+        className={`btn btn--primary btn--large ${styles.beginButton} ${styles.animateDelay5}`}
+        onClick={handleStart}
+      >
+        BEGIN
+      </button>
     </div>
   );
 }

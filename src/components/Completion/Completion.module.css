@@ -85,3 +85,30 @@
   max-width: 280px;
   animation: fadeSlideUp 0.8s ease-out 0.3s both;
 }
+
+/* Minimal completion screen */
+.minimalContainer {
+  justify-content: center;
+}
+
+.quoteBlock {
+  text-align: center;
+  max-width: 320px;
+  margin-bottom: var(--space-xxl);
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
+.quoteText {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+  font-style: italic;
+}
+
+.quoteAuthor {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}

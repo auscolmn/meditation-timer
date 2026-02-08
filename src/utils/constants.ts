@@ -58,7 +58,17 @@ export const DEFAULT_SETTINGS: Settings = {
   preparationTime: 0,
   freezesAvailable: 2,
   freezesPerMonth: 2,
-  lastFreezeGrantMonth: ''
+  lastFreezeGrantMonth: '',
+  // Customization defaults
+  showDurationCard: true,
+  showSoundsCard: true,
+  showIntervalsCard: true,
+  showPresetsCard: true,
+  quickStartEnabled: false,
+  hideStreakStats: false,
+  minimalCompletionScreen: false,
+  hideNavDuringTimer: false,
+  customDurationPresets: [5, 10, 15, 20]
 };
 
 // Preparation time presets (in seconds)

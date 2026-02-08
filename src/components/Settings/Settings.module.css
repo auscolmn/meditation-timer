@@ -42,7 +42,48 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 0;
+}
+
+/* Expandable sections */
+.expandHeader {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: var(--space-sm);
+}
+
+.expandHeader:hover .expandIcon {
+  color: var(--primary);
+}
+
+.expandSummary {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: right;
+  margin-right: var(--space-sm);
+}
+
+.expandIcon {
+  color: var(--text-tertiary);
+  transition: transform var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.expandIcon.expanded {
+  transform: rotate(180deg);
+}
+
+.expandContent {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-light);
 }
 
 .sectionDescription {
@@ -202,4 +243,74 @@
   color: var(--text-tertiary);
   font-style: italic;
   margin-top: var(--space-md);
+}
+
+/* Subsection titles */
+.subsectionTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.subsectionTitle:first-child {
+  margin-top: 0;
+}
+
+.subsectionHint {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-md);
+}
+
+/* Duration presets list */
+.presetsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.presetPill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  background-color: var(--surface-variant);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.presetRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: var(--border);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.presetRemove:hover {
+  background: var(--error);
+  color: white;
+}
+
+.addPresetRow {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.presetInput {
+  width: 100px;
+  text-align: center;
 }
