@@ -392,8 +392,10 @@
 }
 
 .beginButton {
-  width: 100%;
-  max-width: calc(600px - var(--space-lg) * 2);
+  width: auto;
+  min-width: 200px;
+  padding-left: var(--space-xxl);
+  padding-right: var(--space-xxl);
   box-shadow: var(--shadow-lg);
   pointer-events: auto;
 }
