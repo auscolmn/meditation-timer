@@ -9,10 +9,10 @@
 
 /* CSS Custom Properties - Subtle Earth Color Palette */
 :root {
-  /* Primary Colors */
-  --primary: #3D3D3D;           /* Charcoal - main interactive elements */
-  --primary-light: #6B6B6B;     /* Light charcoal - hover states */
-  --primary-lighter: #9A9A9A;   /* Lighter - disabled states */
+  /* Primary Colors - Earthy Clay */
+  --primary: #8B6F5C;           /* Earthy clay - main interactive elements */
+  --primary-light: #A6887A;     /* Light clay - hover states */
+  --primary-lighter: #C4AFA3;   /* Lighter clay - disabled states */
 
   /* Success/Completion */
   --success: #5C7A5C;           /* Muted sage green - streaks, completed sessions */
@@ -32,12 +32,15 @@
   /* Borders & Dividers */
   --border: #E5E5E0;            /* Subtle warm border */
   --border-light: #F0F0EB;      /* Very subtle border */
-  --card-border: #CCCCCC;       /* Light gray border for cards */
 
-  /* Shadows (very subtle) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
+  /* Accent - Soft Sand */
+  --sand: #E8E0D5;              /* Soft sand - active states */
+  --sand-dark: #D5CBBC;         /* Darker sand - hover on active */
+
+  /* Shadows (warm, earthy tones for soft depth) */
+  --shadow-sm: 0 2px 8px -2px rgba(84, 78, 62, 0.08);
+  --shadow-md: 0 6px 20px -6px rgba(84, 78, 62, 0.12);
+  --shadow-lg: 0 10px 30px -10px rgba(84, 78, 62, 0.15);
 
   /* Spacing Scale (generous for breathing room) */
   --space-xs: 4px;
@@ -87,9 +90,9 @@
 
 /* Dark mode - manual toggle */
 [data-theme="dark"] {
-  --primary: #E5E5E0;
-  --primary-light: #FAFAF8;
-  --primary-lighter: #9A9A9A;
+  --primary: #C4AFA3;           /* Lighter clay for dark mode */
+  --primary-light: #D4C4BA;     /* Even lighter on hover */
+  --primary-lighter: #8B6F5C;   /* Muted for disabled */
 
   --success: #7A9A7A;
   --success-light: #5C7A5C;
@@ -105,11 +108,13 @@
 
   --border: #3A3A38;
   --border-light: #2E2E2C;
-  --card-border: #5A5A58;       /* Lighter border for dark mode cards */
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --sand: #4A453D;              /* Muted sand for dark mode */
+  --sand-dark: #5A544A;         /* Slightly lighter on hover */
+
+  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
 /* Base styles */

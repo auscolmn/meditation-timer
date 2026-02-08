@@ -133,18 +133,19 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
 }
 
 .presetButton:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  background: var(--sand);
+  border-color: var(--sand);
+  color: var(--text-primary);
 }
 
 .presetButton.presetActive {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--surface-raised);
+  background: var(--sand);
+  border-color: var(--sand-dark);
+  color: var(--text-primary);
 }
 
 .durationInputs {
@@ -346,18 +347,19 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
 }
 
 .prepPresetButton:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+  background: var(--sand);
+  border-color: var(--sand);
+  color: var(--text-primary);
 }
 
 .prepPresetButton.prepPresetActive {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--surface-raised);
+  background: var(--sand);
+  border-color: var(--sand-dark);
+  color: var(--text-primary);
 }
 
 .customPrepInput {

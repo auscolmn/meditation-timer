@@ -62,7 +62,8 @@ function Completion({ session, onMeditateAgain }: CompletionProps) {
             r="45"
             fill="none"
             stroke="var(--border)"
-            strokeWidth="6"
+            strokeWidth="8"
+            strokeLinecap="round"
           />
           <circle
             cx="50"
@@ -70,7 +71,7 @@ function Completion({ session, onMeditateAgain }: CompletionProps) {
             r="45"
             fill="none"
             stroke="var(--success)"
-            strokeWidth="6"
+            strokeWidth="8"
             strokeLinecap="round"
             className={styles.progressCircle}
             strokeDasharray="283"

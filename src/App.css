@@ -40,13 +40,12 @@
   text-align: center;
 }
 
-/* Card component - Clean and minimal */
+/* Card component - Soft depth, no borders */
 .card {
   background-color: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--space-xl);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-md);
 }
 
 /* Button styles */
@@ -73,10 +72,12 @@
 
 .btn--primary:hover:not(:disabled) {
   background-color: var(--primary-light);
+  transform: scale(1.02);
 }
 
 .btn--primary:active:not(:disabled) {
   transform: scale(0.98);
+  background-color: var(--primary);
 }
 
 .btn--secondary {
@@ -270,7 +271,7 @@
 
 .modal {
   background-color: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--space-xl);
   max-width: 400px;
   width: 100%;
@@ -278,7 +279,6 @@
   overflow-y: auto;
   animation: slideUp var(--transition-base) ease;
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--card-border);
 }
 
 .modal-header {
