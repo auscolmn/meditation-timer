@@ -294,7 +294,8 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
             r="45"
             fill="none"
             stroke="var(--border)"
-            strokeWidth="6"
+            strokeWidth="8"
+            strokeLinecap="round"
           />
           {/* Progress circle */}
           <circle
@@ -303,7 +304,7 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
             r="45"
             fill="none"
             stroke={isPreparing ? "var(--text-tertiary)" : "var(--success)"}
-            strokeWidth="6"
+            strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
