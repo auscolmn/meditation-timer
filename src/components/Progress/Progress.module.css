@@ -114,17 +114,18 @@
 }
 
 .progressBar {
-  height: 6px;
-  background-color: var(--border);
+  height: 8px;
+  background-color: var(--border-light);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background-color: var(--success);
+  background: linear-gradient(90deg, var(--success-light), var(--success));
   border-radius: var(--radius-full);
   transition: width 0.5s ease;
+  box-shadow: 0 0 12px rgba(95, 111, 82, 0.3);
 }
 
 .statCard {
@@ -151,7 +152,7 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* Calendar */
+/* Calendar - Floating Grid */
 .calendarHeader {
   display: flex;
   align-items: center;
@@ -167,91 +168,134 @@
 .dayNames {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-md);
 }
 
 .dayName {
   text-align: center;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   padding: var(--space-xs);
 }
 
 .calendarGrid {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 2px;
 }
 
 .week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: var(--space-xs);
+  gap: 2px;
 }
 
 .day {
   aspect-ratio: 1;
+  min-height: 44px;
+  min-width: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  border-radius: var(--radius-md);
   background: transparent;
-  transition: background-color var(--transition-fast);
-  padding: var(--space-xs);
+  border: none;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+  position: relative;
 }
 
 .day:hover:not(:disabled) {
   background-color: var(--border-light);
 }
 
-.day.today {
-  background-color: var(--border-light);
-  border: 1px solid var(--border);
+/* Today's date - subtle ring */
+.day.today .dayNumber {
+  border: 1.5px solid var(--success);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Future days - faint */
 .day.future {
-  opacity: 0.4;
+  opacity: 0.35;
+}
+
+/* Days with sessions - subtle sage green circle around number */
+.day.hasSession .dayNumber {
+  background-color: rgba(95, 111, 82, 0.2);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-medium);
+}
+
+.day.hasSession:hover:not(:disabled) .dayNumber {
+  background-color: rgba(95, 111, 82, 0.3);
 }
 
 .dayEmpty {
   aspect-ratio: 1;
+  min-height: 44px;
 }
 
 .dayNumber {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   color: var(--text-primary);
+  transition: color var(--transition-fast);
 }
 
+/* Session dots - shown below number */
 .sessionDots {
   display: flex;
   gap: 2px;
   align-items: center;
+  position: absolute;
+  bottom: 2px;
 }
 
 .dot {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background-color: var(--success);
 }
 
 .dotMore {
-  font-size: 8px;
+  font-size: 7px;
   color: var(--success);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Frozen day indicator */
-.day.frozen {
-  background-color: var(--info-bg, rgba(33, 150, 243, 0.1));
+.day.frozen .dayNumber {
+  background-color: rgba(100, 160, 200, 0.15);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day.frozen.hasSession .dayNumber {
+  background-color: rgba(95, 111, 82, 0.2);
 }
 
 .freezeIcon {
-  color: var(--info);
+  color: var(--info, #64a0c8);
   flex-shrink: 0;
 }
 
@@ -304,6 +348,16 @@
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   font-weight: var(--font-weight-medium);
+}
+
+/* Zen insight message */
+.insightMessage {
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  margin-bottom: var(--space-lg);
+  text-align: center;
 }
 
 /* Session list in modal */

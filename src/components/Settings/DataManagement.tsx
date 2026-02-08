@@ -12,6 +12,7 @@ import styles from './DataManagement.module.css';
 function DataManagement() {
   const { exportAllData, importAllData, sessions } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [expanded, setExpanded] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importPreview, setImportPreview] = useState<{
@@ -112,12 +113,39 @@ function DataManagement() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.sectionTitle}>Data Management</h2>
-      <p className={styles.description}>
-        Export your meditation data for backup or import from a previous backup.
-      </p>
+      <button
+        type="button"
+        className={styles.expandHeader}
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+      >
+        <h2 className={styles.sectionTitle}>Data Management</h2>
+        <span className={styles.expandSummary}>
+          {sessions.length} session{sessions.length !== 1 ? 's' : ''}
+        </span>
+        <svg
+          className={`${styles.expandIcon} ${expanded ? styles.expanded : ''}`}
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
 
-      <div className={styles.actions}>
+      {expanded && (
+        <div className={styles.expandContent}>
+          <p className={styles.description}>
+            Export your meditation data for backup or import from a previous backup.
+          </p>
+
+          <div className={styles.actions}>
         {/* Export Button */}
         <button
           className={`btn btn--secondary ${styles.actionButton}`}
@@ -148,11 +176,9 @@ function DataManagement() {
           </svg>
           Import Backup
         </label>
-      </div>
-
-      <p className={styles.stats}>
-        Current data: {sessions.length} session{sessions.length !== 1 ? 's' : ''}
-      </p>
+          </div>
+        </div>
+      )}
 
       {/* Import Modal */}
       {showImportModal && (
