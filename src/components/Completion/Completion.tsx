@@ -7,7 +7,6 @@ import styles from './Completion.module.css';
 
 interface CompletionProps {
   session: Session | null;
-  onViewProgress: () => void;
   onMeditateAgain: () => void;
 }
 
@@ -79,7 +78,7 @@ function Completion({ session, onMeditateAgain }: CompletionProps) {
           />
         </svg>
         <div className={styles.checkmark}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>

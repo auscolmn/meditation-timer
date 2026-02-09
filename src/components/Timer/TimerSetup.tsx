@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS, PREPARATION_PRESETS } from '../../utils/constants';
 import PresetManager from './PresetManager';
+import ChevronIcon from '../Common/ChevronIcon';
 import type { TimerConfig, DefaultSound, CustomSound, IntervalBell, TimerPreset, DraftTimerSettings } from '../../types';
 import styles from './TimerSetup.module.css';
 
@@ -318,23 +319,13 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       {showDuration && <div className={`card mb-lg ${styles.animateDelay1}`}>
         <h2 className={`${styles.sectionTitle} mb-md`}>Duration</h2>
 
-        {/* Segmented control for duration presets */}
-        <div className={styles.segmentedControl}>
-          {/* Sliding pill indicator */}
-          {activePresetIndex >= 0 && (
-            <div
-              className={styles.segmentPill}
-              style={{
-                width: `calc(${100 / presets.length}% - 8px)`,
-                transform: `translateX(calc(${activePresetIndex * 100}% + 4px))`
-              }}
-            />
-          )}
+        {/* Duration preset buttons */}
+        <div className={styles.durationPresets}>
           {presets.map((preset, index) => (
             <button
               key={preset.minutes}
               type="button"
-              className={`${styles.segmentButton} ${activePresetIndex === index ? styles.segmentActive : ''}`}
+              className={`${styles.durationPresetButton} ${activePresetIndex === index ? styles.durationPresetActive : ''}`}
               onClick={() => applyPreset(preset)}
             >
               {preset.label}
@@ -353,20 +344,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
           <span className={styles.expandSummary}>
             {hours > 0 || seconds > 0 ? `${hours}h ${minutes}m ${seconds}s` : ''}
           </span>
-          <svg
-            className={`${styles.expandIcon} ${durationExpanded ? styles.expanded : ''}`}
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          <ChevronIcon expanded={durationExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
         </button>
 
         {durationExpanded && (
@@ -467,20 +445,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
           <span className={styles.expandSummary}>
             {DEFAULT_SOUNDS[beginningSound]?.name || 'None'} / {DEFAULT_SOUNDS[endingSound]?.name || 'None'}
           </span>
-          <svg
-            className={`${styles.expandIcon} ${soundsExpanded ? styles.expanded : ''}`}
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          <ChevronIcon expanded={soundsExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
         </button>
 
         {soundsExpanded && (
@@ -535,14 +500,16 @@ function TimerSetup({ onStart }: TimerSetupProps) {
 
             {(beginningSound !== 'none' || endingSound !== 'none') && (
               <div className="form-group">
-                <label className="form-label">Bell Volume: {bellVolume}%</label>
+                <label className="form-label" htmlFor="bell-volume">Bell Volume: {bellVolume}%</label>
                 <input
+                  id="bell-volume"
                   type="range"
                   className={styles.volumeSlider}
                   value={bellVolume}
                   onChange={(e) => setBellVolume(parseInt(e.target.value))}
                   min="0"
                   max="100"
+                  aria-label={`Bell volume ${bellVolume}%`}
                 />
               </div>
             )}
@@ -573,14 +540,16 @@ function TimerSetup({ onStart }: TimerSetupProps) {
 
         {backgroundSound !== 'none' && (
               <div className="form-group">
-                <label className="form-label">Background Volume: {backgroundVolume}%</label>
+                <label className="form-label" htmlFor="bg-volume">Background Volume: {backgroundVolume}%</label>
                 <input
+                  id="bg-volume"
                   type="range"
                   className={styles.volumeSlider}
                   value={backgroundVolume}
                   onChange={(e) => setBackgroundVolume(parseInt(e.target.value))}
                   min="0"
                   max="100"
+                  aria-label={`Background volume ${backgroundVolume}%`}
                 />
               </div>
             )}
@@ -600,20 +569,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
           <span className={styles.expandSummary}>
             {intervalBells.length === 0 ? 'None' : `${intervalBells.length} bell${intervalBells.length > 1 ? 's' : ''}`}
           </span>
-          <svg
-            className={`${styles.expandIcon} ${intervalsExpanded ? styles.expanded : ''}`}
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          <ChevronIcon expanded={intervalsExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
         </button>
 
         {intervalsExpanded && (
@@ -706,20 +662,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
           <span className={styles.expandSummary}>
             Save & load configurations
           </span>
-          <svg
-            className={`${styles.expandIcon} ${presetsExpanded ? styles.expanded : ''}`}
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          <ChevronIcon expanded={presetsExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
         </button>
 
         {presetsExpanded && (

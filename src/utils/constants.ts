@@ -30,19 +30,19 @@ export const DEFAULT_SOUNDS: Record<string, DefaultSound> = {
   none: { id: 'none', name: 'None', src: null, type: 'none' }
 };
 
-// Streak goals with their badges
+// Streak goals with their badges (SVG icon identifiers)
 export const STREAK_GOALS: StreakGoal[] = [
-  { days: 3, badge: '⭐', label: '3 days' },
-  { days: 7, badge: '⭐⭐', label: '7 days' },
-  { days: 10, badge: '🏆', label: '10 days' },
-  { days: 14, badge: '🏆', label: '14 days' },
-  { days: 30, badge: '🏆🏆', label: '1 month' },
-  { days: 60, badge: '💎', label: '2 months' },
-  { days: 90, badge: '💎', label: '3 months' },
-  { days: 180, badge: '💎💎', label: '6 months' },
-  { days: 240, badge: '💎💎', label: '8 months' },
-  { days: 300, badge: '💎💎💎', label: '10 months' },
-  { days: 365, badge: '👑', label: '1 year' }
+  { days: 3, badge: 'star', label: '3 days' },
+  { days: 7, badge: 'star', label: '7 days' },
+  { days: 10, badge: 'trophy', label: '10 days' },
+  { days: 14, badge: 'trophy', label: '14 days' },
+  { days: 30, badge: 'trophy', label: '1 month' },
+  { days: 60, badge: 'gem', label: '2 months' },
+  { days: 90, badge: 'gem', label: '3 months' },
+  { days: 180, badge: 'gem', label: '6 months' },
+  { days: 240, badge: 'gem', label: '8 months' },
+  { days: 300, badge: 'gem', label: '10 months' },
+  { days: 365, badge: 'crown', label: '1 year' }
 ];
 
 // Default settings

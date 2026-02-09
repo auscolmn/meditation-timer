@@ -75,7 +75,6 @@
 
 .btn--primary:hover:not(:disabled) {
   background-color: var(--primary-light);
-  transform: scale(1.02);
 }
 
 .btn--primary:active:not(:disabled) {

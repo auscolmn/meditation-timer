@@ -1,5 +1,7 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import ChevronIcon from '../Common/ChevronIcon';
 import {
   exportDataToJson,
   downloadExport,
@@ -23,6 +25,16 @@ function DataManagement() {
   } | null>(null);
   const [pendingImportData, setPendingImportData] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Focus trap for import modal
+  const importModalRef = useFocusTrap<HTMLDivElement>(showImportModal);
+
+  // Auto-dismiss toast
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   // Handle export
   const handleExport = () => {
@@ -34,7 +46,7 @@ function DataManagement() {
       downloadExport(jsonString, filename);
     } catch (err) {
       console.error('Export failed:', err);
-      alert('Failed to export data. Please try again.');
+      showToast('Failed to export data. Please try again.', 'error');
     } finally {
       setIsExporting(false);
     }
@@ -95,7 +107,7 @@ function DataManagement() {
         setShowImportModal(false);
         setPendingImportData(null);
         setImportPreview(null);
-        alert('Data imported successfully!');
+        showToast('Data imported successfully!', 'success');
       }
     } catch (err) {
       console.error('Import failed:', err);
@@ -123,20 +135,7 @@ function DataManagement() {
         <span className={styles.expandSummary}>
           {sessions.length} session{sessions.length !== 1 ? 's' : ''}
         </span>
-        <svg
-          className={`${styles.expandIcon} ${expanded ? styles.expanded : ''}`}
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
+        <ChevronIcon expanded={expanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
       </button>
 
       {expanded && (
@@ -180,6 +179,27 @@ function DataManagement() {
         </div>
       )}
 
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className={`${styles.toast} ${toast.type === 'error' ? styles.toastError : styles.toastSuccess}`}
+          role="status"
+          aria-live="polite"
+        >
+          <span>{toast.message}</span>
+          <button
+            className={styles.toastDismiss}
+            onClick={() => setToast(null)}
+            aria-label="Dismiss notification"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Import Modal */}
       {showImportModal && (
         <div
@@ -188,6 +208,7 @@ function DataManagement() {
           role="presentation"
         >
           <div
+            ref={importModalRef}
             className="modal"
             onClick={e => e.stopPropagation()}
             role="dialog"
