@@ -2,18 +2,12 @@ import { useState, useEffect, useCallback, useMemo, KeyboardEvent } from 'react'
 import styles from './Transition.module.css';
 
 const PHRASES = [
-  'Take a deep breath',
-  'Let go of your worries',
-  'Drop the tension',
-  'Relax your shoulders',
-  'Take a slow breath',
-  'Close your eyes',
-  'Soften your gaze',
-  'Settle in',
-  'Let it all go',
-  'Breathe deeply',
-  'Unclench your jaw',
-  'Release the day',
+  'Breathe',
+  'Let go',
+  'Be still',
+  'Drop out',
+  'Relax',
+  'Be here now',
 ];
 
 // Timing (ms)

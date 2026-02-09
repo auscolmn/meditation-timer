@@ -138,6 +138,20 @@ function Settings() {
               </button>
             </div>
 
+            <div className={styles.settingRow}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Transition Screen</span>
+                <span className={styles.settingHint}>Show calming prompt before meditation</span>
+              </div>
+              <button
+                className={`${styles.toggle} ${settings.transitionEnabled !== false ? styles.toggleOn : ''}`}
+                onClick={handleToggle('transitionEnabled')}
+                aria-label="Toggle transition screen"
+              >
+                <span className={styles.toggleKnob} />
+              </button>
+            </div>
+
             {/* Minimalism Section */}
             <h3 className={styles.subsectionTitle}>Minimalism</h3>
 

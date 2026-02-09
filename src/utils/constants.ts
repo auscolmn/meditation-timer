@@ -68,7 +68,8 @@ export const DEFAULT_SETTINGS: Settings = {
   hideStreakStats: false,
   minimalCompletionScreen: false,
   hideNavDuringTimer: false,
-  customDurationPresets: [5, 10, 15, 20]
+  customDurationPresets: [5, 10, 15, 20],
+  transitionEnabled: true
 };
 
 // Preparation time presets (in seconds)

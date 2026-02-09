@@ -58,6 +58,8 @@ export interface Settings {
   hideNavDuringTimer?: boolean;
   // Customization: Custom duration presets (minutes)
   customDurationPresets?: number[];
+  // Transition screen before meditation
+  transitionEnabled?: boolean;
 }
 
 // Custom sound uploaded by user

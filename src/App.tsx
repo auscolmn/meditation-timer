@@ -78,8 +78,12 @@ function AppContent() {
   // Start meditation session - show transition overlay first
   const startMeditation = (config: TimerConfig) => {
     setTimerConfig(config);
-    setContentFaded(true);
-    setShowMeditationTransition(true);
+    if (settings.transitionEnabled !== false) {
+      setContentFaded(true);
+      setShowMeditationTransition(true);
+    } else {
+      setCurrentScreen(SCREENS.ACTIVE_TIMER);
+    }
   };
 
   // Called when overlay is about to fade out — switch screen underneath
