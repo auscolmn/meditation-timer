@@ -145,9 +145,9 @@
 }
 
 .durationPresetButton.durationPresetActive {
-  background: var(--success);
-  border-color: var(--success);
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface-raised);
 }
 
 .durationInputs {

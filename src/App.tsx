@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { useTheme } from './hooks/useTheme';
 import { timeToSeconds } from './utils/dateUtils';
@@ -6,6 +6,7 @@ import Navigation from './components/Navigation/Navigation';
 import Welcome from './components/Welcome/Welcome';
 import TimerSetup from './components/Timer/TimerSetup';
 import ActiveTimer from './components/Timer/ActiveTimer';
+import Transition from './components/Timer/Transition';
 import Completion from './components/Completion/Completion';
 import Progress from './components/Progress/Progress';
 import Settings from './components/Settings/Settings';
@@ -28,6 +29,8 @@ function AppContent() {
   const [completedSession, setCompletedSession] = useState<Session | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [pendingScreen, setPendingScreen] = useState<Screen | null>(null);
+  const [showMeditationTransition, setShowMeditationTransition] = useState(false);
+  const [contentFaded, setContentFaded] = useState(false);
 
   // Get settings for Quick Start and nav hiding
   const { settings } = useApp();
@@ -72,11 +75,23 @@ function AppContent() {
       transitionToScreen(SCREENS.TIMER_SETUP);
     }
   };
-  // Start meditation session
+  // Start meditation session - show transition overlay first
   const startMeditation = (config: TimerConfig) => {
     setTimerConfig(config);
-    transitionToScreen(SCREENS.ACTIVE_TIMER);
+    setContentFaded(true);
+    setShowMeditationTransition(true);
   };
+
+  // Called when overlay is about to fade out — switch screen underneath
+  const onTransitionReady = useCallback(() => {
+    setCurrentScreen(SCREENS.ACTIVE_TIMER);
+    setContentFaded(false);
+  }, []);
+
+  // Called when the overlay fade-out finishes — unmount it
+  const onTransitionComplete = useCallback(() => {
+    setShowMeditationTransition(false);
+  }, []);
 
   // Complete meditation session
   const completeMeditation = (session: Session) => {
@@ -94,10 +109,10 @@ function AppContent() {
     }
   };
 
-  // Meditate again after completion
-  const meditateAgain = () => {
+  // Continue after completion - go to Progress
+  const continueAfterCompletion = () => {
     setCompletedSession(null);
-    transitionToScreen(SCREENS.TIMER_SETUP);
+    transitionToScreen(SCREENS.PROGRESS);
   };
 
   // Render current screen
@@ -122,7 +137,7 @@ function AppContent() {
         return (
           <Completion
             session={completedSession}
-            onMeditateAgain={meditateAgain}
+            onMeditateAgain={continueAfterCompletion}
           />
         );
 
@@ -168,9 +183,12 @@ function AppContent() {
 
   return (
     <div className="app">
-      <main className={`app-main ${isTransitioning ? 'transitioning' : ''}`}>
+      <main className={`app-main ${isTransitioning ? 'transitioning' : ''} ${contentFaded ? 'meditationFadeOut' : ''}`}>
         {renderScreen()}
       </main>
+      {showMeditationTransition && (
+        <Transition onReady={onTransitionReady} onComplete={onTransitionComplete} />
+      )}
       {showNavigation && (
         <Navigation
           activeTab={getActiveTab()}

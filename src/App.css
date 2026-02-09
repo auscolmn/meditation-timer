@@ -21,6 +21,11 @@
   opacity: 0;
 }
 
+.app-main.meditationFadeOut {
+  opacity: 0;
+  transition: opacity 800ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Screen container - used by all screen components */
 .screen {
   flex: 1;
