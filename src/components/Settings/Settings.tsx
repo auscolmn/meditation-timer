@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import ThemeToggle from '../Common/ThemeToggle';
 import SoundUpload from '../Common/SoundUpload';
+import ChevronIcon from '../Common/ChevronIcon';
 import DataManagement from './DataManagement';
 import styles from './Settings.module.css';
 
@@ -59,20 +60,7 @@ function Settings() {
         >
           <h2 className={styles.sectionTitle}>Customize</h2>
           <span className={styles.expandSummary}>Timer setup & minimalism</span>
-          <svg
-            className={`${styles.expandIcon} ${customizeExpanded ? styles.expanded : ''}`}
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          <ChevronIcon expanded={customizeExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
         </button>
 
         {customizeExpanded && (
@@ -266,20 +254,7 @@ function Settings() {
           <span className={styles.expandSummary}>
             {customSounds.length === 0 ? 'None uploaded' : `${customSounds.length} sound${customSounds.length > 1 ? 's' : ''}`}
           </span>
-          <svg
-            className={`${styles.expandIcon} ${soundsExpanded ? styles.expanded : ''}`}
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          <ChevronIcon expanded={soundsExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
         </button>
 
         {soundsExpanded && (

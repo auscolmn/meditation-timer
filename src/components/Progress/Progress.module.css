@@ -330,7 +330,21 @@
 }
 
 .goalBadge {
-  font-size: var(--font-size-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.goalItem.completed .goalBadge {
+  color: var(--success);
+}
+
+.goalItem.current .goalBadge {
+  color: var(--primary);
 }
 
 .goalLabel {
@@ -340,8 +354,9 @@
 }
 
 .goalCheck {
+  display: flex;
+  align-items: center;
   color: var(--success);
-  font-weight: var(--font-weight-medium);
 }
 
 .goalProgress {

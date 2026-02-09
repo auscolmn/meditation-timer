@@ -72,8 +72,6 @@ function AppContent() {
       transitionToScreen(SCREENS.TIMER_SETUP);
     }
   };
-  const goToProgress = () => transitionToScreen(SCREENS.PROGRESS);
-
   // Start meditation session
   const startMeditation = (config: TimerConfig) => {
     setTimerConfig(config);
@@ -124,7 +122,6 @@ function AppContent() {
         return (
           <Completion
             session={completedSession}
-            onViewProgress={goToProgress}
             onMeditateAgain={meditateAgain}
           />
         );

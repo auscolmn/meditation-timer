@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, ChangeEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   formatDuration,
   formatMonthYear,
@@ -15,6 +16,46 @@ import { STREAK_GOALS } from '../../utils/constants';
 import StreakFreeze from './StreakFreeze';
 import Charts from './Charts';
 import styles from './Progress.module.css';
+
+// Badge SVG icons for streak goals
+const BadgeIcon = ({ type }: { type: string }) => {
+  switch (type) {
+    case 'star':
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      );
+    case 'trophy':
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+          <path d="M4 22h16"/>
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+        </svg>
+      );
+    case 'gem':
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 3h12l4 6-10 13L2 9Z"/>
+          <path d="M11 3 8 9l4 13 4-13-3-6"/>
+          <path d="M2 9h20"/>
+        </svg>
+      );
+    case 'crown':
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/>
+          <path d="M5 21h14"/>
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
 
 // Snowflake icon for frozen days
 const SnowflakeIcon = () => (
@@ -145,6 +186,10 @@ function Progress() {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [deleteConfirmId, selectedDate]);
+
+  // Focus traps for modals
+  const dateModalRef = useFocusTrap<HTMLDivElement>(!!selectedDate);
+  const deleteModalRef = useFocusTrap<HTMLDivElement>(!!deleteConfirmId);
 
   // Get sessions for selected date
   const selectedDateSessions = selectedDate
@@ -347,10 +392,14 @@ function Progress() {
                     key={goal.days}
                     className={`${styles.goalItem} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
                   >
-                    <span className={styles.goalBadge}>{goal.badge}</span>
+                    <span className={styles.goalBadge}><BadgeIcon type={goal.badge} /></span>
                     <span className={styles.goalLabel}>{goal.label}</span>
                     {isCompleted && (
-                      <span className={styles.goalCheck}>✓</span>
+                      <span className={styles.goalCheck}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      </span>
                     )}
                     {isCurrent && (
                       <span className={styles.goalProgress}>
@@ -375,6 +424,7 @@ function Progress() {
       {selectedDate && (
         <div className="modal-overlay" onClick={() => setSelectedDate(null)} role="presentation">
           <div
+            ref={dateModalRef}
             className="modal"
             onClick={e => e.stopPropagation()}
             role="dialog"
@@ -474,6 +524,7 @@ function Progress() {
       {deleteConfirmId && (
         <div className="modal-overlay" onClick={() => setDeleteConfirmId(null)} role="presentation">
           <div
+            ref={deleteModalRef}
             className="modal"
             onClick={e => e.stopPropagation()}
             role="dialog"

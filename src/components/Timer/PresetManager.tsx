@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import type { TimerPreset, Duration, IntervalBell } from '../../types';
 import styles from './PresetManager.module.css';
 
@@ -32,6 +33,10 @@ function PresetManager({
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+  // Focus traps for modals
+  const saveModalRef = useFocusTrap<HTMLDivElement>(showSaveModal);
+  const deleteModalRef = useFocusTrap<HTMLDivElement>(!!showDeleteConfirm);
 
   // Save current settings as a preset
   const handleSavePreset = () => {
@@ -125,6 +130,7 @@ function PresetManager({
           role="presentation"
         >
           <div
+            ref={saveModalRef}
             className="modal"
             onClick={e => e.stopPropagation()}
             role="dialog"
@@ -171,6 +177,7 @@ function PresetManager({
           role="presentation"
         >
           <div
+            ref={deleteModalRef}
             className="modal"
             onClick={e => e.stopPropagation()}
             role="dialog"

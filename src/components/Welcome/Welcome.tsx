@@ -1,4 +1,4 @@
-import { useEffect, KeyboardEvent } from 'react';
+import { useEffect, useState, KeyboardEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../hooks/useTheme';
 import styles from './Welcome.module.css';
@@ -15,14 +15,22 @@ function Welcome({ onStart }: WelcomeProps) {
   const quote = getDailyQuote();
 
   const logoSrc = effectiveTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
+  const [countdown, setCountdown] = useState(AUTO_TRANSITION_SECONDS);
 
-  // Auto-transition to timer setup after 5 seconds
+  // Visual countdown and auto-transition
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onStart();
-    }, AUTO_TRANSITION_SECONDS * 1000);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          onStart();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => clearInterval(interval);
   }, [onStart]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -49,6 +57,9 @@ function Welcome({ onStart }: WelcomeProps) {
           </blockquote>
         )}
 
+        <p className={styles.countdownHint}>
+          Tap anywhere or wait {countdown}s
+        </p>
       </div>
     </div>
   );

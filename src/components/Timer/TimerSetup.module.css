@@ -20,23 +20,23 @@
 }
 
 .animateDelay1 {
-  animation: fadeSlideUp 0.8s ease-out 0.2s both;
+  animation: fadeSlideUp 0.4s ease-out 0.05s both;
 }
 
 .animateDelay2 {
-  animation: fadeSlideUp 0.8s ease-out 0.4s both;
+  animation: fadeSlideUp 0.4s ease-out 0.1s both;
 }
 
 .animateDelay3 {
-  animation: fadeSlideUp 0.8s ease-out 0.6s both;
+  animation: fadeSlideUp 0.4s ease-out 0.15s both;
 }
 
 .animateDelay4 {
-  animation: fadeSlideUp 0.8s ease-out 0.8s both;
+  animation: fadeSlideUp 0.4s ease-out 0.2s both;
 }
 
 .animateDelay5 {
-  animation: fadeSlideUp 0.8s ease-out 1s both;
+  animation: fadeSlideUp 0.4s ease-out 0.25s both;
 }
 
 .sectionTitle {
@@ -116,49 +116,38 @@
   margin-bottom: var(--space-md);
 }
 
-/* Segmented control for duration presets */
-.segmentedControl {
-  position: relative;
+/* Duration preset pill buttons */
+.durationPresets {
   display: flex;
-  background: var(--border-light);
-  border-radius: var(--radius-full);
-  padding: 4px;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
   margin-bottom: var(--space-lg);
-  user-select: none;
 }
 
-.segmentPill {
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 0;
-  background: var(--success);
-  border-radius: var(--radius-full);
-  transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-  z-index: 1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.segmentButton {
+.durationPresetButton {
   flex: 1;
-  position: relative;
-  z-index: 2;
-  border: none;
-  background: none;
-  padding: var(--space-sm) 0;
+  padding: var(--space-sm) var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: all var(--transition-base);
+  min-height: 44px;
 }
 
-.segmentButton:hover {
+.durationPresetButton:hover {
+  background: var(--border-light);
+  border-color: var(--border);
   color: var(--text-primary);
 }
 
-.segmentButton.segmentActive {
-  color: var(--background);
+.durationPresetButton.durationPresetActive {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
 }
 
 .durationInputs {

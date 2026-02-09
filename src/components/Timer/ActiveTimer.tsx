@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { formatTimeDisplay } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
 import type { TimerConfig, Session } from '../../types';
@@ -264,6 +265,9 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     : Math.min((elapsedTime / config.duration) * 100, 100);
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
+  // Focus trap for end confirmation modal
+  const endModalRef = useFocusTrap<HTMLDivElement>(showEndConfirm);
+
   // Handle escape key for modal
   useEffect(() => {
     if (!showEndConfirm) return;
@@ -358,6 +362,7 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
           role="presentation"
         >
           <div
+            ref={endModalRef}
             className="modal"
             onClick={e => e.stopPropagation()}
             role="dialog"
