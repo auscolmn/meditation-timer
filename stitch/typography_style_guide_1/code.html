@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Light Zen Style Guide - Typography &amp; Color</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "stone-soft": "#F5F2ED",
+                        "deep-charcoal": "#2D2926",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "serif": ["Cormorant Garamond", "serif"],
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            background-color: #F5F2ED;
+            color: #2D2926;
+        }
+        .serif-display { font-family: 'Cormorant Garamond', serif; }
+        .sans-utility { font-family: 'Inter', sans-serif; }
+        .ios-status-bar { height: 44px; }
+        .spec-label { 
+            @apply text-[9px] uppercase tracking-widest text-deep-charcoal/40 font-bold mb-1;
+        }
+        .spec-value {
+            @apply text-[10px] bg-deep-charcoal/5 px-2 py-0.5 rounded-sm font-mono;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="sans-utility antialiased">
+<div class="max-w-[390px] mx-auto min-h-screen bg-stone-soft relative overflow-hidden flex flex-col">
+<div class="ios-status-bar flex justify-between items-center px-8 pt-4">
+<span class="text-xs font-semibold">9:41</span>
+<div class="flex gap-1.5">
+<span class="material-symbols-outlined text-[16px]">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[16px]">wifi</span>
+<span class="material-symbols-outlined text-[16px]">battery_full</span>
+</div>
+</div>
+<header class="px-8 py-6">
+<div class="flex items-center justify-between mb-8">
+<button class="w-8 h-8 -ml-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">arrow_back_ios</span>
+</button>
+<span class="spec-value">v1.0 / LIGHT</span>
+</div>
+<h1 class="serif-display text-4xl font-light tracking-tight">Style Guide</h1>
+<p class="sans-utility text-[11px] uppercase tracking-[0.3em] opacity-40 mt-2">Design System • Typography</p>
+</header>
+<main class="px-8 flex-1 space-y-12 pb-20">
+<section>
+<div class="flex items-baseline justify-between border-b border-deep-charcoal/10 pb-2 mb-8">
+<h2 class="serif-display text-xl">Primary Serif</h2>
+<span class="spec-label">Cormorant Garamond</span>
+</div>
+<div class="mb-10">
+<div class="flex justify-between items-center mb-4">
+<span class="spec-label">H1 Header</span>
+<span class="spec-value">300 Light / 48px</span>
+</div>
+<h3 class="serif-display text-[48px] leading-[1.1] font-light">The mind is like water.</h3>
+</div>
+<div class="mb-10">
+<div class="flex justify-between items-center mb-4">
+<span class="spec-label">Timer Digits</span>
+<span class="spec-value">400 Regular / 84px</span>
+</div>
+<div class="flex justify-center py-10 border border-deep-charcoal/5 rounded-sm bg-white/20">
+<span class="serif-display text-[84px] leading-none">24:00</span>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-baseline justify-between border-b border-deep-charcoal/10 pb-2 mb-8">
+<h2 class="serif-display text-xl">Functional Sans</h2>
+<span class="spec-label">Inter</span>
+</div>
+<div class="mb-10">
+<div class="flex justify-between items-center mb-4">
+<span class="spec-label">Body Copy</span>
+<span class="spec-value">400 Regular / 15px / 1.6</span>
+</div>
+<p class="sans-utility text-[15px] leading-[1.6] text-deep-charcoal/80">
+                    Settle into a comfortable posture. Observe the sensation of the breath moving through the body without trying to change it.
+                </p>
+</div>
+<div class="mb-10">
+<div class="flex justify-between items-center mb-4">
+<span class="spec-label">Button / Action</span>
+<span class="spec-value">600 SemiBold / 12px / +0.2em</span>
+</div>
+<div class="bg-deep-charcoal text-stone-soft py-4 px-6 flex justify-center rounded-sm">
+<span class="text-[12px] uppercase tracking-[0.2em] font-semibold">End Session</span>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-baseline justify-between border-b border-deep-charcoal/10 pb-2 mb-8">
+<h2 class="serif-display text-xl">Color Palette</h2>
+<span class="spec-label">Monochromatic</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<div class="h-24 bg-stone-soft border border-deep-charcoal/10"></div>
+<div class="flex justify-between">
+<span class="spec-label">Soft Stone</span>
+<span class="spec-value">#F5F2ED</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="h-24 bg-deep-charcoal"></div>
+<div class="flex justify-between">
+<span class="spec-label">Deep Charcoal</span>
+<span class="spec-value">#2D2926</span>
+</div>
+</div>
+</div>
+</section>
+<section class="pt-4">
+<div class="relative aspect-[4/3] overflow-hidden grayscale">
+<img alt="Zen landscape" class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpwQ8hpjpwikwEWZyipx_Cg7mjj_fYPiM3vb1SF4804xNd1yT6ssSNYfrQn6G6PmQB2d6gqXGBtXBvvFPwhW5wEajvW8cU4OdWmG5YwlKIXIrIKPudmC6j7nJMEz-La9bGf6PRfxQHMdZjmT6zw7ula0z1CSlsjplkFkfv20qVgfxa8n3w14uYpXxDwMAuC6BrOZK6oau672Xn3-6Jg3oLhRZpg9akcTdSvOziOhWTiFFT6-Zo4QCRi4bUPZvi-iDMyXkw9VtQ908g"/>
+<div class="absolute inset-0 flex items-center justify-center border border-deep-charcoal/5">
+<span class="serif-display text-2xl italic text-deep-charcoal">Aura of Calm</span>
+</div>
+</div>
+<p class="text-[10px] text-center mt-4 opacity-40 uppercase tracking-widest italic">Sample Usage / Image Treatment</p>
+</section>
+</main>
+<div class="flex justify-center pb-2 pt-6">
+<div class="w-32 h-1 bg-deep-charcoal/10 rounded-full"></div>
+</div>
+</div>
+
+</body></html>

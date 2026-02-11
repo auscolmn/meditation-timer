@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zen Timer - Configuration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&amp;family=Inter:wght@300;400;500&amp;family=Material+Icons+Outlined&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#44413C",
+                        "background-light": "#F9F7F2",
+                        "background-dark": "#1C1B19",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#2A2825",
+                        "border-light": "#E8E4DD",
+                        "border-dark": "#3D3A36",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "24px",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+        .soft-shadow {
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-primary dark:text-stone-300 transition-colors duration-300 min-h-screen flex flex-col">
+<div class="h-12 w-full"></div>
+<main class="flex-1 px-6 pb-24 max-w-md mx-auto w-full">
+<header class="py-8 text-center">
+<h1 class="serif-font text-3xl font-medium text-stone-800 dark:text-stone-100">Set Your Timer</h1>
+</header>
+<div class="space-y-4">
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-6 soft-shadow border border-stone-100 dark:border-border-dark">
+<label class="block text-sm font-medium text-stone-500 dark:text-stone-400 mb-4 tracking-wide uppercase text-[10px]">Duration</label>
+<div class="grid grid-cols-4 gap-2 mb-6">
+<button class="py-2.5 px-1 rounded-full border border-border-light dark:border-border-dark text-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">5 min</button>
+<button class="py-2.5 px-1 rounded-full bg-primary text-stone-100 text-sm shadow-md">10 min</button>
+<button class="py-2.5 px-1 rounded-full border border-border-light dark:border-border-dark text-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">15 min</button>
+<button class="py-2.5 px-1 rounded-full border border-border-light dark:border-border-dark text-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">20 min</button>
+</div>
+<div class="h-px bg-stone-100 dark:bg-border-dark w-full mb-4"></div>
+<button class="flex items-center justify-between w-full text-stone-600 dark:text-stone-400">
+<span class="text-sm font-medium">Custom</span>
+<span class="material-icons-outlined text-stone-400">expand_more</span>
+</button>
+</div>
+<button class="w-full bg-card-light dark:bg-card-dark rounded-3xl p-6 soft-shadow border border-stone-100 dark:border-border-dark flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+<span class="serif-font text-lg font-medium text-stone-800 dark:text-stone-200">Sounds</span>
+<div class="flex items-center gap-2">
+<span class="text-sm text-stone-400 dark:text-stone-500">Bell / Tibetan Bell</span>
+<span class="material-icons-outlined text-stone-300">chevron_right</span>
+</div>
+</button>
+<button class="w-full bg-card-light dark:bg-card-dark rounded-3xl p-6 soft-shadow border border-stone-100 dark:border-border-dark flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+<span class="serif-font text-lg font-medium text-stone-800 dark:text-stone-200">Interval Bells</span>
+<div class="flex items-center gap-2">
+<span class="text-sm text-stone-400 dark:text-stone-500">None</span>
+<span class="material-icons-outlined text-stone-300">chevron_right</span>
+</div>
+</button>
+<button class="w-full bg-card-light dark:bg-card-dark rounded-3xl p-6 soft-shadow border border-stone-100 dark:border-border-dark flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+<span class="serif-font text-lg font-medium text-stone-800 dark:text-stone-200">Presets</span>
+<div class="flex items-center gap-2">
+<span class="text-sm text-stone-400 dark:text-stone-500">Save &amp; load</span>
+<span class="material-icons-outlined text-stone-300">chevron_right</span>
+</div>
+</button>
+</div>
+<div class="mt-12 px-2">
+<button class="w-full bg-primary py-5 rounded-full text-stone-100 font-medium text-lg tracking-[0.2em] shadow-xl hover:opacity-90 transition-all active:scale-[0.98]">
+                BEGIN
+            </button>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-lg border-t border-border-light dark:border-border-dark pb-8 pt-3 px-8">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 group text-primary dark:text-stone-100">
+<span class="material-icons-outlined text-2xl">timer</span>
+<span class="text-[10px] font-medium uppercase tracking-widest">Timer</span>
+<div class="h-0.5 w-4 bg-primary rounded-full mt-1"></div>
+</button>
+<button class="flex flex-col items-center gap-1 group text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors">
+<span class="material-icons-outlined text-2xl">insert_chart_outlined</span>
+<span class="text-[10px] font-medium uppercase tracking-widest">Progress</span>
+<div class="h-0.5 w-4 bg-transparent mt-1"></div>
+</button>
+<button class="flex flex-col items-center gap-1 group text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors">
+<span class="material-icons-outlined text-2xl">settings</span>
+<span class="text-[10px] font-medium uppercase tracking-widest">Settings</span>
+<div class="h-0.5 w-4 bg-transparent mt-1"></div>
+</button>
+</div>
+</nav>
+<button class="fixed top-4 right-4 p-2 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined text-sm">dark_mode</span>
+</button>
+
+</body></html>

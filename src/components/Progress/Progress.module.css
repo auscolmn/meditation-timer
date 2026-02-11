@@ -3,6 +3,7 @@
     opacity: 0;
     transform: translateY(15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -85,7 +86,8 @@
 }
 
 .streakNumber {
-  font-size: 56px;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
   line-height: 1;

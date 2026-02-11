@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zen Timer - Meditation App</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&amp;family=Playfair+Display:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#8B7E74", // Earthy taupe/brown
+                        "background-light": "#FAF9F6", // Warm off-white
+                        "background-dark": "#1C1B19", // Deep charcoal/earthy dark
+                    },
+                    fontFamily: {
+                        display: ["'Playfair Display'", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "24px",
+                    },
+                },
+            },
+        };
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+            }
+        }
+    </script>
+<style>
+        .material-symbols-rounded {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }.zen-card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(139, 126, 116, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-primary font-sans transition-colors duration-500 overflow-hidden">
+<div class="flex flex-col h-screen max-w-md mx-auto relative px-8 pt-16 pb-12">
+<header class="flex justify-center mb-auto">
+<div class="text-[10px] tracking-[0.2em] uppercase opacity-40 font-medium">
+                Session 1
+            </div>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center -mt-20">
+<div class="font-display text-[100px] leading-none mb-12 tracking-tight text-[#4A443F] dark:text-[#E2DED0]">
+                20:00
+            </div>
+<button class="group relative px-4 py-2" onclick="toggleTheme()">
+<span class="text-xs tracking-[0.4em] uppercase font-light text-primary hover:opacity-70 transition-opacity">
+                    Start
+                </span>
+<div class="mt-1 h-[1px] w-0 group-hover:w-full bg-primary/20 mx-auto transition-all duration-300"></div>
+</button>
+</main>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full border border-primary/5 -z-10 pointer-events-none"></div>
+<nav class="mt-auto pt-8 border-t border-primary/5">
+<div class="flex justify-between items-center px-4">
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-rounded text-[22px] text-primary">schedule</span>
+<span class="text-[10px] tracking-widest uppercase font-medium">Timer</span>
+</a>
+<a class="flex flex-col items-center gap-1 opacity-30 hover:opacity-100 transition-opacity group" href="#">
+<span class="material-symbols-rounded text-[22px]">bar_chart_4_bars</span>
+<span class="text-[10px] tracking-widest uppercase font-medium">Progress</span>
+</a>
+<a class="flex flex-col items-center gap-1 opacity-30 hover:opacity-100 transition-opacity group" href="#">
+<span class="material-symbols-rounded text-[22px]">settings</span>
+<span class="text-[10px] tracking-widest uppercase font-medium">Settings</span>
+</a>
+</div>
+</nav>
+<div class="mt-8 flex justify-center">
+<div class="w-32 h-1 bg-primary/10 rounded-full"></div>
+</div>
+</div>
+<div class="fixed top-0 left-0 w-full h-full -z-20 pointer-events-none opacity-40 dark:opacity-10">
+<div class="absolute top-[10%] right-[10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute bottom-[20%] left-[5%] w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
+</div>
+
+</body></html>

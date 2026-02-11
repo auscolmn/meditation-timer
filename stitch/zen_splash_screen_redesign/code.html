@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sati - Zen Splash Screen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&amp;family=Inter:wght@200;300&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4A4A4A",
+                        "background-light": "#F5F2ED",
+                        "background-dark": "#1A1917",
+                    },
+                    fontFamily: {
+                        display: ["'Cormorant Garamond'", "serif"],
+                        sans: ["'Inter'", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0px",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+        }
+        .fade-in {
+            animation: fadeIn 2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .unalome-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 4s ease-in-out forwards;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-primary dark:text-stone-300 transition-colors duration-700">
+<div class="h-screen w-full flex flex-col items-center justify-between py-24 px-8 cursor-pointer overflow-hidden" onclick="location.reload()">
+<div class="flex-1"></div>
+<div class="flex flex-col items-center justify-center space-y-16 w-full max-w-md">
+<div class="flex justify-center items-center w-32 h-32 mb-4">
+<svg class="w-full h-full opacity-70" fill="none" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+<path class="unalome-path" d="M50 10V30C50 30 65 35 50 45C35 55 65 65 50 75C35 85 75 100 50 120C25 140 75 140 50 120C25 100 75 80 50 120C40 135 60 135 50 120" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.75"></path>
+<circle class="fade-in" cx="50" cy="5" fill="currentColor" r="1.5" style="animation-delay: 1.5s; opacity: 0;"></circle>
+</svg>
+</div>
+<div class="text-center fade-in" style="animation-delay: 0.5s; opacity: 0;">
+<h1 class="font-display text-7xl tracking-widest font-light">Sati</h1>
+</div>
+<div class="text-center space-y-6 max-w-xs fade-in" style="animation-delay: 1.2s; opacity: 0;">
+<p class="font-sans font-extralight text-lg leading-relaxed tracking-[0.1em] opacity-80">
+                    "Every problem is a gift — without problems we would not grow."
+                </p>
+<p class="font-sans font-light text-xs uppercase tracking-[0.25em] opacity-60">
+                    Tony Robbins
+                </p>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-end items-center pb-4">
+<span class="font-sans font-light text-[10px] uppercase tracking-[0.3em] opacity-30 fade-in" style="animation-delay: 2.5s; opacity: 0;">
+                Tap anywhere or wait 4s
+            </span>
+</div>
+</div>
+<script>
+        // Simple visual feedback for dark mode preference if needed
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        // Wait 4 seconds then "transition" (here just a console log or subtle visual change)
+        setTimeout(() => {
+            const footerText = document.querySelector('.opacity-30');
+            if (footerText) {
+                footerText.textContent = "Entering your practice...";
+                footerText.classList.remove('opacity-30');
+                footerText.classList.add('opacity-60');
+            }
+        }, 4000);
+    </script>
+
+</body></html>
