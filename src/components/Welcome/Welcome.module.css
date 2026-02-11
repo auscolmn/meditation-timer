@@ -17,14 +17,14 @@
 }
 
 .title {
-  font-family: var(--font-serif);
-  font-size: 58px;
-  font-weight: var(--font-weight-regular);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 72px;
+  font-weight: 300;
   color: var(--text-primary);
   margin-top: -20px;
   margin-bottom: var(--space-lg);
   text-align: center;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.1em;
   animation: fadeSlideUp 0.8s ease-out;
 }
 
@@ -46,24 +46,29 @@
 }
 
 .quoteText {
-  font-family: var(--font-serif);
-  font-size: var(--font-size-xl);
-  line-height: 1.5;
-  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  line-height: 1.625;
+  letter-spacing: 0.1em;
   color: var(--text-primary);
-  font-style: italic;
+  font-style: normal;
   margin-bottom: var(--space-lg);
-  font-weight: var(--font-weight-regular);
+  font-weight: 200;
+  opacity: 0.8;
 }
 
 .quoteAuthor {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
   color: var(--text-secondary);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
+  opacity: 0.6;
 }
 
 .quoteCategory {

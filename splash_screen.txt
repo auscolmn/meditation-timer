@@ -1,0 +1,135 @@
+To help your developer replicate the Zen Splash Screen exactly, here are the technical specifications used for the layout and typography.
+
+These settings assume a standard mobile screen width (around 375pt - 414pt).
+
+1. Background & Base Layer
+
+
+
+
+
+Background Color: #F5F2ED (Soft Stone)
+
+
+
+Safe Area Padding: 40px (Left and Right)
+
+2. App Title ("Sati")
+
+
+
+
+
+Font: Cormorant Garamond (SemiBold or Medium)
+
+
+
+Size: 48px
+
+
+
+Color: #2D2926 (Deep Charcoal)
+
+
+
+Letter Spacing: -0.01em (Slightly tight for a more sophisticated look)
+
+
+
+Position: Top 20% of the screen.
+
+3. Central Symbol (Unalome)
+
+
+
+
+
+Stroke Weight: 1px or 1.5px (Must be thin and delicate)
+
+
+
+Color: #B5835A (Warm Terracotta / Muted Gold)
+
+
+
+Size: Approximately 80px in height.
+
+
+
+Spacing: 40px margin below the App Title.
+
+4. Quote & Author
+
+
+
+
+
+Quote Font: Inter (Light)
+
+
+
+Size: 18px
+
+
+
+Color: #2D2926
+
+
+
+Line Height: 1.6 (Essential for "spaciousness")
+
+
+
+Letter Spacing: 0.02em
+
+
+
+Text Alignment: Center
+
+
+
+Author Font: Inter (Regular or Medium)
+
+
+
+Author Size: 14px
+
+
+
+Author Letter Spacing: 0.1em (All-Caps)
+
+
+
+Margin Top (Author): 16px below the quote.
+
+5. Action Hint ("Tap anywhere")
+
+
+
+
+
+Font: Inter (Light)
+
+
+
+Size: 12px
+
+
+
+Color: #A09E9B (Faded Slate / Muted Grey)
+
+
+
+Letter Spacing: 0.15em (Very wide)
+
+
+
+Text Transform: Uppercase
+
+
+
+Position: 60px from the bottom of the screen.
+
+Summary of the "Zen Spacing" Logic
+
+The most important "instruction" for your coding agent is to avoid vertical centering. In a zen layout, items should feel like they are floating in an intentional hierarchy from top to bottom, with at least 25% of the total screen height left as empty space at any given point.

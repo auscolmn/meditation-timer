@@ -5,9 +5,10 @@
 }
 
 .label {
-  font-weight: var(--font-weight-medium);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
   color: var(--text-primary);
-  font-size: var(--font-size-base);
+  font-size: 24px;
 }
 
 .toggle {
