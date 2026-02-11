@@ -215,6 +215,8 @@ function Progress() {
 
   return (
     <div className="screen">
+      <h1 className={styles.title}>Progress</h1>
+
       {/* Stats Section - hidden when hideStats is enabled */}
       {!hideStats && (
         <div className={`card mb-lg ${styles.statsSection}`}>

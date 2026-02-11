@@ -11,13 +11,15 @@
 }
 
 .title {
-  font-family: var(--font-serif);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-medium);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 400;
+  font-style: italic;
   color: var(--text-primary);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-2xl);
   animation: fadeSlideUp 0.8s ease-out;
   text-align: center;
+  letter-spacing: -0.02em;
 }
 
 .animateDelay1 {
@@ -41,8 +43,9 @@
 }
 
 .sectionTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 400;
   color: var(--text-primary);
   margin-bottom: 0;
 }
@@ -221,11 +224,13 @@
 }
 
 .appName {
-  font-family: var(--font-serif);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-medium);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 400;
+  font-style: italic;
   color: var(--text-primary);
   margin-bottom: var(--space-xs);
+  letter-spacing: -0.02em;
 }
 
 .appVersion {

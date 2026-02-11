@@ -10,6 +10,19 @@
   }
 }
 
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 400;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  animation: fadeSlideUp 0.8s ease-out;
+}
+
+
 /* Expandable sections */
 .expandHeader {
   display: flex;
@@ -32,8 +45,9 @@
 }
 
 .expandTitle {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 400;
   color: var(--text-primary);
 }
 
@@ -86,18 +100,20 @@
 }
 
 .streakNumber {
-  font-family: var(--font-serif);
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-medium);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 120px;
+  font-weight: 400;
   color: var(--text-primary);
   line-height: 1;
   letter-spacing: -0.03em;
 }
 
 .streakLabel {
-  font-size: var(--font-size-lg);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-style: italic;
   color: var(--text-secondary);
-  font-weight: var(--font-weight-regular);
+  font-weight: 400;
 }
 
 /* Next Goal Progress */
@@ -163,8 +179,9 @@
 }
 
 .calendarTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 400;
 }
 
 .dayNames {
@@ -176,10 +193,10 @@
 .dayName {
   text-align: center;
   font-size: 10px;
-  font-weight: var(--font-weight-semibold);
+  font-weight: 500;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   padding: var(--space-xs);
 }
 
@@ -253,8 +270,9 @@
 }
 
 .dayNumber {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
   color: var(--text-primary);
   transition: color var(--transition-fast);
 }

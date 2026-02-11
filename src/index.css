@@ -159,7 +159,7 @@ body {
 /* Typography */
 h1 {
   font-family: var(--font-serif);
-  font-size: var(--font-size-2xl);
+  font-size: 34px;
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -169,7 +169,7 @@ h1 {
 
 h2 {
   font-family: var(--font-serif);
-  font-size: var(--font-size-xl);
+  font-size: 24px;
   font-weight: var(--font-weight-medium);
   line-height: 1.3;
   letter-spacing: -0.015em;
@@ -179,7 +179,7 @@ h2 {
 
 h3 {
   font-family: var(--font-serif);
-  font-size: var(--font-size-lg);
+  font-size: 20px;
   font-weight: var(--font-weight-medium);
   line-height: 1.4;
   letter-spacing: -0.01em;
