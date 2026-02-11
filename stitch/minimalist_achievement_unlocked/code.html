@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>7 Day Stillness Achievement</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4d125",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221f10",
+                        "stone-subtle": "#e8e8e3",
+                        "text-subtle": "#7a7a72",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Cormorant Garamond", "serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .tracking-ultra-wide {
+            letter-spacing: 0.25em;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex items-center justify-center overflow-hidden">
+<!-- App Background Mockup (The blurred meditation screen) -->
+<div class="fixed inset-0 z-0 flex flex-col items-center justify-center opacity-40 blur-sm pointer-events-none">
+<div class="w-64 h-64 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<div class="w-48 h-48 rounded-full bg-primary/5 flex items-center justify-center">
+<div class="w-32 h-32 rounded-full border border-primary/20"></div>
+</div>
+</div>
+<div class="mt-8 text-center">
+<h2 class="font-serif text-2xl text-stone-700 dark:text-stone-300">Evening Breath</h2>
+<p class="font-display text-sm text-text-subtle mt-2 uppercase tracking-widest">12:00 Remaining</p>
+</div>
+</div>
+<!-- Achievement Modal Overlay -->
+<div class="fixed inset-0 bg-stone-900/5 backdrop-blur-sm z-10 flex items-center justify-center p-6">
+<!-- Achievement Card -->
+<div class="relative w-full max-w-sm bg-background-light dark:bg-stone-900/90 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-stone-200/50 dark:border-stone-800 rounded-xl overflow-hidden flex flex-col items-center p-12 text-center">
+<!-- Hero Icon: Stacked Stone Cairn Style -->
+<div class="mb-10 flex flex-col items-center space-y-1">
+<!-- Golden Lotus / Cairn Element -->
+<div class="w-16 h-16 flex items-center justify-center text-primary">
+<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.75" viewbox="0 0 24 24">
+<path d="M12 2L15 5H9L12 2Z" fill="currentColor" fill-opacity="0.1"></path>
+<path d="M7 10H17M5 15H19M3 20H21"></path>
+<path d="M12 10V5"></path>
+<circle cx="12" cy="3" fill="currentColor" r="1"></circle>
+</svg>
+</div>
+<!-- Subtle reflection glow -->
+<div class="w-8 h-1 bg-primary/30 blur-md rounded-full mt-2"></div>
+</div>
+<!-- Content -->
+<div class="space-y-3 mb-12">
+<h1 class="font-serif text-4xl text-stone-800 dark:text-stone-100 font-normal">
+                    7 Day Stillness
+                </h1>
+<p class="font-display text-sm text-text-subtle dark:text-stone-400 font-light max-w-[200px] mx-auto leading-relaxed">
+                    A week of mindful presence and inner reflection.
+                </p>
+</div>
+<!-- Action Button -->
+<button class="font-display text-[10px] text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors uppercase tracking-ultra-wide py-2 px-6 focus:outline-none">
+                Continue
+            </button>
+<!-- Decorative Border Accents -->
+<div class="absolute top-0 left-0 w-8 h-[1px] bg-primary/20"></div>
+<div class="absolute top-0 left-0 h-8 w-[1px] bg-primary/20"></div>
+<div class="absolute bottom-0 right-0 w-8 h-[1px] bg-stone-200 dark:bg-stone-800"></div>
+<div class="absolute bottom-0 right-0 h-8 w-[1px] bg-stone-200 dark:bg-stone-800"></div>
+</div>
+</div>
+<!-- Status Bar for iOS (Mockup) -->
+<div class="fixed top-0 left-0 right-0 h-11 px-8 flex justify-between items-center z-50 pointer-events-none opacity-60">
+<span class="text-xs font-medium text-stone-500">9:41</span>
+<div class="flex items-center space-x-1.5">
+<span class="material-icons text-[14px] text-stone-500">signal_cellular_4_bar</span>
+<span class="material-icons text-[14px] text-stone-500">wifi</span>
+<span class="material-icons text-[14px] text-stone-500">battery_full</span>
+</div>
+</div>
+<!-- Background texture image for tactile feel -->
+<div class="fixed inset-0 -z-10 opacity-[0.03] pointer-events-none mix-blend-multiply">
+<img alt="" class="w-full h-full object-cover" data-alt="Soft subtle paper or stone texture pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeUYYnvVh0PvCd0G594a1rrgrEsZoIK0-V2BgwLES7y0qsS6OuirDy_yBgRrSIpJ5gk27dSPCX9pgY8TcvdLa3wvef2YZMLrMRVhxqF6FdL8OZIfi_qrANxtoimYL6TBiefIZewYzrDoLyGpu2F3vSFWtQI0RLWwfqmWrwg97d5IEMsioKk59MIYVKSHitS5Lh2gPBTczv04l7ec7Bz-aY4zB5Qso-pELwwBnXNtvFxIJnCVqye4McQ6f4Q7E-HcWcZBHybLSdvM8x"/>
+</div>
+</body></html>

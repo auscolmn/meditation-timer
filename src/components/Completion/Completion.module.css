@@ -7,6 +7,7 @@
     opacity: 0;
     transform: translateY(15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -53,6 +54,7 @@
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
@@ -94,8 +96,16 @@
 .quoteBlock {
   text-align: center;
   max-width: 320px;
-  margin-bottom: var(--space-xxl);
   animation: fadeSlideUp 0.8s ease-out;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-xs);
+  color: var(--text-primary);
+  text-align: center;
 }
 
 .quoteText {

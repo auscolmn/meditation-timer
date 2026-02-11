@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dark Zen Style Guide - Meditation App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "zen-charcoal": "#1A1918",
+                        "zen-cream": "#E5E2DD",
+                        "zen-muted": "#3D3B38",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif-primary": ["Cormorant Garamond", "serif"],
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --bg-zen: #1A1918;
+            --text-zen: #E5E2DD;
+        }
+        body {
+            background-color: var(--bg-zen);
+            color: var(--text-zen);
+        }
+        .ios-status-bar {
+            height: 44px;
+        }
+        .serif-text { font-family: 'Cormorant Garamond', serif; }
+        .sans-text { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display antialiased">
+<div class="max-w-[390px] mx-auto min-h-screen bg-zen-charcoal shadow-2xl relative overflow-hidden flex flex-col">
+<div class="ios-status-bar flex justify-between items-center px-8 pt-4 shrink-0">
+<span class="text-xs font-medium text-zen-cream">9:41</span>
+<div class="flex gap-1.5 text-zen-cream">
+<span class="material-icons text-[14px]">signal_cellular_alt</span>
+<span class="material-icons text-[14px]">wifi</span>
+<span class="material-icons text-[14px]">battery_full</span>
+</div>
+</div>
+<header class="px-6 py-4 flex items-center justify-between shrink-0">
+<button class="w-10 h-10 flex items-center justify-start rounded-full text-zen-cream opacity-60">
+<span class="material-icons">arrow_back_ios</span>
+</button>
+<h1 class="serif-text text-xl font-medium tracking-wide">Dark Zen Guide</h1>
+<div class="w-10"></div>
+</header>
+<main class="px-6 pb-12 flex-1 overflow-y-auto no-scrollbar">
+<section class="mt-4 mb-10">
+<p class="sans-text text-[10px] uppercase tracking-[0.3em] text-zen-cream/40 font-semibold mb-2">System V.2</p>
+<h2 class="serif-text text-4xl leading-tight">Dark Mode Typography</h2>
+<p class="sans-text text-sm text-zen-cream/60 mt-3 leading-relaxed font-light">
+                    A monastic interface for focused practice. Monochromatic, high-contrast legibility using Soft Cream on Warm Charcoal.
+                </p>
+</section>
+<section class="mb-12">
+<div class="flex items-center justify-between border-b border-zen-cream/10 pb-2 mb-6">
+<span class="sans-text text-[11px] font-bold uppercase tracking-widest text-zen-cream">Primary Serif</span>
+<span class="sans-text text-[11px] text-zen-cream/30 italic">Display &amp; Timer</span>
+</div>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between items-end mb-3">
+<span class="sans-text text-[10px] text-zen-cream/40">H1 Header</span>
+<span class="sans-text text-[9px] px-1.5 py-0.5 bg-zen-cream/5 text-zen-cream/60 rounded">Garamond Light / 42px</span>
+</div>
+<h3 class="serif-text text-5xl font-light text-zen-cream">The Void</h3>
+</div>
+<div>
+<div class="flex justify-between items-end mb-3">
+<span class="sans-text text-[10px] text-zen-cream/40">Timer Digits</span>
+<span class="sans-text text-[9px] px-1.5 py-0.5 bg-zen-cream/5 text-zen-cream/60 rounded">Garamond Regular / 80px</span>
+</div>
+<div class="flex justify-center py-10 bg-zen-muted/30 rounded-2xl border border-zen-cream/5">
+<h3 class="serif-text text-[80px] leading-none text-zen-cream tracking-tight">20:00</h3>
+</div>
+</div>
+</div>
+</section>
+<section class="mb-12">
+<div class="flex items-center justify-between border-b border-zen-cream/10 pb-2 mb-6">
+<span class="sans-text text-[11px] font-bold uppercase tracking-widest text-zen-cream">Secondary Sans</span>
+<span class="sans-text text-[11px] text-zen-cream/30 italic">Functional UI</span>
+</div>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between items-end mb-3">
+<span class="sans-text text-[10px] text-zen-cream/40">Body Text</span>
+<span class="sans-text text-[9px] px-1.5 py-0.5 bg-zen-cream/5 text-zen-cream/60 rounded">Inter Regular / 15px</span>
+</div>
+<p class="sans-text text-base leading-relaxed text-zen-cream/80 font-light">
+                            Observe the breath without judgment. Each inhalation is a beginning, each exhalation a release into the present moment.
+                        </p>
+</div>
+<div>
+<div class="flex justify-between items-end mb-3">
+<span class="sans-text text-[10px] text-zen-cream/40">Primary Action</span>
+<span class="sans-text text-[9px] px-1.5 py-0.5 bg-zen-cream/5 text-zen-cream/60 rounded">Inter SemiBold / 13px / +3 Track</span>
+</div>
+<button class="w-full bg-zen-cream text-zen-charcoal rounded-sm py-4 flex items-center justify-center">
+<span class="sans-text text-[13px] uppercase tracking-[0.3em] font-bold">Begin</span>
+</button>
+</div>
+</div>
+</section>
+<section class="mb-12">
+<div class="flex items-center justify-between border-b border-zen-cream/10 pb-2 mb-6">
+<span class="sans-text text-[11px] font-bold uppercase tracking-widest text-zen-cream">Monochromatic Palette</span>
+</div>
+<div class="grid grid-cols-4 gap-3">
+<div class="space-y-2">
+<div class="aspect-square bg-[#1A1918] border border-zen-cream/10 rounded-md shadow-inner"></div>
+<p class="sans-text text-[8px] text-center text-zen-cream/50">#1A1918<br/>BG</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-[#E5E2DD] rounded-md"></div>
+<p class="sans-text text-[8px] text-center text-zen-cream/50">#E5E2DD<br/>PRIMARY</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-[#3D3B38] rounded-md"></div>
+<p class="sans-text text-[8px] text-center text-zen-cream/50">#3D3B38<br/>MUTED</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-[#FFFFFF] border border-zen-cream/10 rounded-md"></div>
+<p class="sans-text text-[8px] text-center text-zen-cream/50">#FFFFFF<br/>ACCENT</p>
+</div>
+</div>
+</section>
+<section class="mb-6">
+<div class="rounded-2xl overflow-hidden relative aspect-video shadow-2xl">
+<img alt="Atmospheric dark minimalist scene" class="w-full h-full object-cover grayscale opacity-40 brightness-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpwQ8hpjpwikwEWZyipx_Cg7mjj_fYPiM3vb1SF4804xNd1yT6ssSNYfrQn6G6PmQB2d6gqXGBtXBvvFPwhW5wEajvW8cU4OdWmG5YwlKIXIrIKPudmC6j7nJMEz-La9bGf6PRfxQHMdZjmT6zw7ula0z1CSlsjplkFkfv20qVgfxa8n3w14uYpXxDwMAuC6BrOZK6oau672Xn3-6Jg3oLhRZpg9akcTdSvOziOhWTiFFT6-Zo4QCRi4bUPZvi-iDMyXkw9VtQ908g"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center space-y-2">
+<span class="serif-text text-zen-cream text-3xl italic tracking-wide">Stillness</span>
+<div class="w-8 h-[1px] bg-zen-cream/40"></div>
+</div>
+</div>
+<p class="sans-text text-[10px] text-center mt-4 text-zen-cream/30 italic">High-contrast hierarchy on atmospheric background</p>
+</section>
+</main>
+<div class="flex justify-center pb-2 shrink-0">
+<div class="w-32 h-1 bg-zen-cream/10 rounded-full"></div>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Light Monochrome Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        charcoal: "#2D2926",
+                        stone: "#F5F2ED",
+                        "stone-subtle": "#E8E4DE",
+                    },
+                    fontFamily: {
+                        display: ["'Instrument Serif'", "serif"],
+                        sans: ["'Inter'", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+            color: #2D2926;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: #F5F2ED;
+            color: #2D2926;
+        }
+        .zen-divider {
+            height: 1px;
+            background-color: #E8E4DE;
+            width: 100%;
+        }
+        .zen-card {
+            background-color: transparent;
+            border: 1px solid transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen font-sans antialiased">
+<div class="max-w-md mx-auto min-h-screen flex flex-col px-8 pt-20 pb-32">
+<header class="mb-14">
+<h1 class="font-display italic text-4xl tracking-tight text-charcoal">Settings</h1>
+</header>
+<div class="space-y-10">
+<section class="space-y-6">
+<h2 class="font-display text-2xl text-charcoal">Theme</h2>
+<div class="flex items-center justify-between py-2">
+<span class="text-sm font-light tracking-wide">Appearance</span>
+<div class="flex items-center gap-6">
+<button class="flex items-center justify-center opacity-100">
+<span class="material-symbols-outlined text-[20px]">light_mode</span>
+</button>
+<button class="flex items-center justify-center opacity-30">
+<span class="material-symbols-outlined text-[20px]">contrast</span>
+</button>
+<button class="flex items-center justify-center opacity-30">
+<span class="material-symbols-outlined text-[20px]">dark_mode</span>
+</button>
+</div>
+</div>
+<div class="zen-divider"></div>
+</section>
+<section class="space-y-6">
+<h2 class="font-display text-2xl text-charcoal">Customize</h2>
+<div class="space-y-2">
+<button class="w-full flex items-center justify-between py-3 group">
+<span class="text-sm font-light tracking-wide">Timer setup &amp; minimalism</span>
+<span class="material-symbols-outlined text-sm opacity-40 transition-transform group-hover:translate-x-1">chevron_right</span>
+</button>
+<div class="zen-divider"></div>
+<button class="w-full flex items-center justify-between py-3 group">
+<span class="text-sm font-light tracking-wide">Custom Sounds</span>
+<div class="flex items-center gap-2">
+<span class="text-[11px] opacity-40 uppercase tracking-widest">None</span>
+<span class="material-symbols-outlined text-sm opacity-40 transition-transform group-hover:translate-x-1">chevron_right</span>
+</div>
+</button>
+<div class="zen-divider"></div>
+<button class="w-full flex items-center justify-between py-3 group">
+<span class="text-sm font-light tracking-wide">Data Management</span>
+<div class="flex items-center gap-2">
+<span class="text-[11px] opacity-40 uppercase tracking-widest">24 sessions</span>
+<span class="material-symbols-outlined text-sm opacity-40 transition-transform group-hover:translate-x-1">chevron_right</span>
+</div>
+</button>
+<div class="zen-divider"></div>
+</div>
+</section>
+<section class="pt-10 text-center space-y-6">
+<div class="space-y-2">
+<h2 class="font-display italic text-3xl text-charcoal">Sati</h2>
+<p class="text-[10px] uppercase tracking-[0.3em] opacity-40">Version 1.0.0</p>
+</div>
+<p class="text-charcoal opacity-70 leading-relaxed font-light text-sm max-w-[260px] mx-auto italic">
+                    A simple meditation timer app to help you build a consistent practice. Built for the benefit of all beings.
+                </p>
+<div class="flex justify-center gap-10 pt-4">
+<a class="text-[11px] uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity" href="#">Privacy</a>
+<a class="text-[11px] uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity" href="#">Support</a>
+</div>
+</section>
+</div>
+<nav class="fixed bottom-0 left-0 right-0 bg-stone/90 backdrop-blur-md px-10 pb-10 pt-6">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<a class="flex flex-col items-center gap-2 group opacity-30 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined">timer</span>
+<span class="text-[9px] font-medium tracking-[0.2em]">TIMER</span>
+</a>
+<a class="flex flex-col items-center gap-2 group opacity-30 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-[9px] font-medium tracking-[0.2em]">PROGRESS</span>
+</a>
+<a class="flex flex-col items-center gap-2" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[9px] font-medium tracking-[0.2em]">SETTINGS</span>
+</a>
+</div>
+<div class="w-32 h-[2px] bg-charcoal/10 mx-auto mt-8 rounded-full"></div>
+</nav>
+</div>
+<div class="fixed inset-0 pointer-events-none opacity-[0.02] mix-blend-multiply" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDge8jaNcarCUo6DBvQsrSMarVjuymWVODDpqIOBiyfpV036iwB_ZWe-5TqAzAkNOrOAFnbXNN-puGiECoijvwZXzSd2Wd6SoZ66_nxLjR_xR1r4aIpkzjk_vERlZ0MKen9U1H-pJsPgpVMrfY7tAbQq6OSIyxXpRR9Uq-PCzCQ79sddHx6spDNzdPfjbDWnyrY0fCDvh-PkfRramDmNiOuOhfIgHsKgh4bzDRC5QWMKb1SeuSsXqM37NWWP9yUg6oX8OzsQwKcaILT');"></div>
+
+</body></html>

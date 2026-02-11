@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zen Timer - Configuration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3d2b1f", // Changed from terracotta to earthy brown for monochromatic restraint
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#1A1918",
+                        "cream": "#E5E2DD", // Updated to the requested soft cream hex
+                        "earthy-brown": "#3d2b1f",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Serif", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-status-bar {
+            height: 44px;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-cream min-h-screen flex flex-col items-center overflow-hidden">
+<div class="w-full ios-status-bar flex justify-between items-center px-8 text-xs opacity-60">
+<span>9:41</span>
+<div class="flex items-center gap-1.5">
+<span class="material-icons text-[12px]">signal_cellular_alt</span>
+<span class="material-icons text-[12px]">wifi</span>
+<span class="material-icons text-[12px]">battery_full</span>
+</div>
+</div>
+<main class="w-full max-w-md flex-1 flex flex-col px-8 py-12 relative">
+<header class="text-center mb-16 mt-4">
+<h1 class="text-3xl font-normal text-cream opacity-90 tracking-wide">
+                Set Your Timer
+            </h1>
+<p class="text-xs uppercase tracking-[0.2em] opacity-40 mt-3 font-sans">Deep Presence</p>
+</header>
+<section class="mb-16">
+<div class="grid grid-cols-3 gap-4">
+<button class="py-4 border border-cream/20 rounded-full flex items-center justify-center transition-all">
+<span class="text-cream opacity-70">10m</span>
+</button>
+<button class="py-4 border border-cream/20 rounded-full flex items-center justify-center transition-all">
+<span class="text-cream opacity-70">20m</span>
+</button>
+<button class="py-4 bg-earthy-brown rounded-full flex items-center justify-center border border-earthy-brown">
+<span class="text-cream font-medium">45m</span>
+</button>
+<button class="py-4 border border-cream/20 rounded-full flex items-center justify-center transition-all">
+<span class="text-cream opacity-70">60m</span>
+</button>
+<button class="py-4 border border-cream/20 rounded-full flex items-center justify-center transition-all">
+<span class="text-cream opacity-70">90m</span>
+</button>
+<button class="py-4 border border-cream/20 rounded-full flex items-center justify-center transition-all">
+<span class="material-icons text-cream/40">more_horiz</span>
+</button>
+</div>
+</section>
+<section class="space-y-4">
+<div class="group border-b border-cream/10 py-6">
+<button class="w-full flex justify-between items-center">
+<div class="flex flex-col items-start">
+<span class="text-lg text-cream opacity-90">Sounds</span>
+<span class="text-xs text-cream opacity-40 mt-1">Himalayan Singing Bowl</span>
+</div>
+<span class="material-icons opacity-40 group-hover:opacity-90 transition-opacity">expand_more</span>
+</button>
+</div>
+<div class="group border-b border-cream/10 py-6">
+<button class="w-full flex justify-between items-center">
+<div class="flex flex-col items-start">
+<span class="text-lg text-cream opacity-90">Interval Bells</span>
+<span class="text-xs text-cream opacity-40 mt-1">Every 15 minutes</span>
+</div>
+<span class="material-icons opacity-40 group-hover:opacity-90 transition-opacity">expand_more</span>
+</button>
+</div>
+<div class="group border-b border-cream/10 py-6">
+<button class="w-full flex justify-between items-center">
+<div class="flex flex-col items-start">
+<span class="text-lg text-cream opacity-90">Warm-up</span>
+<span class="text-xs text-cream opacity-40 mt-1">30 seconds</span>
+</div>
+<span class="material-icons opacity-40 group-hover:opacity-90 transition-opacity">expand_more</span>
+</button>
+</div>
+</section>
+<div class="flex-1 flex items-center justify-center opacity-5 pointer-events-none">
+<div class="w-32 h-32 rounded-full border border-cream/40 relative flex items-center justify-center">
+<div class="w-24 h-24 rounded-full border border-cream/20"></div>
+<div class="w-16 h-16 rounded-full border border-cream/10"></div>
+</div>
+</div>
+<footer class="mt-auto pb-8">
+<button class="w-full bg-earthy-brown hover:bg-earthy-brown/90 py-5 rounded-full flex items-center justify-center transition-all active:scale-[0.98] group">
+<span class="text-cream font-medium tracking-[0.25em] text-sm uppercase group-hover:tracking-[0.3em] transition-all">Begin</span>
+</button>
+<p class="text-center text-[10px] uppercase tracking-widest opacity-20 mt-6">A moment of silence awaits</p>
+</footer>
+</main>
+<div class="fixed inset-0 -z-10 opacity-5 pointer-events-none">
+<img alt="Subtle dark nature texture" class="w-full h-full object-cover mix-blend-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoa7k9hKCDkYN_9pOcgbhUtWUYvw9UPsI6uYPJm6_ZJXcwtdWZHMj962O1zDce8ztZAS4ZBu2R6wRCMKCXATlSrOY2iJ6pIQxXnFiCYtat4oy2d755FRBzRwcLJ8adLraZRVncf-SH3-7ehw2oKYP4svmkC7zlszIyG-5c1olhiUrQg3zFX4bKrVbUitcBiYH3HAZUo-wfgyJKaTFkcTrjUay-6nBG4iEUD0D8ktalnWmrU9PhuicqDm5NVP7Cx_6of-pNbwDMPKIC"/>
+</div>
+
+</body></html>

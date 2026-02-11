@@ -17,13 +17,14 @@
 }
 
 .title {
+  font-family: var(--font-serif);
   font-size: 58px;
-  font-weight: var(--font-weight-light);
+  font-weight: var(--font-weight-regular);
   color: var(--text-primary);
   margin-top: -20px;
   margin-bottom: var(--space-lg);
   text-align: center;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
   animation: fadeSlideUp 0.8s ease-out;
 }
 
@@ -32,6 +33,7 @@
     opacity: 0;
     transform: translateY(15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -44,11 +46,12 @@
 }
 
 .quoteText {
-  font-size: 20px;
-  line-height: 1.7;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  line-height: 1.5;
   letter-spacing: -0.01em;
   color: var(--text-primary);
-  font-style: normal;
+  font-style: italic;
   margin-bottom: var(--space-lg);
   font-weight: var(--font-weight-regular);
 }
@@ -109,7 +112,6 @@
   }
 
   .quoteText {
-    font-size: 16px;
+    font-size: var(--font-size-lg);
   }
 }
-

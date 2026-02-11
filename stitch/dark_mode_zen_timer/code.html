@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zen Timer - Meditation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#195de6",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#1A1918",
+                        "zen-cream": "#E5E2DD",
+                        "zen-sage": "#7A827B",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Cormorant Garamond", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .timer-glow {
+            text-shadow: 0 0 20px rgba(229, 226, 221, 0.05);
+        }
+        /* Custom scrollbar-hide if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-zen-cream overflow-hidden h-screen w-full flex items-center justify-center">
+<!-- Mobile Device Mockup Container -->
+<div class="relative w-full max-w-[390px] h-full max-h-[844px] bg-background-dark flex flex-col items-center justify-between px-8 py-14 overflow-hidden shadow-2xl">
+<!-- Status Bar Area (iOS Style) -->
+<div class="w-full flex justify-between items-center opacity-40 text-[10px] font-medium tracking-widest uppercase mb-4">
+<span>9:41</span>
+<div class="flex gap-2">
+<span class="material-icons-outlined text-[12px]">signal_cellular_alt</span>
+<span class="material-icons-outlined text-[12px]">wifi</span>
+<span class="material-icons-outlined text-[12px]">battery_full</span>
+</div>
+</div>
+<!-- Top Navigation / Context -->
+<div class="w-full flex justify-center items-center">
+<span class="text-zen-sage/60 text-[11px] uppercase tracking-[0.3em] font-light">Zazen Focus</span>
+</div>
+<!-- Main Timer Section -->
+<div class="flex-grow flex flex-col items-center justify-center w-full relative">
+<!-- Subtle Progress Ring (Decorative Background) -->
+<div class="absolute inset-0 flex items-center justify-center opacity-5">
+<div class="w-72 h-72 rounded-full border border-zen-cream"></div>
+</div>
+<!-- Timer Digits -->
+<div class="relative z-10 flex flex-col items-center">
+<h1 class="font-serif text-[110px] leading-none tracking-tight text-zen-cream timer-glow font-light">
+                    20:00
+                </h1>
+<!-- Preset Indicators (Dots) -->
+<div class="flex gap-6 mt-12">
+<div class="w-1 h-1 rounded-full bg-zen-sage/30"></div>
+<div class="w-1 h-1 rounded-full bg-zen-cream/60"></div>
+<div class="w-1 h-1 rounded-full bg-zen-sage/30"></div>
+</div>
+</div>
+</div>
+<!-- Primary Action -->
+<div class="w-full flex flex-col items-center gap-16 mb-12">
+<button class="group flex flex-col items-center">
+<span class="text-zen-cream text-sm font-light tracking-[0.6em] uppercase transition-all group-active:opacity-50">
+                    Start
+                </span>
+<div class="mt-4 w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_rgba(25,93,230,0.6)]"></div>
+</button>
+</div>
+<!-- Bottom Navigation -->
+<nav class="w-full max-w-[280px] flex justify-between items-center">
+<a class="text-zen-cream" href="#">
+<span class="material-icons-outlined text-[22px] font-light">timer</span>
+</a>
+<a class="text-zen-sage/40 hover:text-zen-cream transition-colors" href="#">
+<span class="material-icons-outlined text-[22px] font-light">bar_chart</span>
+</a>
+<a class="text-zen-sage/40 hover:text-zen-cream transition-colors" href="#">
+<span class="material-icons-outlined text-[22px] font-light">spatial_audio_off</span>
+</a>
+<a class="text-zen-sage/40 hover:text-zen-cream transition-colors" href="#">
+<span class="material-icons-outlined text-[22px] font-light">settings</span>
+</a>
+</nav>
+<!-- Home Indicator (iOS style) -->
+<div class="mt-8 w-32 h-1 bg-zen-sage/10 rounded-full"></div>
+<!-- Decorative Background Element (Extremely subtle) -->
+<div class="absolute -top-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute -bottom-24 -right-24 w-80 h-80 bg-zen-sage/5 rounded-full blur-[100px] pointer-events-none"></div>
+</div>
+</body></html>

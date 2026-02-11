@@ -3,6 +3,7 @@
     opacity: 0;
     transform: translateY(15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -10,8 +11,9 @@
 }
 
 .title {
-  font-size: 28px;
-  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
   color: var(--text-primary);
   margin-bottom: var(--space-xl);
   animation: fadeSlideUp 0.8s ease-out;
@@ -219,8 +221,9 @@
 }
 
 .appName {
-  font-size: 24px;
-  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
   color: var(--text-primary);
   margin-bottom: var(--space-xs);
 }
@@ -291,6 +294,7 @@
   height: 18px;
   padding: 0;
   border: none;
+  appearance: none;
   background: var(--border);
   border-radius: 50%;
   color: var(--text-secondary);

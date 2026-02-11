@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#E5E2DD",
+                        "background-dark": "#1A1918",
+                        "sage-glow": "#84a59d",
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: max(884px, 100dvh);
+        }
+        .glow-line {
+            box-shadow: 0 0 12px rgba(229, 226, 221, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-primary/90 min-h-screen selection:bg-primary/20">
+<div class="h-14 w-full"></div>
+<main class="px-8 pb-32 max-w-md mx-auto">
+<header class="flex justify-between items-center py-6">
+<span class="text-[10px] uppercase tracking-[0.3em] opacity-40 font-medium">Dashboard</span>
+<button class="p-2 -mr-2">
+<span class="material-icons-outlined text-lg opacity-40">more_horiz</span>
+</button>
+</header>
+<section class="py-12 flex flex-col items-center justify-center text-center">
+<div class="relative">
+<h1 class="text-7xl font-light italic text-primary tracking-tight">
+                    1 day
+                </h1>
+<p class="text-[10px] opacity-40 mt-4 tracking-[0.25em] uppercase">Current Streak</p>
+<div class="absolute -top-6 -right-10 w-12 h-12 border border-primary/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-primary/30 font-light">shutter_speed</span>
+</div>
+</div>
+</section>
+<section class="mb-16">
+<div class="flex justify-between items-end mb-6">
+<span class="text-[10px] uppercase tracking-widest opacity-30">Consistency</span>
+<span class="text-[10px] uppercase tracking-widest opacity-30">Last 7 Days</span>
+</div>
+<div class="space-y-8">
+<div class="relative h-px w-full bg-primary/5">
+<div class="absolute inset-y-0 left-0 w-3/4 bg-primary/40 glow-line rounded-full"></div>
+</div>
+<div class="relative h-px w-full bg-primary/5">
+<div class="absolute inset-y-0 left-0 w-1/2 bg-primary/20 glow-line rounded-full"></div>
+</div>
+<div class="relative h-px w-full bg-primary/5">
+<div class="absolute inset-y-0 left-0 w-5/6 bg-primary/40 glow-line rounded-full"></div>
+</div>
+</div>
+</section>
+<section class="mb-16">
+<div class="flex items-center justify-between mb-10">
+<h2 class="text-2xl italic font-light text-primary/80">November</h2>
+<div class="flex gap-6">
+<span class="material-icons-outlined text-sm opacity-20">chevron_left</span>
+<span class="material-icons-outlined text-sm opacity-20">chevron_right</span>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-y-10 text-center">
+<div class="text-[10px] uppercase tracking-widest opacity-20 font-medium">S</div>
+<div class="text-[10px] uppercase tracking-widest opacity-20 font-medium">M</div>
+<div class="text-[10px] uppercase tracking-widest opacity-20 font-medium">T</div>
+<div class="text-[10px] uppercase tracking-widest opacity-20 font-medium">W</div>
+<div class="text-[10px] uppercase tracking-widest opacity-20 font-medium">T</div>
+<div class="text-[10px] uppercase tracking-widest opacity-20 font-medium">F</div>
+<div class="text-[10px] uppercase tracking-widest opacity-20 font-medium">S</div>
+<div class="text-lg font-light opacity-10">28</div>
+<div class="text-lg font-light opacity-10">29</div>
+<div class="text-lg font-light opacity-10">30</div>
+<div class="text-lg font-light opacity-10">31</div>
+<div class="text-lg font-light relative flex items-center justify-center">
+<span class="relative z-10 text-primary">1</span>
+<div class="absolute w-10 h-10 border border-primary/30 rounded-full"></div>
+</div>
+<div class="text-lg font-light text-primary/60">2</div>
+<div class="text-lg font-light text-primary/60">3</div>
+<div class="text-lg font-light text-primary/60">4</div>
+<div class="text-lg font-light text-primary/60">5</div>
+<div class="text-lg font-light text-primary/60">6</div>
+<div class="text-lg font-light text-primary/60">7</div>
+<div class="text-lg font-light text-primary/60">8</div>
+<div class="text-lg font-light text-primary/60">9</div>
+<div class="text-lg font-light text-primary/60">10</div>
+</div>
+</section>
+<section>
+<h2 class="text-[10px] uppercase tracking-widest opacity-30 mb-10">Milestones</h2>
+<div class="space-y-12">
+<article class="group">
+<h3 class="text-xl font-light text-primary/80 group-hover:text-primary transition-colors duration-500">
+                        100 Minutes Mindful
+                    </h3>
+<p class="text-[10px] opacity-20 mt-2 uppercase tracking-[0.1em]">Achieved Oct 24</p>
+</article>
+<article class="group">
+<h3 class="text-xl font-light text-primary/80 group-hover:text-primary transition-colors duration-500">
+                        Morning Ritual Established
+                    </h3>
+<p class="text-[10px] opacity-20 mt-2 uppercase tracking-[0.1em]">Achieved Oct 12</p>
+</article>
+<article class="group">
+<h3 class="text-xl font-light text-primary/80 group-hover:text-primary transition-colors duration-500">
+                        The Quiet Observer
+                    </h3>
+<p class="text-[10px] opacity-20 mt-2 uppercase tracking-[0.1em]">Achieved Sep 30</p>
+</article>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-background-dark/90 backdrop-blur-2xl border-t border-primary/5 px-12 py-8">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<button class="opacity-20 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined font-light">spa</span>
+</button>
+<button class="text-primary">
+<span class="material-symbols-outlined font-light">analytics</span>
+</button>
+<button class="opacity-20 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined font-light">self_improvement</span>
+</button>
+<button class="opacity-20 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined font-light">settings</span>
+</button>
+</div>
+</nav>
+
+</body></html>
