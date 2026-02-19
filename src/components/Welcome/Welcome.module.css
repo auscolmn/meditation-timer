@@ -18,7 +18,7 @@
 
 .title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 72px;
+  font-size: clamp(42px, 15vw, 72px);
   font-weight: 300;
   color: var(--text-primary);
   margin-top: -20px;
@@ -112,7 +112,6 @@
   }
 
   .title {
-    font-size: 48px;
     margin-bottom: var(--space-md);
   }
 
