@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { KeepAwake } from '@capacitor-community/keep-awake';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { useApp } from '../../context/AppContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { formatTimeDisplay } from '../../utils/dateUtils';
@@ -12,6 +15,18 @@ interface ActiveTimerProps {
   onEnd: (session: Session | null) => void;
 }
 
+// Fixed ID so re-scheduling always replaces the previous end-of-session notification
+const END_NOTIFICATION_ID = 1001;
+
+// If a bell's moment passed more than this many seconds ago (e.g. the WebView
+// was suspended while the screen was off), mark it as played without sounding
+// it, so returning to the app doesn't fire a burst of stale bells at once.
+const MISSED_BELL_TOLERANCE_SEC = 2;
+
+// How often we re-derive elapsed time from the wall clock. Sub-second so the
+// displayed seconds never visibly stutter, cheap enough not to matter.
+const TICK_MS = 500;
+
 function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   const { addSession, customSounds, settings } = useApp();
 
@@ -20,21 +35,42 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   const [prepTimeRemaining, setPrepTimeRemaining] = useState(config.preparationTime || 0);
 
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [bellPlayed, setBellPlayed] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [bellFlash, setBellFlash] = useState(false);
 
+  // --- Wall-clock timing ---
+  // Elapsed time is always derived from real timestamps, never from counting
+  // interval ticks. WebView timers throttle or suspend entirely when the app
+  // is backgrounded or the screen locks; deriving from Date.now() means the
+  // timer is correct the instant we get to run again.
+  const phaseStartRef = useRef<number>(Date.now()); // start of current phase (prep or meditation)
+  const pausedTotalRef = useRef(0);                 // ms spent paused within the current phase
+  const pauseBeganRef = useRef<number | null>(null);
+  const isPreparingRef = useRef(config.preparationTime > 0);
+
+  // Bell bookkeeping (refs, not state: written from the tick, read nowhere in render)
+  const playedBellsRef = useRef<Set<number>>(new Set());
+  const endingBellFiredRef = useRef(false);
+  const beginningBellFiredRef = useRef(false);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Refs for audio elements
   const bellAudioRef = useRef<HTMLAudioElement>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const playedBellsRef = useRef<Set<number>>(new Set());
 
   // Web Audio API refs for seamless background looping
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
+
+  // Seconds elapsed in the current phase, from the wall clock, excluding pauses
+  const getPhaseElapsedSec = useCallback((): number => {
+    const pausedMs =
+      pausedTotalRef.current +
+      (pauseBeganRef.current !== null ? Date.now() - pauseBeganRef.current : 0);
+    return Math.max(0, Math.floor((Date.now() - phaseStartRef.current - pausedMs) / 1000));
+  }, []);
 
   // Get sound source by ID
   const getSoundSrc = useCallback((soundId: string): string | null => {
@@ -51,31 +87,152 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     if (!src || !bellAudioRef.current) return;
 
     bellAudioRef.current.src = src;
-    bellAudioRef.current.volume = (config.bellVolume || 80) / 100;
+    bellAudioRef.current.volume = (config.bellVolume ?? 80) / 100;
     bellAudioRef.current.play().catch(console.error);
 
     // Visual feedback
     setBellFlash(true);
-    setTimeout(() => setBellFlash(false), 500);
+    if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = setTimeout(() => setBellFlash(false), 500);
   }, [getSoundSrc, config.bellVolume]);
 
-  // Request wake lock
-  useEffect(() => {
-    const requestWakeLock = async () => {
-      if ('wakeLock' in navigator) {
-        try {
-          wakeLockRef.current = await navigator.wakeLock.request('screen');
-        } catch (err) {
-          console.log('Wake lock request failed:', err);
+  // --- End-of-session notification (native safety net) ---
+  // If the OS suspends the WebView (screen locked, app backgrounded) the
+  // ending bell can't play from JS. A scheduled local notification makes sure
+  // the phone still tells the user their session is over. Cancelled whenever
+  // the session ends in-app, pauses, or the component unmounts.
+  const cancelEndNotification = useCallback(async () => {
+    if (!Capacitor.isNativePlatform()) return;
+    try {
+      await LocalNotifications.cancel({ notifications: [{ id: END_NOTIFICATION_ID }] });
+    } catch { /* never let the safety net break the session */ }
+  }, []);
+
+  const scheduleEndNotification = useCallback(async () => {
+    if (!Capacitor.isNativePlatform()) return;
+    try {
+      let { display } = await LocalNotifications.checkPermissions();
+      if (display !== 'granted') {
+        ({ display } = await LocalNotifications.requestPermissions());
+      }
+      if (display !== 'granted') return;
+
+      const remainingSec = config.duration - getPhaseElapsedSec();
+      if (remainingSec <= 0) return;
+
+      const minutes = Math.round(config.duration / 60);
+      await LocalNotifications.schedule({
+        notifications: [{
+          id: END_NOTIFICATION_ID,
+          title: 'Meditation complete',
+          body: minutes > 0
+            ? `Your ${minutes}-minute session has ended.`
+            : 'Your session has ended.',
+          schedule: { at: new Date(Date.now() + remainingSec * 1000), allowWhileIdle: true },
+        }],
+      });
+    } catch { /* never let the safety net break the session */ }
+  }, [config.duration, getPhaseElapsedSec]);
+
+  // --- The tick: derive time, fire due bells ---
+  // Runs from setInterval and on visibility changes. All side effects happen
+  // here, in a plain callback — never inside a state updater, where React
+  // (StrictMode, React Compiler) assumes purity and may invoke twice.
+  const tick = useCallback(() => {
+    const elapsed = getPhaseElapsedSec();
+
+    if (isPreparingRef.current) {
+      const remaining = Math.max(config.preparationTime - elapsed, 0);
+      setPrepTimeRemaining(remaining);
+      if (remaining <= 0) {
+        // Transition to the meditation phase: restart the wall clock
+        isPreparingRef.current = false;
+        phaseStartRef.current = Date.now();
+        pausedTotalRef.current = 0;
+        pauseBeganRef.current = null;
+        setIsPreparing(false);
+        setElapsedTime(0);
+      }
+      return;
+    }
+
+    setElapsedTime(elapsed);
+
+    // Interval bells: threshold check (>=), so a wall-clock jump after a
+    // suspension can't skip past one. Bells missed by more than the tolerance
+    // are marked done silently instead of all sounding at once on resume.
+    config.intervalBells?.forEach(bell => {
+      if (elapsed >= bell.time && !playedBellsRef.current.has(bell.time)) {
+        playedBellsRef.current.add(bell.time);
+        if (elapsed - bell.time <= MISSED_BELL_TOLERANCE_SEC) {
+          playBell(bell.sound);
         }
       }
+    });
+
+    // Ending bell: always rings once when the duration is crossed, even if we
+    // only discover it late (screen came back on) — this is the one bell the
+    // user must not miss. The timer itself keeps counting up by design.
+    if (elapsed >= config.duration && !endingBellFiredRef.current) {
+      endingBellFiredRef.current = true;
+      if (config.endingSound !== 'none') {
+        playBell(config.endingSound);
+      }
+      // The scheduled notification is no longer needed if we got to ring in-app
+      cancelEndNotification();
+    }
+  }, [config.preparationTime, config.duration, config.intervalBells, config.endingSound,
+      getPhaseElapsedSec, playBell, cancelEndNotification]);
+
+  // Keep the latest tick reachable from long-lived listeners without re-subscribing
+  const tickRef = useRef(tick);
+  useEffect(() => { tickRef.current = tick; }, [tick]);
+
+  // Drive the tick. Restarting the interval on dep changes is harmless now:
+  // time comes from the wall clock, so no drift can accumulate.
+  useEffect(() => {
+    if (isPaused) return;
+    const id = setInterval(() => tickRef.current(), TICK_MS);
+    return () => clearInterval(id);
+  }, [isPaused]);
+
+  // --- Keep the screen awake ---
+  // Native: the keep-awake plugin (iOS idleTimerDisabled / Android
+  // FLAG_KEEP_SCREEN_ON) — reliable inside Capacitor's WebView.
+  // Web: the Screen Wake Lock API, re-acquired on every return to visibility,
+  // because the OS silently releases it whenever the page is hidden.
+  useEffect(() => {
+    const isNative = Capacitor.isNativePlatform();
+
+    const acquireWebWakeLock = async () => {
+      if (isNative || !('wakeLock' in navigator)) return;
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+      } catch { /* not critical; the timer stays correct regardless */ }
     };
-    requestWakeLock();
+
+    if (isNative) {
+      KeepAwake.keepAwake().catch(() => {});
+    } else {
+      acquireWebWakeLock();
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return;
+      // Catch the clock up immediately (fires any bell whose moment arrived)
+      tickRef.current();
+      // iOS is prone to leaving the AudioContext suspended; nudge it back
+      audioContextRef.current?.resume().catch(() => {});
+      acquireWebWakeLock();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      if (wakeLockRef.current) {
-        wakeLockRef.current.release();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (isNative) {
+        KeepAwake.allowSleep().catch(() => {});
       }
+      wakeLockRef.current?.release().catch(() => {});
     };
   }, []);
 
@@ -93,6 +250,12 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
         // Create audio context
         const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         audioContextRef.current = new AudioContextClass();
+
+        // iOS can create the context in a 'suspended' state even though the
+        // session began from a tap; resume it explicitly or nothing plays.
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume().catch(() => {});
+        }
 
         // Fetch and decode audio
         const response = await fetch(src);
@@ -140,85 +303,57 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     }
   }, [config.backgroundVolume]);
 
-  // Play beginning bell (after preparation phase ends, or immediately if no preparation)
+  // Play beginning bell (after preparation phase ends, or immediately if no
+  // preparation). Fired-once ref + timeout cleanup: StrictMode double-mounts
+  // effects, and playBell's identity can change mid-session (customSounds).
   useEffect(() => {
-    if (config.beginningSound !== 'none' && !isPreparing) {
-      // Small delay to ensure audio context is ready
-      setTimeout(() => playBell(config.beginningSound), 100);
+    if (isPreparing || beginningBellFiredRef.current) return;
+    if (config.beginningSound === 'none') {
+      beginningBellFiredRef.current = true;
+      return;
     }
-  }, [config.beginningSound, playBell, isPreparing]);
+    // Small delay to ensure audio context is ready
+    const timeoutId = setTimeout(() => {
+      beginningBellFiredRef.current = true;
+      playBell(config.beginningSound);
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [isPreparing, config.beginningSound, playBell]);
 
-  // Preparation countdown
+  // Schedule the end-of-session notification once the meditation phase begins;
+  // cancel it whenever this effect tears down (session over, unmount).
   useEffect(() => {
-    if (!isPreparing || isPaused) return;
+    if (isPreparing) return;
+    scheduleEndNotification();
+    return () => { cancelEndNotification(); };
+  }, [isPreparing, scheduleEndNotification, cancelEndNotification]);
 
-    intervalRef.current = setInterval(() => {
-      setPrepTimeRemaining(prev => {
-        const newTime = prev - 1;
-
-        // Preparation complete - transition to meditation
-        if (newTime <= 0) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          setIsPreparing(false);
-          return 0;
-        }
-
-        return newTime;
-      });
-    }, 1000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isPreparing, isPaused]);
-
-  // Timer count-up (only runs after preparation is complete)
+  // Clear any pending bell-flash timeout on unmount
   useEffect(() => {
-    if (isPaused || isPreparing) return;
-
-    intervalRef.current = setInterval(() => {
-      setElapsedTime(prev => {
-        const newTime = prev + 1;
-
-        // Check for interval bells
-        config.intervalBells?.forEach(bell => {
-          if (bell.time === newTime && !playedBellsRef.current.has(bell.time)) {
-            playedBellsRef.current.add(bell.time);
-            playBell(bell.sound);
-          }
-        });
-
-        // Play ending bell when duration is reached (but don't stop)
-        if (newTime === config.duration && !bellPlayed) {
-          setBellPlayed(true);
-          if (config.endingSound !== 'none') {
-            playBell(config.endingSound);
-          }
-        }
-
-        return newTime;
-      });
-    }, 1000);
-
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
     };
-  }, [isPaused, isPreparing, config.duration, config.intervalBells, config.endingSound, playBell, bellPlayed]);
+  }, []);
 
-
-  // Handle pause/resume
+  // Handle pause/resume — side effects live here, not inside a state updater
   const togglePause = () => {
-    setIsPaused(prev => {
-      const newPaused = !prev;
-      if (audioContextRef.current) {
-        if (newPaused) {
-          audioContextRef.current.suspend();
-        } else {
-          audioContextRef.current.resume();
-        }
+    const nextPaused = !isPaused;
+    if (nextPaused) {
+      pauseBeganRef.current = Date.now();
+      audioContextRef.current?.suspend().catch(() => {});
+      // The end time just moved into the future; the old notification is wrong
+      cancelEndNotification();
+    } else {
+      if (pauseBeganRef.current !== null) {
+        pausedTotalRef.current += Date.now() - pauseBeganRef.current;
+        pauseBeganRef.current = null;
       }
-      return newPaused;
-    });
+      audioContextRef.current?.resume().catch(() => {});
+      if (!isPreparingRef.current) {
+        scheduleEndNotification();
+      }
+    }
+    setIsPaused(nextPaused);
   };
 
   // Handle end session
@@ -227,16 +362,12 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   };
 
   const confirmEndSession = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    // The scheduled notification must not fire after an in-app end
+    cancelEndNotification();
 
-    // Stop audio
+    // Stop audio (also handled by unmount cleanup; harmless to do eagerly)
     if (audioContextRef.current) {
       audioContextRef.current.close().catch(() => {});
-    }
-
-    // Release wake lock
-    if (wakeLockRef.current) {
-      wakeLockRef.current.release();
     }
 
     // If still in preparation phase, don't save a session
@@ -245,11 +376,12 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
       return;
     }
 
-    // Save session with actual elapsed time
+    // Save with the wall-clock elapsed time, not the possibly-stale state value
+    const finalElapsed = getPhaseElapsedSec();
     const session = addSession({
-      duration: elapsedTime,
+      duration: finalElapsed,
       completed: true,
-      endedEarly: elapsedTime < config.duration
+      endedEarly: finalElapsed < config.duration
     });
 
     onComplete(session);
@@ -265,18 +397,8 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     : Math.min((elapsedTime / config.duration) * 100, 100);
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
-  // Focus trap for end confirmation modal
-  const endModalRef = useFocusTrap<HTMLDivElement>(showEndConfirm);
-
-  // Handle escape key for modal
-  useEffect(() => {
-    if (!showEndConfirm) return;
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowEndConfirm(false);
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [showEndConfirm]);
+  // Focus trap for end confirmation modal — Escape closes it
+  const endModalRef = useFocusTrap<HTMLDivElement>(showEndConfirm, () => setShowEndConfirm(false));
 
   return (
     <div className={`screen screen--centered ${styles.container} ${bellFlash ? styles.flash : ''} ${isPreparing ? styles.preparing : ''}`}>
@@ -358,7 +480,6 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
         <div
           className="modal-overlay"
           onClick={() => setShowEndConfirm(false)}
-          onKeyDown={(e) => e.key === 'Escape' && setShowEndConfirm(false)}
           role="presentation"
         >
           <div

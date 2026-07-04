@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
-import { formatDuration } from '../../utils/dateUtils';
+import { formatDuration, getSessionsForDate, getTodayString } from '../../utils/dateUtils';
 import type { Session } from '../../types';
 import styles from './Completion.module.css';
 
@@ -18,10 +18,13 @@ function Completion({ session, onMeditateAgain }: CompletionProps) {
   // Get quote for minimal mode (memoized to stay stable)
   const quote = useMemo(() => getDailyQuote(), [getDailyQuote]);
 
-  // Check if a new goal was just achieved
-  const goalJustAchieved = streakData.completedGoals.find(
-    goal => goal.days === streakData.currentStreak
-  );
+  // Check if a new goal was just achieved. The streak only advances on the
+  // first session of a day, so only that session gets the celebration —
+  // a second sit on day 7 shouldn't announce "7-day goal achieved" again.
+  const isFirstSessionToday = getSessionsForDate(sessions, getTodayString()).length === 1;
+  const goalJustAchieved = isFirstSessionToday
+    ? streakData.completedGoals.find(goal => goal.days === streakData.currentStreak)
+    : undefined;
 
   // Hide animation after it plays
   useEffect(() => {
