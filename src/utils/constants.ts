@@ -9,14 +9,12 @@ export const THEME_OPTIONS: Record<'LIGHT' | 'DARK' | 'AUTO', Theme> = {
 
 // localStorage keys
 export const STORAGE_KEYS = {
-  QUOTES: 'innercompass_quotes',
-  SESSIONS: 'innercompass_sessions',
-  CUSTOM_SOUNDS: 'innercompass_custom_sounds',
-  SETTINGS: 'innercompass_settings',
-  LAST_QUOTE_DATE: 'innercompass_last_quote_date',
-  DAILY_QUOTE_INDEX: 'innercompass_daily_quote_index',
-  PRESETS: 'innercompass_presets',
-  STREAK_FREEZES: 'innercompass_streak_freezes'
+  QUOTES: 'sati_quotes',
+  SESSIONS: 'sati_sessions',
+  CUSTOM_SOUNDS: 'sati_custom_sounds',
+  SETTINGS: 'sati_settings',
+  PRESETS: 'sati_presets',
+  STREAK_FREEZES: 'sati_streak_freezes'
 } as const;
 
 // Default sounds available in the app

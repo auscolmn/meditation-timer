@@ -211,7 +211,7 @@ export interface AppContextValue {
   // Streak freeze actions
   addStreakFreeze: (date: string, reason?: string) => StreakFreeze;
   deleteStreakFreeze: (freezeId: string) => void;
-  useFreeze: () => boolean;
+  spendStreakFreeze: () => boolean;
   grantMonthlyFreezes: () => void;
 
   // Data management

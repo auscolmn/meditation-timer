@@ -22,7 +22,7 @@ const SnowflakeIcon = () => (
 );
 
 function StreakFreeze() {
-  const { settings, sessions, useFreeze, grantMonthlyFreezes } = useApp();
+  const { settings, sessions, spendStreakFreeze, grantMonthlyFreezes } = useApp();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [freezeUsed, setFreezeUsed] = useState(false);
 
@@ -50,7 +50,7 @@ function StreakFreeze() {
 
   // Handle using a freeze
   const handleUseFreeze = () => {
-    const success = useFreeze();
+    const success = spendStreakFreeze();
     if (success) {
       setFreezeUsed(true);
       setShowConfirmModal(false);

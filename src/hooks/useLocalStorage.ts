@@ -3,13 +3,22 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 type SetValue<T> = (value: T | ((prev: T) => T)) => void;
 
 /**
- * Custom hook for syncing state with localStorage
+ * Custom hook for syncing state with localStorage.
+ *
+ * State is the source of truth; persistence happens in an effect.
+ * This means functional updates (`setValue(prev => ...)`) go through
+ * React's own updater queue, so rapid successive updates can never
+ * clobber each other (no stale-ref reads).
  */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, SetValue<T>, () => void, string | null] {
   const [error, setError] = useState<string | null>(null);
+
+  // Keep initialValue in a ref so effects don't re-run when callers
+  // pass inline literals (e.g. `useLocalStorage(key, [])`).
+  const initialValueRef = useRef(initialValue);
 
   // Get initial value from localStorage or use provided initial value
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -22,52 +31,62 @@ export function useLocalStorage<T>(
     }
   });
 
-  // Use ref to access current value without adding to dependencies
-  const storedValueRef = useRef(storedValue);
-  useEffect(() => {
-    storedValueRef.current = storedValue;
-  }, [storedValue]);
+  // When true, the next persistence effect run is skipped
+  // (used on mount, on removal, and on cross-tab syncs).
+  const skipPersistRef = useRef(true);
 
-  // Update localStorage when state changes
-  const setValue = useCallback<SetValue<T>>((value) => {
+  // Persist to localStorage whenever state changes
+  useEffect(() => {
+    if (skipPersistRef.current) {
+      skipPersistRef.current = false;
+      return;
+    }
     try {
-      setError(null);
-      // Allow value to be a function (like useState)
-      const valueToStore = value instanceof Function ? value(storedValueRef.current) : value;
-      setStoredValue(valueToStore);
-      localStorage.setItem(key, JSON.stringify(valueToStore));
+      localStorage.setItem(key, JSON.stringify(storedValue));
     } catch (err) {
       console.error(`Error setting localStorage key "${key}":`, err);
-      // Handle quota exceeded error
-      if (err instanceof DOMException && (err.name === 'QuotaExceededError' || err.code === 22)) {
-        setError('Storage quota exceeded. Please delete some data.');
-      } else {
-        setError('Failed to save data.');
-      }
+      // Report asynchronously to avoid cascading synchronous renders
+      const message =
+        err instanceof DOMException && (err.name === 'QuotaExceededError' || err.code === 22)
+          ? 'Storage quota exceeded. Please delete some data.'
+          : 'Failed to save data.';
+      queueMicrotask(() => setError(message));
     }
-  }, [key]);
+  }, [key, storedValue]);
 
-  // Remove from localStorage
+  // Update state; persistence is handled by the effect above.
+  const setValue = useCallback<SetValue<T>>((value) => {
+    setError(null);
+    setStoredValue(value);
+  }, []);
+
+  // Remove from localStorage and reset state without re-persisting
   const removeValue = useCallback(() => {
     try {
-      setError(null);
       localStorage.removeItem(key);
-      setStoredValue(initialValue);
+      skipPersistRef.current = true;
+      setStoredValue(initialValueRef.current);
+      setError(null);
     } catch (err) {
       console.error(`Error removing localStorage key "${key}":`, err);
       setError('Failed to remove data.');
     }
-  }, [key, initialValue]);
+  }, [key]);
 
-  // Sync with other tabs/windows
+  // Sync with other tabs/windows (including deletions)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === key && e.newValue !== null) {
-        try {
-          setStoredValue(JSON.parse(e.newValue));
-        } catch (err) {
-          console.error(`Error parsing storage event for key "${key}":`, err);
-        }
+      if (e.key !== key) return;
+      skipPersistRef.current = true;
+      if (e.newValue === null) {
+        // Key was removed in another tab
+        setStoredValue(initialValueRef.current);
+        return;
+      }
+      try {
+        setStoredValue(JSON.parse(e.newValue));
+      } catch (err) {
+        console.error(`Error parsing storage event for key "${key}":`, err);
       }
     };
 

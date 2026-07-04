@@ -70,8 +70,8 @@ function AppContent() {
       const config: TimerConfig = {
         duration: timeToSeconds(settings.lastDuration),
         preparationTime: settings.preparationTime || 0,
-        beginningSound: settings.lastBeginningSound || 'bell1',
-        endingSound: settings.lastEndingSound || 'bell1',
+        beginningSound: settings.lastBeginningSound || 'bell',
+        endingSound: settings.lastEndingSound || 'bell',
         backgroundSound: settings.lastBackgroundSound || 'none',
         bellVolume: settings.bellVolume ?? 80,
         backgroundVolume: settings.backgroundVolume ?? 50,

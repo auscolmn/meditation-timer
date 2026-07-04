@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, DEFAULT_QUOTES, DEFAULT_SETTINGS } from '../utils/constants';
 import { getTodayString, formatDateString } from '../utils/dateUtils';
@@ -43,10 +43,6 @@ export function AppProvider({ children }: AppProviderProps) {
 
   // Streak freezes state
   const [streakFreezes, setStreakFreezes] = useLocalStorage<StreakFreeze[]>(STORAGE_KEYS.STREAK_FREEZES, []);
-
-  // Daily quote tracking
-  const [lastQuoteDate, setLastQuoteDate] = useLocalStorage<string | null>(STORAGE_KEYS.LAST_QUOTE_DATE, null);
-  const [dailyQuoteIndex, setDailyQuoteIndex] = useLocalStorage<number>(STORAGE_KEYS.DAILY_QUOTE_INDEX, 0);
 
   // Draft timer settings (persists during navigation, not in localStorage)
   const [draftTimerSettings, setDraftTimerSettings] = useState<DraftTimerSettings | null>(null);
@@ -161,7 +157,7 @@ export function AppProvider({ children }: AppProviderProps) {
     setStreakFreezes(prev => prev.filter(f => f.id !== freezeId));
   }, [setStreakFreezes]);
 
-  const useFreeze = useCallback((): boolean => {
+  const spendStreakFreeze = useCallback((): boolean => {
     const available = settings.freezesAvailable ?? 0;
     if (available <= 0) return false;
 
@@ -181,25 +177,22 @@ export function AppProvider({ children }: AppProviderProps) {
     }
   }, [settings.lastFreezeGrantMonth, settings.freezesPerMonth, updateSettings]);
 
-  // Get daily quote
+  // Refill streak freezes once per month, on app startup
+  useEffect(() => {
+    grantMonthlyFreezes();
+  }, [grantMonthlyFreezes]);
+
+  // Get daily quote — derived deterministically from the date, so it is
+  // pure (safe to call during render) and consistent for the whole day.
   const getDailyQuote = useCallback((): Quote | null => {
-    const today = getTodayString();
-
     if (quotes.length === 0) return null;
-
-    // Check if we need a new quote for today
-    if (lastQuoteDate !== today) {
-      // Select a new random quote
-      const newIndex = Math.floor(Math.random() * quotes.length);
-      setLastQuoteDate(today);
-      setDailyQuoteIndex(newIndex);
-      return quotes[newIndex];
+    const today = getTodayString();
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) {
+      hash = (hash * 31 + today.charCodeAt(i)) >>> 0;
     }
-
-    // Return the same quote for today
-    const safeIndex = dailyQuoteIndex < quotes.length ? dailyQuoteIndex : 0;
-    return quotes[safeIndex];
-  }, [quotes, lastQuoteDate, dailyQuoteIndex, setLastQuoteDate, setDailyQuoteIndex]);
+    return quotes[hash % quotes.length];
+  }, [quotes]);
 
   // Export all data
   const exportAllData = useCallback((): ExportData => {
@@ -265,7 +258,7 @@ export function AppProvider({ children }: AppProviderProps) {
     // Streak freeze actions
     addStreakFreeze,
     deleteStreakFreeze,
-    useFreeze,
+    spendStreakFreeze,
     grantMonthlyFreezes,
 
     // Data management
@@ -298,7 +291,7 @@ export function AppProvider({ children }: AppProviderProps) {
     deletePreset,
     addStreakFreeze,
     deleteStreakFreeze,
-    useFreeze,
+    spendStreakFreeze,
     grantMonthlyFreezes,
     exportAllData,
     importAllData
