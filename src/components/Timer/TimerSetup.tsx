@@ -41,10 +41,10 @@ function TimerSetup({ onStart }: TimerSetupProps) {
     duration: settings.lastDuration || { hours: 0, minutes: 10, seconds: 0 },
     preparationTime: settings.preparationTime || 0,
     beginningSound: settings.lastBeginningSound || 'bell',
-    endingSound: settings.lastEndingSound || 'gong',
+    endingSound: settings.lastEndingSound || 'tibetan-bell',
     backgroundSound: settings.lastBackgroundSound || 'none',
-    backgroundVolume: settings.backgroundVolume || 50,
-    bellVolume: settings.bellVolume || 80,
+    backgroundVolume: settings.backgroundVolume ?? 50,
+    bellVolume: settings.bellVolume ?? 80,
     intervalBells: settings.lastIntervalBells || []
   };
 
@@ -95,12 +95,22 @@ function TimerSetup({ onStart }: TimerSetupProps) {
     ...customSounds.filter(s => s.type === 'background')
   ], [customSounds]);
 
+  // Resolve a sound ID to its display name (default or custom)
+  const getSoundName = (soundId: string): string => {
+    if (DEFAULT_SOUNDS[soundId]) return DEFAULT_SOUNDS[soundId].name;
+    const custom = customSounds.find(s => s.id === soundId);
+    return custom ? custom.name : 'None';
+  };
+
   // Quick-start presets from settings
-  const customPresets = settings.customDurationPresets ?? [5, 10, 15, 20];
-  const presets: DurationPreset[] = customPresets.map(m => ({
-    label: `${m} min`,
-    minutes: m
-  }));
+  const customPresets = useMemo(
+    () => settings.customDurationPresets ?? [5, 10, 15, 20],
+    [settings.customDurationPresets]
+  );
+  const presets: DurationPreset[] = useMemo(
+    () => customPresets.map(m => ({ label: `${m} min`, minutes: m })),
+    [customPresets]
+  );
 
   // Visibility settings
   const showDuration = settings.showDurationCard !== false;
@@ -138,6 +148,25 @@ function TimerSetup({ onStart }: TimerSetupProps) {
     };
     setDraftTimerSettings(draft);
   }, [hours, minutes, seconds, preparationTime, beginningSound, endingSound, backgroundSound, backgroundVolume, bellVolume, intervalBells, setDraftTimerSettings]);
+
+  // Stop any playing preview when leaving this screen
+  useEffect(() => {
+    const audio = previewAudioRef.current;
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    };
+  }, []);
+
+  const stopPreview = () => {
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current.currentTime = 0;
+    }
+    setPlayingSound(null);
+  };
 
   // Preview sound (toggle play/pause)
   const previewSound = (soundId: string) => {
@@ -194,6 +223,8 @@ function TimerSetup({ onStart }: TimerSetupProps) {
 
   // Validate and handle start
   const handleStart = () => {
+    stopPreview();
+
     const totalSeconds = timeToSeconds({ hours, minutes, seconds });
 
     if (totalSeconds === 0) {
@@ -292,6 +323,13 @@ function TimerSetup({ onStart }: TimerSetupProps) {
     setError('');
   };
 
+  // A preset may reference a custom sound that was deleted since it was saved
+  const validSoundOrFallback = (soundId: string, fallback: string): string => {
+    if (DEFAULT_SOUNDS[soundId]) return soundId;
+    if (customSounds.some(s => s.id === soundId)) return soundId;
+    return fallback;
+  };
+
   // Handle loading a preset
   const handleLoadPreset = (preset: TimerPreset) => {
     setHours(preset.duration.hours);
@@ -299,12 +337,15 @@ function TimerSetup({ onStart }: TimerSetupProps) {
     setSeconds(preset.duration.seconds);
     setPreparationTime(preset.preparationTime);
     setCustomPrepTime(!PREPARATION_PRESETS.some(p => p.seconds === preset.preparationTime));
-    setBeginningSound(preset.beginningSound);
-    setEndingSound(preset.endingSound);
-    setBackgroundSound(preset.backgroundSound);
+    setBeginningSound(validSoundOrFallback(preset.beginningSound, 'bell'));
+    setEndingSound(validSoundOrFallback(preset.endingSound, 'tibetan-bell'));
+    setBackgroundSound(validSoundOrFallback(preset.backgroundSound, 'none'));
     setBackgroundVolume(preset.backgroundVolume);
     setBellVolume(preset.bellVolume);
-    setIntervalBells(preset.intervalBells);
+    setIntervalBells(preset.intervalBells.map(bell => ({
+      ...bell,
+      sound: validSoundOrFallback(bell.sound, 'chime')
+    })));
     setError('');
   };
 
@@ -443,7 +484,7 @@ function TimerSetup({ onStart }: TimerSetupProps) {
         >
           <h2 className={styles.sectionTitle}>Sounds</h2>
           <span className={styles.expandSummary}>
-            {DEFAULT_SOUNDS[beginningSound]?.name || 'None'} / {DEFAULT_SOUNDS[endingSound]?.name || 'None'}
+            {getSoundName(beginningSound)} / {getSoundName(endingSound)}
           </span>
           <ChevronIcon expanded={soundsExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
         </button>

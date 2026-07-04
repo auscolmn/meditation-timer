@@ -3,9 +3,19 @@ import { useEffect, useRef } from 'react';
 /**
  * Traps keyboard focus within a container element when active.
  * Returns a ref to attach to the container (e.g., modal dialog).
+ * If onEscape is provided, pressing Escape calls it (e.g., to close a modal).
  */
-export function useFocusTrap<T extends HTMLElement = HTMLElement>(active: boolean) {
+export function useFocusTrap<T extends HTMLElement = HTMLElement>(
+  active: boolean,
+  onEscape?: () => void
+) {
   const containerRef = useRef<T>(null);
+
+  // Keep the latest callback without re-running the trap effect
+  const onEscapeRef = useRef(onEscape);
+  useEffect(() => {
+    onEscapeRef.current = onEscape;
+  }, [onEscape]);
 
   useEffect(() => {
     if (!active || !containerRef.current) return;
@@ -27,6 +37,11 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(active: boolea
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onEscapeRef.current) {
+        e.stopPropagation();
+        onEscapeRef.current();
+        return;
+      }
       if (e.key !== 'Tab') return;
 
       const elements = getFocusableElements();

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback, KeyboardEvent } from 'react';
 import styles from './Transition.module.css';
 
 const PHRASES = [
@@ -27,9 +27,9 @@ interface TransitionProps {
 function Transition({ onReady, onComplete }: TransitionProps) {
   const [phase, setPhase] = useState<Phase>('void');
 
-  const phrase = useMemo(
-    () => PHRASES[Math.floor(Math.random() * PHRASES.length)],
-    []
+  // Chosen once when the component mounts (lazy initializer runs a single time)
+  const [phrase] = useState(
+    () => PHRASES[Math.floor(Math.random() * PHRASES.length)]
   );
 
   const skip = useCallback(() => {

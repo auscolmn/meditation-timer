@@ -34,9 +34,9 @@ function PresetManager({
   const [presetName, setPresetName] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
-  // Focus traps for modals
-  const saveModalRef = useFocusTrap<HTMLDivElement>(showSaveModal);
-  const deleteModalRef = useFocusTrap<HTMLDivElement>(!!showDeleteConfirm);
+  // Focus traps for modals (Escape closes them)
+  const saveModalRef = useFocusTrap<HTMLDivElement>(showSaveModal, () => setShowSaveModal(false));
+  const deleteModalRef = useFocusTrap<HTMLDivElement>(!!showDeleteConfirm, () => setShowDeleteConfirm(null));
 
   // Save current settings as a preset
   const handleSavePreset = () => {
