@@ -10,6 +10,7 @@ import Transition from './components/Timer/Transition';
 import Completion from './components/Completion/Completion';
 import Progress from './components/Progress/Progress';
 import Settings from './components/Settings/Settings';
+import MissedDayPrompt from './components/Common/MissedDayPrompt';
 import './App.css';
 import type { Screen, TimerConfig, Session, NavigationTab } from './types';
 
@@ -203,6 +204,11 @@ function AppContent() {
       <main className={`app-main ${isTransitioning ? 'transitioning' : ''} ${contentFaded ? 'meditationFadeOut' : ''}`}>
         {renderScreen()}
       </main>
+
+      {/* Missed-day check-in — never shown during an active session */}
+      {(currentScreen === SCREENS.WELCOME ||
+        currentScreen === SCREENS.TIMER_SETUP ||
+        currentScreen === SCREENS.PROGRESS) && <MissedDayPrompt />}
       {showMeditationTransition && (
         <Transition onReady={onTransitionReady} onComplete={onTransitionComplete} />
       )}

@@ -11,7 +11,7 @@ import {
   getDay,
   differenceInDays
 } from 'date-fns';
-import type { Session, Duration, StreakFreeze } from '../types';
+import type { Session, Duration } from '../types';
 
 /**
  * Get today's date as YYYY-MM-DD string
@@ -37,16 +37,12 @@ export function parseDateString(dateString: string): Date {
 /**
  * Calculate current streak from sessions
  * @param sessions - Array of session objects with date field
- * @param freezes - Optional array of streak freezes
  */
-export function calculateStreak(sessions: Session[], freezes: StreakFreeze[] = []): number {
+export function calculateStreak(sessions: Session[]): number {
   if (!sessions || sessions.length === 0) return 0;
 
   // Get unique dates (ignore multiple sessions per day)
   const uniqueDates = [...new Set(sessions.map(s => s.date))];
-
-  // Get frozen dates
-  const frozenDates = new Set(freezes.map(f => f.date));
 
   // Sort dates in descending order (newest first)
   uniqueDates.sort((a, b) => b.localeCompare(a));
@@ -54,22 +50,17 @@ export function calculateStreak(sessions: Session[], freezes: StreakFreeze[] = [
   const today = getTodayString();
   const yesterday = formatDateString(subDays(new Date(), 1));
 
-  // Check if most recent session is today or yesterday (or today/yesterday is frozen)
+  // Check if most recent session is today or yesterday
   const mostRecent = uniqueDates[0];
-  const hasTodaySession = uniqueDates.includes(today) || frozenDates.has(today);
-  const hasYesterdaySession = uniqueDates.includes(yesterday) || frozenDates.has(yesterday);
-
-  if (mostRecent !== today && mostRecent !== yesterday && !hasTodaySession && !hasYesterdaySession) {
+  if (mostRecent !== today && mostRecent !== yesterday) {
     // Streak is broken - no session today or yesterday
     return 0;
   }
 
-  // Count consecutive days (including frozen days)
+  // Count consecutive days
   let streak = 0;
-  let checkDate = (mostRecent === today || frozenDates.has(today)) ? new Date() : subDays(new Date(), 1);
-
-  // Create a set of all "valid" dates (sessions + freezes)
-  const validDates = new Set([...uniqueDates, ...frozenDates]);
+  let checkDate = mostRecent === today ? new Date() : subDays(new Date(), 1);
+  const validDates = new Set(uniqueDates);
 
   while (true) {
     const expectedDate = formatDateString(checkDate);
@@ -254,4 +245,31 @@ export function formatSessionTime(isoString: string): string {
  */
 export function formatMonthYear(year: number, month: number): string {
   return format(new Date(year, month), 'MMMM yyyy');
+}
+
+/**
+ * Missed-day check-in: returns yesterday's date string (YYYY-MM-DD) if the
+ * app should ask the user whether they meditated yesterday, or null if not.
+ *
+ * We only ask when a streak is genuinely at stake: yesterday has no session,
+ * but the day before it does — so a "yes" reconnects the chain. We never ask
+ * users with no practice history, and never ask twice about the same day.
+ */
+export function getMissedDayToAskAbout(
+  sessions: Session[],
+  lastPromptedDate?: string,
+  now: Date = new Date()
+): string | null {
+  if (!sessions || sessions.length === 0) return null;
+
+  const yesterday = formatDateString(subDays(now, 1));
+  if (lastPromptedDate === yesterday) return null;
+
+  const dayBefore = formatDateString(subDays(now, 2));
+  const sessionDates = new Set(sessions.map(s => s.date));
+
+  if (sessionDates.has(yesterday)) return null;   // nothing missed
+  if (!sessionDates.has(dayBefore)) return null;  // no streak to reconnect
+
+  return yesterday;
 }

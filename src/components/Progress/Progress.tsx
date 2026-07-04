@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, ChangeEvent } from 'react';
+import { useState, useMemo, ChangeEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useStreak } from '../../hooks/useStreak';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
@@ -13,7 +13,6 @@ import {
   formatSessionTime
 } from '../../utils/dateUtils';
 import { STREAK_GOALS } from '../../utils/constants';
-import StreakFreeze from './StreakFreeze';
 import Charts from './Charts';
 import styles from './Progress.module.css';
 
@@ -57,16 +56,6 @@ const BadgeIcon = ({ type }: { type: string }) => {
   }
 };
 
-// Snowflake icon for frozen days
-const SnowflakeIcon = () => (
-  <svg className={styles.freezeIcon} xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="2" x2="12" y2="22"/>
-    <line x1="2" y1="12" x2="22" y2="12"/>
-    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-    <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/>
-  </svg>
-);
-
 // Chevron icon for expandable sections
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
   <svg
@@ -89,14 +78,11 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function Progress() {
-  const { sessions, deleteSession, addManualSession, streakFreezes, settings } = useApp();
-  const streakData = useStreak(sessions, streakFreezes);
+  const { sessions, deleteSession, addManualSession, settings } = useApp();
+  const streakData = useStreak(sessions);
 
   // Hide stats/streak based on minimalism setting
   const hideStats = settings.hideStreakStats;
-
-  // Create a set of frozen dates for quick lookup
-  const frozenDates = useMemo(() => new Set(streakFreezes.map(f => f.date)), [streakFreezes]);
 
   // Calculate additional statistics (memoized)
   const { longestSession, averageSession } = useMemo(() => ({
@@ -108,10 +94,9 @@ function Progress() {
       : 0
   }), [sessions, streakData.totalTime]);
 
-  // Calendar state
-  const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  // Calendar state (lazy init keeps render pure)
+  const [viewYear, setViewYear] = useState(() => new Date().getFullYear());
+  const [viewMonth, setViewMonth] = useState(() => new Date().getMonth());
 
   // Modal state
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -175,21 +160,13 @@ function Progress() {
     }
   };
 
-  // Handle escape key for modals
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (deleteConfirmId) setDeleteConfirmId(null);
-        else if (selectedDate) setSelectedDate(null);
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [deleteConfirmId, selectedDate]);
-
-  // Focus traps for modals
-  const dateModalRef = useFocusTrap<HTMLDivElement>(!!selectedDate);
-  const deleteModalRef = useFocusTrap<HTMLDivElement>(!!deleteConfirmId);
+  // Focus traps for modals (Escape closes the topmost layer only: the
+  // delete confirmation can sit on top of the date modal, and one Escape
+  // press should peel a single layer, not both)
+  const dateModalRef = useFocusTrap<HTMLDivElement>(!!selectedDate, () => {
+    if (!deleteConfirmId) setSelectedDate(null);
+  });
+  const deleteModalRef = useFocusTrap<HTMLDivElement>(!!deleteConfirmId, () => setDeleteConfirmId(null));
 
   // Get sessions for selected date
   const selectedDateSessions = selectedDate
@@ -309,24 +286,19 @@ function Progress() {
                 const sessionCount = daySessions.length;
                 const todayCheck = isDateToday(dateStr);
                 const isFuture = isDateFuture(dateStr);
-                const isFrozen = frozenDates.has(dateStr);
 
                 const hasSession = sessionCount > 0;
 
                 return (
                   <button
                     key={dateStr}
-                    className={`${styles.day} ${todayCheck ? styles.today : ''} ${isFuture ? styles.future : ''} ${isFrozen ? styles.frozen : ''} ${hasSession ? styles.hasSession : ''}`}
+                    className={`${styles.day} ${todayCheck ? styles.today : ''} ${isFuture ? styles.future : ''} ${hasSession ? styles.hasSession : ''}`}
                     onClick={() => handleDayClick(date)}
                     disabled={isFuture}
                   >
                     <span className={styles.dayNumber}>{date.getDate()}</span>
-                    {isFrozen && sessionCount === 0 && (
-                      <SnowflakeIcon />
-                    )}
                     {sessionCount > 0 && (
                       <div className={styles.sessionDots}>
-                        {isFrozen && <SnowflakeIcon />}
                         {sessionCount > 3 ? (
                           <span className={styles.dotMore}>3+</span>
                         ) : (
@@ -413,9 +385,6 @@ function Progress() {
               })}
             </div>
           )}
-
-          {/* Streak Freeze */}
-          <StreakFreeze />
 
           {/* Charts */}
           <Charts />

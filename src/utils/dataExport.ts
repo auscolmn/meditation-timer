@@ -1,4 +1,4 @@
-import type { ExportData, Session, Settings, Quote, CustomSound, TimerPreset, StreakFreeze } from '../types';
+import type { ExportData, Session, Settings, Quote, CustomSound, TimerPreset } from '../types';
 
 /**
  * Export data to a JSON string
@@ -113,19 +113,6 @@ function validatePresets(presets: unknown): presets is TimerPreset[] {
 }
 
 /**
- * Validate an array of streak freezes
- */
-function validateStreakFreezes(freezes: unknown): freezes is StreakFreeze[] {
-  if (!Array.isArray(freezes)) return false;
-  return freezes.every(f =>
-    typeof f === 'object' && f !== null &&
-    typeof f.id === 'string' &&
-    typeof f.date === 'string' &&
-    typeof f.createdAt === 'string'
-  );
-}
-
-/**
  * Validate imported data structure
  */
 export function validateImport(data: unknown): ValidationResult {
@@ -176,11 +163,6 @@ export function validateImport(data: unknown): ValidationResult {
   // Validate presets
   if (dataObj.presets !== undefined && !validatePresets(dataObj.presets)) {
     return { valid: false, error: 'Invalid presets format' };
-  }
-
-  // Validate streak freezes
-  if (dataObj.streakFreezes !== undefined && !validateStreakFreezes(dataObj.streakFreezes)) {
-    return { valid: false, error: 'Invalid streak freezes format' };
   }
 
   return {

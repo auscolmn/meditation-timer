@@ -4,6 +4,7 @@ import {
   formatDateString,
   parseDateString,
   calculateStreak,
+  getMissedDayToAskAbout,
   getLongestStreak,
   getSessionsForDate,
   timeToSeconds,
@@ -14,7 +15,7 @@ import {
   isDateFuture,
   isDateToday
 } from '../dateUtils';
-import type { Session, StreakFreeze } from '../../types';
+import type { Session} from '../../types';
 
 // Helper to create mock sessions
 const createSession = (date: string, duration = 600): Session => ({
@@ -118,18 +119,6 @@ describe('dateUtils', () => {
       expect(calculateStreak(sessions)).toBe(2);
     });
 
-    it('should handle freezes as valid days', () => {
-      vi.setSystemTime(new Date('2024-06-15'));
-      const sessions = [
-        createSession('2024-06-15'),
-        // no session on 14th but it's frozen
-        createSession('2024-06-13')
-      ];
-      const freezes: StreakFreeze[] = [
-        { id: '1', date: '2024-06-14', createdAt: new Date().toISOString() }
-      ];
-      expect(calculateStreak(sessions, freezes)).toBe(3);
-    });
   });
 
   describe('getLongestStreak', () => {
@@ -299,5 +288,40 @@ describe('dateUtils', () => {
       expect(isDateToday('2024-06-14')).toBe(false);
       expect(isDateToday('2024-06-16')).toBe(false);
     });
+  });
+});
+
+describe('getMissedDayToAskAbout', () => {
+  // Fixed "now" so results don't depend on when the tests run
+  const now = new Date(2026, 5, 15, 10, 0, 0); // 15 June 2026
+  const d = (day: number) => `2026-06-${String(day).padStart(2, '0')}`;
+  const session = (date: string) => ({
+    id: date, date, timestamp: `${date}T08:00:00.000Z`,
+    duration: 600, completed: true, endedEarly: false
+  });
+
+  it('returns yesterday when it is the single missing link', () => {
+    // practiced on the 13th, missed the 14th, opens app on the 15th
+    expect(getMissedDayToAskAbout([session(d(13))], undefined, now)).toBe(d(14));
+  });
+
+  it('still asks when today already has a session (restore case)', () => {
+    expect(getMissedDayToAskAbout([session(d(13)), session(d(15))], undefined, now)).toBe(d(14));
+  });
+
+  it('returns null when yesterday has a session', () => {
+    expect(getMissedDayToAskAbout([session(d(14))], undefined, now)).toBeNull();
+  });
+
+  it('returns null when there is no streak to reconnect (gap > 1 day)', () => {
+    expect(getMissedDayToAskAbout([session(d(10))], undefined, now)).toBeNull();
+  });
+
+  it('returns null for a user with no sessions', () => {
+    expect(getMissedDayToAskAbout([], undefined, now)).toBeNull();
+  });
+
+  it('never asks twice about the same day', () => {
+    expect(getMissedDayToAskAbout([session(d(13))], d(14), now)).toBeNull();
   });
 });

@@ -1,15 +1,13 @@
-import { createContext, useContext, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useCallback, useMemo, useState, ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, DEFAULT_QUOTES, DEFAULT_SETTINGS } from '../utils/constants';
-import { getTodayString, formatDateString } from '../utils/dateUtils';
-import { format } from 'date-fns';
+import { getTodayString } from '../utils/dateUtils';
 import type {
   Session,
   Settings,
   Quote,
   CustomSound,
   TimerPreset,
-  StreakFreeze,
   ExportData,
   AppContextValue,
   DraftTimerSettings
@@ -41,8 +39,6 @@ export function AppProvider({ children }: AppProviderProps) {
   // Presets state
   const [presets, setPresets] = useLocalStorage<TimerPreset[]>(STORAGE_KEYS.PRESETS, []);
 
-  // Streak freezes state
-  const [streakFreezes, setStreakFreezes] = useLocalStorage<StreakFreeze[]>(STORAGE_KEYS.STREAK_FREEZES, []);
 
   // Draft timer settings (persists during navigation, not in localStorage)
   const [draftTimerSettings, setDraftTimerSettings] = useState<DraftTimerSettings | null>(null);
@@ -141,47 +137,6 @@ export function AppProvider({ children }: AppProviderProps) {
     setPresets(prev => prev.filter(p => p.id !== presetId));
   }, [setPresets]);
 
-  // Streak freeze actions
-  const addStreakFreeze = useCallback((date: string, reason?: string): StreakFreeze => {
-    const newFreeze: StreakFreeze = {
-      id: crypto.randomUUID(),
-      date,
-      reason,
-      createdAt: new Date().toISOString()
-    };
-    setStreakFreezes(prev => [...prev, newFreeze]);
-    return newFreeze;
-  }, [setStreakFreezes]);
-
-  const deleteStreakFreeze = useCallback((freezeId: string) => {
-    setStreakFreezes(prev => prev.filter(f => f.id !== freezeId));
-  }, [setStreakFreezes]);
-
-  const spendStreakFreeze = useCallback((): boolean => {
-    const available = settings.freezesAvailable ?? 0;
-    if (available <= 0) return false;
-
-    const yesterday = formatDateString(new Date(Date.now() - 86400000));
-    addStreakFreeze(yesterday, 'Streak freeze used');
-    updateSettings({ freezesAvailable: available - 1 });
-    return true;
-  }, [settings.freezesAvailable, addStreakFreeze, updateSettings]);
-
-  const grantMonthlyFreezes = useCallback(() => {
-    const currentMonth = format(new Date(), 'yyyy-MM');
-    if (settings.lastFreezeGrantMonth !== currentMonth) {
-      updateSettings({
-        freezesAvailable: settings.freezesPerMonth ?? 2,
-        lastFreezeGrantMonth: currentMonth
-      });
-    }
-  }, [settings.lastFreezeGrantMonth, settings.freezesPerMonth, updateSettings]);
-
-  // Refill streak freezes once per month, on app startup
-  useEffect(() => {
-    grantMonthlyFreezes();
-  }, [grantMonthlyFreezes]);
-
   // Get daily quote — derived deterministically from the date, so it is
   // pure (safe to call during render) and consistent for the whole day.
   const getDailyQuote = useCallback((): Quote | null => {
@@ -204,11 +159,10 @@ export function AppProvider({ children }: AppProviderProps) {
         settings,
         quotes,
         customSounds,
-        presets,
-        streakFreezes
+        presets
       }
     };
-  }, [sessions, settings, quotes, customSounds, presets, streakFreezes]);
+  }, [sessions, settings, quotes, customSounds, presets]);
 
   // Import all data
   const importAllData = useCallback((data: ExportData) => {
@@ -217,8 +171,7 @@ export function AppProvider({ children }: AppProviderProps) {
     if (data.data.quotes) setQuotes(data.data.quotes);
     if (data.data.customSounds) setCustomSounds(data.data.customSounds);
     if (data.data.presets) setPresets(data.data.presets);
-    if (data.data.streakFreezes) setStreakFreezes(data.data.streakFreezes);
-  }, [setSessions, setSettings, setQuotes, setCustomSounds, setPresets, setStreakFreezes]);
+  }, [setSessions, setSettings, setQuotes, setCustomSounds, setPresets]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo((): AppContextValue => ({
@@ -228,7 +181,6 @@ export function AppProvider({ children }: AppProviderProps) {
     quotes,
     customSounds,
     presets,
-    streakFreezes,
     draftTimerSettings,
 
     // Session actions
@@ -255,12 +207,7 @@ export function AppProvider({ children }: AppProviderProps) {
     updatePreset,
     deletePreset,
 
-    // Streak freeze actions
-    addStreakFreeze,
-    deleteStreakFreeze,
-    spendStreakFreeze,
-    grantMonthlyFreezes,
-
+  
     // Data management
     exportAllData,
     importAllData,
@@ -273,7 +220,6 @@ export function AppProvider({ children }: AppProviderProps) {
     quotes,
     customSounds,
     presets,
-    streakFreezes,
     draftTimerSettings,
     addSession,
     deleteSession,
@@ -289,10 +235,6 @@ export function AppProvider({ children }: AppProviderProps) {
     addPreset,
     updatePreset,
     deletePreset,
-    addStreakFreeze,
-    deleteStreakFreeze,
-    spendStreakFreeze,
-    grantMonthlyFreezes,
     exportAllData,
     importAllData
   ]);

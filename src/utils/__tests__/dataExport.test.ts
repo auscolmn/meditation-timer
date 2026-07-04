@@ -42,8 +42,7 @@ const createValidExportData = (): ExportData => ({
       }
     ],
     customSounds: [],
-    presets: [],
-    streakFreezes: []
+    presets: []
   }
 });
 
@@ -171,7 +170,6 @@ describe('dataExport', () => {
       data.data.quotes = [];
       data.data.customSounds = [];
       data.data.presets = [];
-      data.data.streakFreezes = [];
 
       const result = validateImport(data);
       expect(result.valid).toBe(true);

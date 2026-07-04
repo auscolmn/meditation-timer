@@ -11,8 +11,8 @@ interface CompletionProps {
 }
 
 function Completion({ session, onMeditateAgain }: CompletionProps) {
-  const { sessions, streakFreezes, settings, getDailyQuote } = useApp();
-  const streakData = useStreak(sessions, streakFreezes);
+  const { sessions, settings, getDailyQuote } = useApp();
+  const streakData = useStreak(sessions);
   const [showAnimation, setShowAnimation] = useState(true);
 
   // Get quote for minimal mode (memoized to stay stable)

@@ -13,8 +13,7 @@ export const STORAGE_KEYS = {
   SESSIONS: 'sati_sessions',
   CUSTOM_SOUNDS: 'sati_custom_sounds',
   SETTINGS: 'sati_settings',
-  PRESETS: 'sati_presets',
-  STREAK_FREEZES: 'sati_streak_freezes'
+  PRESETS: 'sati_presets'
 } as const;
 
 // Default sounds available in the app
@@ -54,9 +53,6 @@ export const DEFAULT_SETTINGS: Settings = {
   lastIntervalBells: [],
   focusMode: false,
   preparationTime: 0,
-  freezesAvailable: 2,
-  freezesPerMonth: 2,
-  lastFreezeGrantMonth: '',
   // Customization defaults
   showDurationCard: true,
   showSoundsCard: true,

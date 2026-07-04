@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useStreak } from '../useStreak';
-import type { Session, StreakFreeze } from '../../types';
+import type { Session } from '../../types';
 
 // Helper to create mock sessions
 const createSession = (date: string, duration = 600): Session => ({
@@ -148,19 +148,4 @@ describe('useStreak', () => {
     expect(result.current.progressPercent).toBe(100);
   });
 
-  it('should include freezes in streak calculation', () => {
-    vi.setSystemTime(new Date('2024-06-15'));
-    const sessions = [
-      createSession('2024-06-15', 600),
-      // Gap on 14th (frozen)
-      createSession('2024-06-13', 600)
-    ];
-    const freezes: StreakFreeze[] = [
-      { id: '1', date: '2024-06-14', createdAt: new Date().toISOString() }
-    ];
-
-    const { result } = renderHook(() => useStreak(sessions, freezes));
-
-    expect(result.current.currentStreak).toBe(3);
-  });
 });

@@ -91,6 +91,9 @@ function LineChart({ data }: { data: { label: string; value: number }[] }) {
   const padding = 40;
   const maxValue = Math.max(...data.map(d => d.value), 1);
 
+  // Guard: a line needs at least two points (avoids 0/0 = NaN coordinates)
+  if (data.length < 2) return null;
+
   const points = data.map((item, index) => {
     const x = padding + (index / (data.length - 1)) * (chartWidth - padding * 2);
     const y = chartHeight - padding - ((item.value / maxValue) * (chartHeight - padding * 2));

@@ -41,10 +41,9 @@ export interface Settings {
   focusMode: boolean;
   preparationTime: number;
   theme?: Theme;
-  // Streak freeze settings
-  freezesAvailable?: number;
-  freezesPerMonth?: number;
-  lastFreezeGrantMonth?: string;  // YYYY-MM
+  // Missed-day check-in: the last date (YYYY-MM-DD) the user was asked
+  // whether they meditated on it, so we never ask twice about the same day
+  lastMissedDayPromptDate?: string;
   // Customization: Timer Setup visibility
   showDurationCard?: boolean;
   showSoundsCard?: boolean;
@@ -137,14 +136,6 @@ export interface DraftTimerSettings {
   intervalBells: IntervalBell[];
 }
 
-// Streak freeze record
-export interface StreakFreeze {
-  id: string;
-  date: string;           // YYYY-MM-DD
-  reason?: string;
-  createdAt: string;
-}
-
 // Data export format
 export interface ExportData {
   version: '1.0.0';
@@ -155,7 +146,6 @@ export interface ExportData {
     quotes: Quote[];
     customSounds: CustomSound[];
     presets: TimerPreset[];
-    streakFreezes: StreakFreeze[];
   };
 }
 
@@ -181,7 +171,6 @@ export interface AppContextValue {
   quotes: Quote[];
   customSounds: CustomSound[];
   presets: TimerPreset[];
-  streakFreezes: StreakFreeze[];
   draftTimerSettings: DraftTimerSettings | null;
 
   // Session actions
@@ -208,11 +197,6 @@ export interface AppContextValue {
   updatePreset: (presetId: string, updates: Partial<TimerPreset>) => void;
   deletePreset: (presetId: string) => void;
 
-  // Streak freeze actions
-  addStreakFreeze: (date: string, reason?: string) => StreakFreeze;
-  deleteStreakFreeze: (freezeId: string) => void;
-  spendStreakFreeze: () => boolean;
-  grantMonthlyFreezes: () => void;
 
   // Data management
   exportAllData: () => ExportData;
