@@ -14,14 +14,14 @@ import './App.css';
 import type { Screen, TimerConfig, Session, NavigationTab } from './types';
 
 // App screens/views
-const SCREENS: Record<string, Screen> = {
+const SCREENS = {
   WELCOME: 'welcome',
   TIMER_SETUP: 'timer_setup',
   ACTIVE_TIMER: 'active_timer',
   COMPLETION: 'completion',
   PROGRESS: 'progress',
   SETTINGS: 'settings'
-};
+} as const satisfies Record<string, Screen>;
 
 function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>(SCREENS.WELCOME);
@@ -56,8 +56,15 @@ function AppContent() {
     return undefined;
   }, [isTransitioning, pendingScreen]);
 
+  // Go straight to the setup screen, bypassing Quick Start.
+  // Used by the Welcome screen's auto-advance so a session never
+  // starts without an explicit user action.
+  const goToTimerSetupDirect = useCallback(() => {
+    transitionToScreen(SCREENS.TIMER_SETUP);
+  }, []);
+
   // Navigation handlers
-  const goToTimerSetup = () => {
+  const goToTimerSetup = useCallback(() => {
     // Quick Start: skip setup and start immediately with last settings
     if (settings.quickStartEnabled && settings.lastDuration) {
       const config: TimerConfig = {
@@ -74,7 +81,9 @@ function AppContent() {
     } else {
       transitionToScreen(SCREENS.TIMER_SETUP);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings]);
+
   // Start meditation session - show transition overlay first
   const startMeditation = (config: TimerConfig) => {
     setTimerConfig(config);
@@ -123,15 +132,19 @@ function AppContent() {
   const renderScreen = () => {
     switch (currentScreen) {
       case SCREENS.WELCOME:
-        return <Welcome onStart={goToTimerSetup} />;
+        return <Welcome onStart={goToTimerSetup} onAutoAdvance={goToTimerSetupDirect} />;
 
       case SCREENS.TIMER_SETUP:
         return <TimerSetup onStart={startMeditation} />;
 
       case SCREENS.ACTIVE_TIMER:
+        // Guard: if we somehow got here without a config, fall back to setup
+        if (!timerConfig) {
+          return <TimerSetup onStart={startMeditation} />;
+        }
         return (
           <ActiveTimer
-            config={timerConfig!}
+            config={timerConfig}
             onComplete={completeMeditation}
             onEnd={endSessionEarly}
           />
@@ -152,7 +165,7 @@ function AppContent() {
         return <Settings />;
 
       default:
-        return <Welcome onStart={goToTimerSetup} />;
+        return <Welcome onStart={goToTimerSetup} onAutoAdvance={goToTimerSetupDirect} />;
     }
   };
 

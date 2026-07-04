@@ -31,6 +31,16 @@ export function useTheme(): UseThemeReturn {
     const applyTheme = () => {
       const effective = getEffectiveTheme();
       document.documentElement.setAttribute('data-theme', effective);
+
+      // Keep browser/PWA chrome color in sync with the theme
+      const themeColor = effective === 'dark' ? '#1A1918' : '#F7F7F7';
+      let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        document.head.appendChild(meta);
+      }
+      meta.content = themeColor;
     };
 
     applyTheme();

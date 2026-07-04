@@ -6,10 +6,13 @@ import styles from './Welcome.module.css';
 const AUTO_TRANSITION_SECONDS = 5;
 
 interface WelcomeProps {
+  /** Manual start (tap / Enter) — may trigger Quick Start */
   onStart: () => void;
+  /** Auto-advance after countdown — always goes to setup, never Quick Start */
+  onAutoAdvance: () => void;
 }
 
-function Welcome({ onStart }: WelcomeProps) {
+function Welcome({ onStart, onAutoAdvance }: WelcomeProps) {
   const { getDailyQuote } = useApp();
   const { effectiveTheme } = useTheme();
   const quote = getDailyQuote();
@@ -17,21 +20,23 @@ function Welcome({ onStart }: WelcomeProps) {
   const logoSrc = effectiveTheme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
   const [countdown, setCountdown] = useState(AUTO_TRANSITION_SECONDS);
 
-  // Visual countdown and auto-transition
+  // Visual countdown — pure state update, no side effects in the updater
+  const isCounting = countdown > 0;
   useEffect(() => {
+    if (!isCounting) return undefined;
     const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          onStart();
-          return 0;
-        }
-        return prev - 1;
-      });
+      setCountdown(prev => Math.max(prev - 1, 0));
     }, 1000);
-
     return () => clearInterval(interval);
-  }, [onStart]);
+  }, [isCounting]);
+
+  // Fire auto-advance exactly once, when the countdown reaches zero
+  useEffect(() => {
+    if (countdown === 0) {
+      onAutoAdvance();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') onStart();
