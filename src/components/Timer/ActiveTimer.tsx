@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { formatTimeDisplay } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
+import { getCustomSoundSrc } from '../../utils/soundStorage';
 import type { TimerConfig, Session } from '../../types';
 import styles from './ActiveTimer.module.css';
 
@@ -72,29 +73,48 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     return Math.max(0, Math.floor((Date.now() - phaseStartRef.current - pausedMs) / 1000));
   }, []);
 
-  // Get sound source by ID
-  const getSoundSrc = useCallback((soundId: string): string | null => {
+  // Resolve a playable src by sound ID. Bundled sounds resolve synchronously;
+  // custom sounds live in the Capacitor Filesystem and resolve async (cached
+  // after the first resolution, and pre-warmed at mount below, so bells still
+  // fire on time).
+  const resolveSoundSrc = useCallback(async (soundId: string): Promise<string | null> => {
     if (soundId === 'none') return null;
     const defaultSound = DEFAULT_SOUNDS[soundId];
     if (defaultSound) return defaultSound.src;
     const customSound = customSounds.find(s => s.id === soundId);
-    return customSound?.dataUrl || null;
+    return customSound ? getCustomSoundSrc(customSound) : null;
   }, [customSounds]);
+
+  // Pre-warm the src cache for every sound this session can play, so bell
+  // playback never waits on a filesystem read at the bell's moment.
+  useEffect(() => {
+    const ids = [
+      config.beginningSound,
+      config.endingSound,
+      config.backgroundSound,
+      ...config.intervalBells.map(b => b.sound)
+    ];
+    ids.forEach(id => { void resolveSoundSrc(id); });
+    // Mount-only warm-up; individual plays re-resolve (from cache) anyway.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Play a bell sound
   const playBell = useCallback((soundId: string) => {
-    const src = getSoundSrc(soundId);
-    if (!src || !bellAudioRef.current) return;
+    void (async () => {
+      const src = await resolveSoundSrc(soundId);
+      if (!src || !bellAudioRef.current) return;
 
-    bellAudioRef.current.src = src;
-    bellAudioRef.current.volume = (config.bellVolume ?? 80) / 100;
-    bellAudioRef.current.play().catch(console.error);
+      bellAudioRef.current.src = src;
+      bellAudioRef.current.volume = (config.bellVolume ?? 80) / 100;
+      bellAudioRef.current.play().catch(console.error);
 
-    // Visual feedback
-    setBellFlash(true);
-    if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
-    flashTimeoutRef.current = setTimeout(() => setBellFlash(false), 500);
-  }, [getSoundSrc, config.bellVolume]);
+      // Visual feedback
+      setBellFlash(true);
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+      flashTimeoutRef.current = setTimeout(() => setBellFlash(false), 500);
+    })();
+  }, [resolveSoundSrc, config.bellVolume]);
 
   // --- End-of-session notification (native safety net) ---
   // If the OS suspends the WebView (screen locked, app backgrounded) the
@@ -240,13 +260,13 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   useEffect(() => {
     if (config.backgroundSound === 'none') return;
 
-    const src = getSoundSrc(config.backgroundSound);
-    if (!src) return;
-
     let isCancelled = false;
 
     const startBackgroundAudio = async () => {
       try {
+        const src = await resolveSoundSrc(config.backgroundSound);
+        if (!src || isCancelled) return;
+
         // Create audio context
         const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         audioContextRef.current = new AudioContextClass();
@@ -294,7 +314,7 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Volume changes handled by separate effect
-  }, [config.backgroundSound, getSoundSrc]);
+  }, [config.backgroundSound, resolveSoundSrc]);
 
   // Update background volume
   useEffect(() => {

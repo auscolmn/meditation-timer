@@ -65,6 +65,21 @@ export interface Settings {
 export interface CustomSound {
   id: string;
   name: string;
+  /** Path of the audio file in the Capacitor Filesystem Data directory. */
+  fileName: string;
+  mimeType: string;
+  type: 'bell' | 'background';
+}
+
+/**
+ * The shape of a custom sound inside a backup file: audio embedded as a
+ * base64 data URL so backups are self-contained and portable across devices.
+ * (Also the legacy in-app storage shape prior to filesystem-backed sounds —
+ * AppContext migrates those on startup.)
+ */
+export interface ExportedCustomSound {
+  id: string;
+  name: string;
   dataUrl: string;
   type: 'bell' | 'background';
 }
@@ -138,13 +153,14 @@ export interface DraftTimerSettings {
 
 // Data export format
 export interface ExportData {
-  version: '1.0.0';
+  /** Backup format version; imports accept any 1.x backup. */
+  version: string;
   exportDate: string;
   data: {
     sessions: Session[];
     settings: Settings;
     quotes: Quote[];
-    customSounds: CustomSound[];
+    customSounds: ExportedCustomSound[];
     presets: TimerPreset[];
   };
 }
@@ -189,7 +205,7 @@ export interface AppContextValue {
   getDailyQuote: () => Quote | null;
 
   // Custom sound actions
-  addCustomSound: (sound: Omit<CustomSound, 'id'>) => CustomSound;
+  addCustomSound: (sound: CustomSound) => CustomSound;
   deleteCustomSound: (soundId: string) => void;
 
   // Preset actions
@@ -198,9 +214,10 @@ export interface AppContextValue {
   deletePreset: (presetId: string) => void;
 
 
-  // Data management
-  exportAllData: () => ExportData;
-  importAllData: (data: ExportData) => void;
+  // Data management (async: custom sound audio is read from / written to
+  // the filesystem when building or applying a backup)
+  exportAllData: () => Promise<ExportData>;
+  importAllData: (data: ExportData) => Promise<void>;
 
   // Draft timer settings
   setDraftTimerSettings: (settings: DraftTimerSettings | null) => void;

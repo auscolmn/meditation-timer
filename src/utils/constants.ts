@@ -127,8 +127,19 @@ export const DEFAULT_QUOTES: Quote[] = [
   { id: 'q49', text: "This is the real secret of life - to be completely engaged with what you are doing in the here and now. And instead of calling it work, realize it is play.", author: "Alan Watts" }
 ];
 
-// Maximum custom sound file size (5MB)
-export const MAX_SOUND_FILE_SIZE = 5 * 1024 * 1024;
+// Maximum custom sound file size (50MB — sounds are stored in the Capacitor
+// Filesystem, not localStorage, so long guided meditations fit comfortably)
+export const MAX_SOUND_FILE_SIZE = 50 * 1024 * 1024;
 
-// Supported audio formats
-export const SUPPORTED_AUDIO_FORMATS = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
+// Supported audio formats (m4a/aac included: iOS Voice Memos and most
+// purchased guided meditations are AAC)
+export const SUPPORTED_AUDIO_FORMATS = [
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/ogg',
+  'audio/mp4',
+  'audio/x-m4a',
+  'audio/aac'
+];

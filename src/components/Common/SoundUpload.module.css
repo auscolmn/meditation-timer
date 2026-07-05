@@ -72,3 +72,15 @@
   background: var(--error);
   color: white;
 }
+
+.uploadError {
+  margin-top: var(--spacing-xs);
+  font-size: 0.8125rem;
+  color: var(--error);
+}
+
+.uploadButtonDisabled {
+  opacity: 0.6;
+  cursor: wait;
+  pointer-events: none;
+}

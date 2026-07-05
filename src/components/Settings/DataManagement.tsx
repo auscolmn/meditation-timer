@@ -1,4 +1,4 @@
-import { useState, useRef, ChangeEvent } from 'react';
+import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import ChevronIcon from '../Common/ChevronIcon';
@@ -9,6 +9,7 @@ import {
   parseImportData,
   readFileAsText
 } from '../../utils/dataExport';
+import type { ExportData } from '../../types';
 import styles from './DataManagement.module.css';
 
 function DataManagement() {
@@ -23,27 +24,40 @@ function DataManagement() {
     presets: number;
     customSounds: number;
   } | null>(null);
-  const [pendingImportData, setPendingImportData] = useState<string | null>(null);
+  const [pendingImportData, setPendingImportData] = useState<ExportData | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Focus trap for import modal
-  const importModalRef = useFocusTrap<HTMLDivElement>(showImportModal);
+  // Focus trap for import modal (Escape closes it, matching the app's
+  // other modals)
+  const importModalRef = useFocusTrap<HTMLDivElement>(showImportModal, () => closeModal());
 
-  // Auto-dismiss toast
+  // Auto-dismiss toast. The timer lives in a ref so a new toast cancels the
+  // previous one's dismissal (instead of being dismissed early by it), and
+  // unmounting can't fire a stale setState.
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = (message: string, type: 'success' | 'error') => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    toastTimerRef.current = setTimeout(() => setToast(null), 4000);
   };
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   // Handle export
-  const handleExport = () => {
+  const handleExport = async () => {
     setIsExporting(true);
     try {
-      const data = exportAllData();
+      const data = await exportAllData();
       const jsonString = exportDataToJson(data);
       const filename = generateExportFilename();
-      downloadExport(jsonString, filename);
+      const delivered = await downloadExport(jsonString, filename);
+      if (delivered) {
+        showToast('Backup exported.', 'success');
+      }
     } catch (err) {
       console.error('Export failed:', err);
       showToast('Failed to export data. Please try again.', 'error');
@@ -72,7 +86,7 @@ function DataManagement() {
         return;
       }
 
-      // Set preview data
+      // Set preview data and keep the parsed result for the confirm step
       if (result.data) {
         setImportPreview({
           sessions: result.data.data.sessions?.length || 0,
@@ -80,7 +94,7 @@ function DataManagement() {
           presets: result.data.data.presets?.length || 0,
           customSounds: result.data.data.customSounds?.length || 0
         });
-        setPendingImportData(content);
+        setPendingImportData(result.data);
       }
 
       setShowImportModal(true);
@@ -97,21 +111,22 @@ function DataManagement() {
   };
 
   // Confirm import
-  const confirmImport = () => {
-    if (!pendingImportData) return;
+  const [isImporting, setIsImporting] = useState(false);
+  const confirmImport = async () => {
+    if (!pendingImportData || isImporting) return;
 
+    setIsImporting(true);
     try {
-      const result = parseImportData(pendingImportData);
-      if (result.valid && result.data) {
-        importAllData(result.data);
-        setShowImportModal(false);
-        setPendingImportData(null);
-        setImportPreview(null);
-        showToast('Data imported successfully!', 'success');
-      }
+      await importAllData(pendingImportData);
+      setShowImportModal(false);
+      setPendingImportData(null);
+      setImportPreview(null);
+      showToast('Data imported successfully!', 'success');
     } catch (err) {
       console.error('Import failed:', err);
       setImportError('Failed to import data');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -249,8 +264,9 @@ function DataManagement() {
                 <button
                   className="btn btn--primary"
                   onClick={confirmImport}
+                  disabled={isImporting}
                 >
-                  Import
+                  {isImporting ? 'Importing…' : 'Import'}
                 </button>
               )}
             </div>

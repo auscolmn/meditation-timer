@@ -109,8 +109,24 @@ describe('dataExport', () => {
       expect(result.valid).toBe(false);
     });
 
-    it('should reject wrong version', () => {
+    it('should reject wrong major version', () => {
       const data = { ...createValidExportData(), version: '2.0.0' };
+      const result = validateImport(data);
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Unsupported version');
+    });
+
+    it('should accept any 1.x version', () => {
+      const data = { ...createValidExportData(), version: '1.2.0' };
+      const result = validateImport(data);
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject a missing version', () => {
+      const data = createValidExportData();
+      delete (data as unknown as Record<string, unknown>).version;
       const result = validateImport(data);
 
       expect(result.valid).toBe(false);
@@ -207,12 +223,13 @@ describe('dataExport', () => {
       global.URL.revokeObjectURL = vi.fn();
     });
 
-    it('should create a download link and click it', () => {
+    it('should create a download link and click it (web path)', async () => {
       const appendChildSpy = vi.spyOn(document.body, 'appendChild');
       const removeChildSpy = vi.spyOn(document.body, 'removeChild');
 
-      downloadExport('{"test": true}', 'test.json');
+      const delivered = await downloadExport('{"test": true}', 'test.json');
 
+      expect(delivered).toBe(true);
       expect(appendChildSpy).toHaveBeenCalled();
       expect(removeChildSpy).toHaveBeenCalled();
       expect(global.URL.createObjectURL).toHaveBeenCalled();

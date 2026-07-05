@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo, ChangeEvent } from 'react';
 import { useApp } from '../../context/AppContext';
 import { timeToSeconds } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS, PREPARATION_PRESETS } from '../../utils/constants';
+import { getCustomSoundSrc } from '../../utils/soundStorage';
 import PresetManager from './PresetManager';
 import ChevronIcon from '../Common/ChevronIcon';
 import type { TimerConfig, DefaultSound, CustomSound, IntervalBell, TimerPreset, DraftTimerSettings } from '../../types';
@@ -186,31 +187,35 @@ function TimerSetup({ onStart }: TimerSetupProps) {
       previewAudioRef.current.currentTime = 0;
     }
 
-    const defaultSound = DEFAULT_SOUNDS[soundId];
-    let src = defaultSound?.src;
+    // Custom sound audio lives in the Capacitor Filesystem, so resolving the
+    // src is async (cached after the first play).
+    void (async () => {
+      const defaultSound = DEFAULT_SOUNDS[soundId];
+      let src: string | null = defaultSound?.src ?? null;
 
-    if (!src) {
-      const customSound = customSounds.find(s => s.id === soundId);
-      src = customSound?.dataUrl || null;
-    }
+      if (!src) {
+        const customSound = customSounds.find(s => s.id === soundId);
+        src = customSound ? await getCustomSoundSrc(customSound) : null;
+      }
 
-    if (src) {
-      previewAudioRef.current.src = src;
+      if (src && previewAudioRef.current) {
+        previewAudioRef.current.src = src;
 
-      // Apply appropriate volume
-      const defaultSoundForVolume = DEFAULT_SOUNDS[soundId];
-      const customSoundForVolume = customSounds.find(s => s.id === soundId);
-      const isBackgroundSound = defaultSoundForVolume?.type === 'background' || customSoundForVolume?.type === 'background';
-      previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : bellVolume / 100;
+        // Apply appropriate volume
+        const defaultSoundForVolume = DEFAULT_SOUNDS[soundId];
+        const customSoundForVolume = customSounds.find(s => s.id === soundId);
+        const isBackgroundSound = defaultSoundForVolume?.type === 'background' || customSoundForVolume?.type === 'background';
+        previewAudioRef.current.volume = isBackgroundSound ? backgroundVolume / 100 : bellVolume / 100;
 
-      previewAudioRef.current.play().catch(console.error);
-      setPlayingSound(soundId);
+        previewAudioRef.current.play().catch(console.error);
+        setPlayingSound(soundId);
 
-      // Listen for when the sound ends
-      previewAudioRef.current.onended = () => {
-        setPlayingSound(null);
-      };
-    }
+        // Listen for when the sound ends
+        previewAudioRef.current.onended = () => {
+          setPlayingSound(null);
+        };
+      }
+    })();
   };
 
   // Apply preset duration

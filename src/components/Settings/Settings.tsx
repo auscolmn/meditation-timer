@@ -246,7 +246,12 @@ function Settings() {
                 <button
                   className="btn btn--secondary"
                   onClick={handleAddPreset}
-                  disabled={!newPresetValue || parseInt(newPresetValue) < 1 || parseInt(newPresetValue) > 120}
+                  disabled={
+                    !newPresetValue ||
+                    parseInt(newPresetValue) < 1 ||
+                    parseInt(newPresetValue) > 120 ||
+                    currentPresets.includes(parseInt(newPresetValue))
+                  }
                 >
                   Add
                 </button>
@@ -274,7 +279,7 @@ function Settings() {
         {soundsExpanded && (
           <div className={styles.expandContent}>
             <p className={styles.sectionDescription}>
-              Upload your own sounds to use during meditation. Supported formats: MP3, WAV, OGG (max 5MB).
+              Upload your own sounds to use during meditation. Supported formats: MP3, M4A, WAV, OGG (max 50MB).
             </p>
 
             {/* Bell Sounds */}
@@ -318,7 +323,7 @@ function Settings() {
         <h2 className={styles.sectionTitle}>About</h2>
         <div className={styles.aboutInfo}>
           <p className={styles.appName}>Sati</p>
-          <p className={styles.appVersion}>Version 1.0.0</p>
+          <p className={styles.appVersion}>Version {__APP_VERSION__}</p>
           <p className={styles.appDescription}>
             A simple meditation timer app to help you build a consistent practice. Built with love for the benefit of all beings.
           </p>

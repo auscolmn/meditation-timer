@@ -1,12 +1,20 @@
-import { createContext, useContext, useCallback, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_KEYS, DEFAULT_QUOTES, DEFAULT_SETTINGS } from '../utils/constants';
 import { getTodayString } from '../utils/dateUtils';
+import {
+  saveSoundFile,
+  deleteSoundFile,
+  readSoundAsDataUrl,
+  clearSoundSrcCache,
+  mimeFromDataUrl
+} from '../utils/soundStorage';
 import type {
   Session,
   Settings,
   Quote,
   CustomSound,
+  ExportedCustomSound,
   TimerPreset,
   ExportData,
   AppContextValue,
@@ -102,19 +110,56 @@ export function AppProvider({ children }: AppProviderProps) {
     setQuotes(DEFAULT_QUOTES);
   }, [setQuotes]);
 
-  // Custom sound actions
-  const addCustomSound = useCallback((sound: Omit<CustomSound, 'id'>): CustomSound => {
-    const newSound: CustomSound = {
-      id: crypto.randomUUID(),
-      ...sound
-    };
-    setCustomSounds(prev => [...prev, newSound]);
-    return newSound;
+  // Custom sound actions.
+  // The caller (SoundUpload) writes the audio file to the filesystem first,
+  // then registers the metadata here — so a sound only ever appears in state
+  // once its file is safely persisted.
+  const addCustomSound = useCallback((sound: CustomSound): CustomSound => {
+    setCustomSounds(prev => [...prev, sound]);
+    return sound;
   }, [setCustomSounds]);
 
   const deleteCustomSound = useCallback((soundId: string) => {
+    // Side effect kept out of the state updater (StrictMode-safe).
+    const sound = customSounds.find(s => s.id === soundId);
+    if (sound) {
+      void deleteSoundFile(sound);
+    }
     setCustomSounds(prev => prev.filter(s => s.id !== soundId));
-  }, [setCustomSounds]);
+  }, [customSounds, setCustomSounds]);
+
+  // One-time migration: sounds saved before the filesystem move carry their
+  // audio inline as a base64 dataUrl in localStorage. Write each to a file
+  // and keep only metadata in state, freeing the localStorage quota.
+  const soundMigrationRan = useRef(false);
+  useEffect(() => {
+    if (soundMigrationRan.current) return;
+    soundMigrationRan.current = true;
+
+    type LegacyOrCurrent = CustomSound | (ExportedCustomSound & { fileName?: undefined });
+    const sounds = customSounds as LegacyOrCurrent[];
+    if (!sounds.some(s => s.fileName === undefined)) return;
+
+    void (async () => {
+      const migrated: CustomSound[] = [];
+      for (const s of sounds) {
+        if (s.fileName !== undefined) {
+          migrated.push(s);
+          continue;
+        }
+        try {
+          const mimeType = mimeFromDataUrl(s.dataUrl) ?? 'audio/mpeg';
+          const fileName = await saveSoundFile(s.id, mimeType, s.dataUrl);
+          migrated.push({ id: s.id, name: s.name, type: s.type, fileName, mimeType });
+        } catch (err) {
+          console.error(`Failed to migrate custom sound "${s.name}":`, err);
+          // Keep the legacy entry so audio isn't lost; retried next launch.
+          migrated.push(s as unknown as CustomSound);
+        }
+      }
+      setCustomSounds(migrated);
+    })();
+  }, [customSounds, setCustomSounds]);
 
   // Preset actions
   const addPreset = useCallback((preset: Omit<TimerPreset, 'id' | 'createdAt'>): TimerPreset => {
@@ -149,8 +194,17 @@ export function AppProvider({ children }: AppProviderProps) {
     return quotes[hash % quotes.length];
   }, [quotes]);
 
-  // Export all data
-  const exportAllData = useCallback((): ExportData => {
+  // Export all data. Sound audio lives in the filesystem, so it's read back
+  // and embedded as base64 data URLs, keeping backups fully self-contained
+  // and portable across devices. Sounds whose files are missing are skipped.
+  const exportAllData = useCallback(async (): Promise<ExportData> => {
+    const exportedSounds: ExportedCustomSound[] = [];
+    for (const sound of customSounds) {
+      const dataUrl = await readSoundAsDataUrl(sound);
+      if (dataUrl) {
+        exportedSounds.push({ id: sound.id, name: sound.name, type: sound.type, dataUrl });
+      }
+    }
     return {
       version: '1.0.0',
       exportDate: new Date().toISOString(),
@@ -158,20 +212,34 @@ export function AppProvider({ children }: AppProviderProps) {
         sessions,
         settings,
         quotes,
-        customSounds,
+        customSounds: exportedSounds,
         presets
       }
     };
   }, [sessions, settings, quotes, customSounds, presets]);
 
-  // Import all data
-  const importAllData = useCallback((data: ExportData) => {
+  // Import all data, replacing current data. Embedded sound audio is written
+  // out to files; existing sound files are removed first.
+  const importAllData = useCallback(async (data: ExportData) => {
+    if (data.data.customSounds) {
+      for (const existing of customSounds) {
+        await deleteSoundFile(existing);
+      }
+      clearSoundSrcCache();
+
+      const importedSounds: CustomSound[] = [];
+      for (const s of data.data.customSounds) {
+        const mimeType = mimeFromDataUrl(s.dataUrl) ?? 'audio/mpeg';
+        const fileName = await saveSoundFile(s.id, mimeType, s.dataUrl);
+        importedSounds.push({ id: s.id, name: s.name, type: s.type, fileName, mimeType });
+      }
+      setCustomSounds(importedSounds);
+    }
     if (data.data.sessions) setSessions(data.data.sessions);
     if (data.data.settings) setSettings({ ...DEFAULT_SETTINGS, ...data.data.settings });
     if (data.data.quotes) setQuotes(data.data.quotes);
-    if (data.data.customSounds) setCustomSounds(data.data.customSounds);
     if (data.data.presets) setPresets(data.data.presets);
-  }, [setSessions, setSettings, setQuotes, setCustomSounds, setPresets]);
+  }, [customSounds, setSessions, setSettings, setQuotes, setCustomSounds, setPresets]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo((): AppContextValue => ({

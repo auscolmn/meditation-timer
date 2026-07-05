@@ -1,4 +1,7 @@
-import type { ExportData, Session, Settings, Quote, CustomSound, TimerPreset } from '../types';
+import { Capacitor } from '@capacitor/core';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import type { ExportData, Session, Settings, Quote, ExportedCustomSound, TimerPreset } from '../types';
 
 /**
  * Export data to a JSON string
@@ -8,9 +11,42 @@ export function exportDataToJson(data: ExportData): string {
 }
 
 /**
- * Trigger a file download with the given content
+ * Deliver the backup file to the user.
+ *
+ * On Android/iOS an anchor-click download does nothing inside the Capacitor
+ * WebView (no download manager is attached to blob: URLs), so the backup is
+ * written to the app's cache directory and handed to the native share sheet,
+ * letting the user save it to Files/Drive or send it anywhere.
+ * On the web the classic blob + anchor download is used.
+ *
+ * Returns false if the user dismissed the native share sheet without saving
+ * (not an error), true otherwise.
  */
-export function downloadExport(jsonString: string, filename: string): void {
+export async function downloadExport(jsonString: string, filename: string): Promise<boolean> {
+  if (Capacitor.isNativePlatform()) {
+    const { uri } = await Filesystem.writeFile({
+      path: filename,
+      directory: Directory.Cache,
+      data: jsonString,
+      encoding: Encoding.UTF8,
+    });
+    try {
+      await Share.share({
+        title: 'Sati backup',
+        dialogTitle: 'Save your Sati backup',
+        url: uri,
+      });
+    } catch (err) {
+      // Dismissing the share sheet rejects with a cancellation message —
+      // that's a user choice, not a failure.
+      if (err instanceof Error && /cancel/i.test(err.message)) {
+        return false;
+      }
+      throw err;
+    }
+    return true;
+  }
+
   const blob = new Blob([jsonString], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
 
@@ -22,6 +58,7 @@ export function downloadExport(jsonString: string, filename: string): void {
   document.body.removeChild(link);
 
   URL.revokeObjectURL(url);
+  return true;
 }
 
 /**
@@ -88,7 +125,7 @@ function validateQuotes(quotes: unknown): quotes is Quote[] {
 /**
  * Validate an array of custom sounds
  */
-function validateCustomSounds(sounds: unknown): sounds is CustomSound[] {
+function validateCustomSounds(sounds: unknown): sounds is ExportedCustomSound[] {
   if (!Array.isArray(sounds)) return false;
   return sounds.every(s =>
     typeof s === 'object' && s !== null &&
@@ -123,8 +160,9 @@ export function validateImport(data: unknown): ValidationResult {
 
   const obj = data as Record<string, unknown>;
 
-  // Check version
-  if (obj.version !== '1.0.0') {
+  // Check version: accept any 1.x backup so future minor/patch format
+  // additions still import into older app builds.
+  if (typeof obj.version !== 'string' || obj.version.split('.')[0] !== '1') {
     return { valid: false, error: `Unsupported version: ${obj.version}` };
   }
 
@@ -178,7 +216,7 @@ export function parseImportData(jsonString: string): ValidationResult {
   try {
     const parsed = JSON.parse(jsonString);
     return validateImport(parsed);
-  } catch (err) {
+  } catch {
     return { valid: false, error: 'Invalid JSON format' };
   }
 }
