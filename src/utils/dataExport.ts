@@ -10,20 +10,56 @@ export function exportDataToJson(data: ExportData): string {
   return JSON.stringify(data, null, 2);
 }
 
+/** How the backup reached the user (drives the confirmation toast). */
+export interface ExportDelivery {
+  /** True unless the user dismissed the share sheet AND no copy was saved. */
+  delivered: boolean;
+  /** Set when a copy was also written to a public folder (Android only). */
+  savedTo?: string;
+}
+
+/**
+ * Write a copy of the backup to the public Documents/Sati folder (Android).
+ *
+ * Public-directory writes need no permission on API 33+, and work on API
+ * 30–32 when writing into a subfolder. On older devices (or any OEM quirk)
+ * the write fails — that's fine, the share sheet remains the guaranteed
+ * path, so failures here are swallowed by design.
+ *
+ * iOS is excluded: Directory.Documents maps to the app sandbox there, which
+ * isn't user-visible, so the share sheet is the right delivery on iOS.
+ */
+async function trySaveToPublicDocuments(jsonString: string, filename: string): Promise<string | undefined> {
+  if (Capacitor.getPlatform() !== 'android') return undefined;
+  try {
+    await Filesystem.writeFile({
+      path: `Sati/${filename}`,
+      directory: Directory.Documents,
+      data: jsonString,
+      encoding: Encoding.UTF8,
+      recursive: true,
+    });
+    return 'Documents/Sati';
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Deliver the backup file to the user.
  *
  * On Android/iOS an anchor-click download does nothing inside the Capacitor
  * WebView (no download manager is attached to blob: URLs), so the backup is
  * written to the app's cache directory and handed to the native share sheet,
- * letting the user save it to Files/Drive or send it anywhere.
+ * letting the user save it to Files/Drive or send it anywhere. On Android a
+ * copy is also written to the public Documents/Sati folder so the backup
+ * survives even if the user just dismisses the share sheet.
  * On the web the classic blob + anchor download is used.
- *
- * Returns false if the user dismissed the native share sheet without saving
- * (not an error), true otherwise.
  */
-export async function downloadExport(jsonString: string, filename: string): Promise<boolean> {
+export async function downloadExport(jsonString: string, filename: string): Promise<ExportDelivery> {
   if (Capacitor.isNativePlatform()) {
+    const savedTo = await trySaveToPublicDocuments(jsonString, filename);
+
     const { uri } = await Filesystem.writeFile({
       path: filename,
       directory: Directory.Cache,
@@ -38,13 +74,14 @@ export async function downloadExport(jsonString: string, filename: string): Prom
       });
     } catch (err) {
       // Dismissing the share sheet rejects with a cancellation message —
-      // that's a user choice, not a failure.
+      // that's a user choice, not a failure. If a public copy was saved,
+      // the export still succeeded.
       if (err instanceof Error && /cancel/i.test(err.message)) {
-        return false;
+        return { delivered: savedTo !== undefined, savedTo };
       }
       throw err;
     }
-    return true;
+    return { delivered: true, savedTo };
   }
 
   const blob = new Blob([jsonString], { type: 'application/json' });
@@ -58,7 +95,7 @@ export async function downloadExport(jsonString: string, filename: string): Prom
   document.body.removeChild(link);
 
   URL.revokeObjectURL(url);
-  return true;
+  return { delivered: true };
 }
 
 /**

@@ -54,9 +54,9 @@ function DataManagement() {
       const data = await exportAllData();
       const jsonString = exportDataToJson(data);
       const filename = generateExportFilename();
-      const delivered = await downloadExport(jsonString, filename);
+      const { delivered, savedTo } = await downloadExport(jsonString, filename);
       if (delivered) {
-        showToast('Backup exported.', 'success');
+        showToast(savedTo ? `Backup saved to ${savedTo}.` : 'Backup exported.', 'success');
       }
     } catch (err) {
       console.error('Export failed:', err);

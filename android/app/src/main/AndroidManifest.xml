@@ -13,6 +13,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:exported="true">
@@ -38,4 +39,16 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Exact end-of-session notifications. Sati is a timer app, which is the
+         acceptable core use case in Play policy for exact alarms. Without these,
+         @capacitor/local-notifications silently falls back to inexact alarms on
+         API 31+, and Doze can delay the "session complete" notification by
+         minutes — precisely when the screen is locked and it matters most.
+         USE_EXACT_ALARM (API 33+) is granted automatically; SCHEDULE_EXACT_ALARM
+         covers Android 12/12L, where it is granted by default when declared. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
 </manifest>

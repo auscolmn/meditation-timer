@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# Native build outputs — never commit binaries
+*.apk
+*.aab
+*.ipa
+android/app/release/
+
+# Signing secrets — a leaked upload keystore is a security incident
+*.jks
+*.keystore
+key.properties
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

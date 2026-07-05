@@ -227,9 +227,9 @@ describe('dataExport', () => {
       const appendChildSpy = vi.spyOn(document.body, 'appendChild');
       const removeChildSpy = vi.spyOn(document.body, 'removeChild');
 
-      const delivered = await downloadExport('{"test": true}', 'test.json');
+      const delivery = await downloadExport('{"test": true}', 'test.json');
 
-      expect(delivered).toBe(true);
+      expect(delivery).toEqual({ delivered: true });
       expect(appendChildSpy).toHaveBeenCalled();
       expect(removeChildSpy).toHaveBeenCalled();
       expect(global.URL.createObjectURL).toHaveBeenCalled();
