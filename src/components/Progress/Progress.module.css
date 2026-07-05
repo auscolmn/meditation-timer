@@ -273,6 +273,12 @@
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(13px, 3.5vw, 20px);
   font-weight: 400;
+  /* Cormorant's default figures are old-style: 3/4/5/7/9 descend below the
+     baseline and 0/1/2 sit at x-height, so digits land visibly off-center
+     inside the today/hasSession rings — by a different amount per digit.
+     Lining figures are uniform (baseline to cap height), which centers
+     every date optically in its circle. */
+  font-variant-numeric: lining-nums;
   color: var(--text-primary);
   transition: color var(--transition-fast);
 }
