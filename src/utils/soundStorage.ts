@@ -89,12 +89,14 @@ export async function saveSoundFile(
     recursive: true,
   });
   srcCache.delete(id);
+  nativeUriCache.delete(id);
   return fileName;
 }
 
 /** Delete a sound file. Never throws — a missing file is already "deleted". */
 export async function deleteSoundFile(sound: Pick<CustomSound, 'id' | 'fileName'>): Promise<void> {
   srcCache.delete(sound.id);
+  nativeUriCache.delete(sound.id);
   try {
     await Filesystem.deleteFile({ path: sound.fileName, directory: Directory.Data });
   } catch {
@@ -138,6 +140,34 @@ export async function getCustomSoundSrc(sound: CustomSound): Promise<string | nu
   }
 }
 
+// Raw file:// URIs for the native SessionAudio pipeline (Part 9). Distinct
+// from srcCache: convertFileSrc produces WebView-servable URLs, but native
+// MediaPlayer/AVAudioPlayer need the underlying filesystem URI.
+const nativeUriCache = new Map<string, string>();
+
+/**
+ * Resolve the raw file:// URI of a custom sound for native playback.
+ * Native platforms only; returns null on web or if the file is missing.
+ */
+export async function getCustomSoundNativeUri(sound: CustomSound): Promise<string | null> {
+  if (!Capacitor.isNativePlatform()) return null;
+
+  const cached = nativeUriCache.get(sound.id);
+  if (cached) return cached;
+
+  try {
+    const { uri } = await Filesystem.getUri({
+      path: sound.fileName,
+      directory: Directory.Data,
+    });
+    nativeUriCache.set(sound.id, uri);
+    return uri;
+  } catch (err) {
+    console.error(`Failed to resolve native URI for custom sound "${sound.name}":`, err);
+    return null;
+  }
+}
+
 /**
  * Read a sound's audio data back as a data URL (used to embed sounds in
  * portable backup exports). Returns null if the file is missing.
@@ -167,9 +197,11 @@ export async function readSoundAsDataUrl(sound: CustomSound): Promise<string | n
 /** Drop a single cached src (after delete/replace). */
 export function evictSoundSrc(id: string): void {
   srcCache.delete(id);
+  nativeUriCache.delete(id);
 }
 
 /** Drop all cached srcs (after a full import replaces the sound set). */
 export function clearSoundSrcCache(): void {
   srcCache.clear();
+  nativeUriCache.clear();
 }

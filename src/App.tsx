@@ -12,6 +12,7 @@ import Progress from './components/Progress/Progress';
 import Settings from './components/Settings/Settings';
 import MissedDayPrompt from './components/Common/MissedDayPrompt';
 import StorageErrorToast from './components/Common/StorageErrorToast';
+import { initNotificationSetup } from './utils/notificationSetup';
 import './App.css';
 import type { Screen, TimerConfig, Session, NavigationTab } from './types';
 
@@ -39,6 +40,12 @@ function AppContent() {
 
   // Initialize theme
   useTheme();
+
+  // One-time notification setup (Part 9): silent end-of-session channel on
+  // Android, bell notification-sound files on iOS. Idempotent fire-and-forget.
+  useEffect(() => {
+    void initNotificationSetup();
+  }, []);
 
   // Handle screen transitions
   const transitionToScreen = (screen: Screen) => {

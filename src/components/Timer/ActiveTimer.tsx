@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -6,7 +6,16 @@ import { useApp } from '../../context/AppContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { formatTimeDisplay } from '../../utils/dateUtils';
 import { DEFAULT_SOUNDS } from '../../utils/constants';
-import { getCustomSoundSrc } from '../../utils/soundStorage';
+import { getCustomSoundSrc, getCustomSoundNativeUri } from '../../utils/soundStorage';
+import SessionAudio from '../../plugins/sessionAudio';
+import type { BellFiredEvent } from '../../plugins/sessionAudio';
+import {
+  buildSessionAudioPlan,
+  intervalTimeFromKey,
+  BEGIN_BELL_KEY,
+  END_BELL_KEY
+} from '../../utils/sessionAudioPlan';
+import { notificationSoundName, SESSION_END_CHANNEL_ID } from '../../utils/notificationSetup';
 import type { TimerConfig, Session } from '../../types';
 import styles from './ActiveTimer.module.css';
 
@@ -56,6 +65,28 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   const beginningBellFiredRef = useRef(false);
   const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // --- Native session-audio pipeline (Part 9) ---
+  // While true, native code owns ALL bell and ambient playback (so bells
+  // ring with the screen locked); JS is display-only and must not play
+  // sounds itself. Only set after SessionAudio.start() succeeds, so a
+  // failed start degrades to the old JS pipeline instead of silence.
+  const nativePipelineRef = useRef(false);
+
+  // Whether this session should use the native pipeline at all:
+  // - Android: always. Ambient plays in a foreground service; bells ride
+  //   exact wake-up alarms, so even silent sits ring while locked.
+  // - iOS: only when ambient audio will play — that is what keeps the app
+  //   alive in the background (UIBackgroundModes audio). A silent sit is
+  //   suspended on lock no matter what, so it keeps the JS pipeline and the
+  //   end notification carries the bell as its sound (notificationSetup).
+  // - Web: never; the existing in-page pipeline stays as-is.
+  const useNativePipeline = useMemo(() => {
+    const platform = Capacitor.getPlatform();
+    if (platform === 'android') return true;
+    if (platform === 'ios') return config.backgroundSound !== 'none';
+    return false;
+  }, [config.backgroundSound]);
+
   // Refs for audio elements
   const bellAudioRef = useRef<HTMLAudioElement>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -99,7 +130,14 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Play a bell sound
+  // Visual bell feedback, shared by the JS player and native bellFired events
+  const flashBell = useCallback(() => {
+    setBellFlash(true);
+    if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = setTimeout(() => setBellFlash(false), 500);
+  }, []);
+
+  // Play a bell sound (JS pipeline — not used while the native pipeline owns bells)
   const playBell = useCallback((soundId: string) => {
     void (async () => {
       const src = await resolveSoundSrc(soundId);
@@ -109,12 +147,22 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
       bellAudioRef.current.volume = (config.bellVolume ?? 80) / 100;
       bellAudioRef.current.play().catch(console.error);
 
-      // Visual feedback
-      setBellFlash(true);
-      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
-      flashTimeoutRef.current = setTimeout(() => setBellFlash(false), 500);
+      flashBell();
     })();
-  }, [resolveSoundSrc, config.bellVolume]);
+  }, [resolveSoundSrc, config.bellVolume, flashBell]);
+
+  // Resolve a sound ID to a native-playable path for the SessionAudio plugin.
+  // Bundled sounds live in the app bundle / assets (webDir is copied there),
+  // encoded as 'asset:<path>'; custom sounds resolve to raw file:// URIs.
+  const resolveNativeSoundPath = useCallback(async (soundId: string): Promise<string | null> => {
+    if (soundId === 'none') return null;
+    const defaultSound = DEFAULT_SOUNDS[soundId];
+    if (defaultSound) {
+      return defaultSound.src ? `asset:${defaultSound.src.replace(/^\//, '')}` : null;
+    }
+    const customSound = customSounds.find(s => s.id === soundId);
+    return customSound ? getCustomSoundNativeUri(customSound) : null;
+  }, [customSounds]);
 
   // --- End-of-session notification (native safety net) ---
   // If the OS suspends the WebView (screen locked, app backgrounded) the
@@ -141,6 +189,18 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
       if (remainingSec <= 0) return;
 
       const minutes = Math.round(config.duration / 60);
+      const platform = Capacitor.getPlatform();
+
+      // Part 9 sound design: bells ring natively, so the notification is
+      // silent (Android: LOW-importance channel; iOS: no `sound` set). The
+      // one exception is iOS silent sessions, where the app is suspended on
+      // lock and nothing can ring natively — there the notification IS the
+      // bell, carrying a CAF copy of the ending sound.
+      const iosBellSound =
+        platform === 'ios' && !useNativePipeline
+          ? notificationSoundName(config.endingSound)
+          : null;
+
       await LocalNotifications.schedule({
         notifications: [{
           id: END_NOTIFICATION_ID,
@@ -149,10 +209,12 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
             ? `Your ${minutes}-minute session has ended.`
             : 'Your session has ended.',
           schedule: { at: new Date(Date.now() + remainingSec * 1000), allowWhileIdle: true },
+          ...(platform === 'android' ? { channelId: SESSION_END_CHANNEL_ID } : {}),
+          ...(iosBellSound ? { sound: iosBellSound } : {}),
         }],
       });
     } catch { /* never let the safety net break the session */ }
-  }, [config.duration, getPhaseElapsedSec]);
+  }, [config.duration, config.endingSound, useNativePipeline, getPhaseElapsedSec]);
 
   // --- The tick: derive time, fire due bells ---
   // Runs from setInterval and on visibility changes. All side effects happen
@@ -178,27 +240,40 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
 
     setElapsedTime(elapsed);
 
+    // While the native pipeline is active it owns all bell audio; the tick
+    // only keeps the display current. Bookkeeping (playedBells, endingFired)
+    // is driven by native bellFired events — and because those events can be
+    // lost while the WebView is suspended, the tick must never treat a
+    // seemingly-unplayed past bell as its own to ring.
+    const nativeOwnsBells = nativePipelineRef.current;
+
     // Interval bells: threshold check (>=), so a wall-clock jump after a
     // suspension can't skip past one. Bells missed by more than the tolerance
     // are marked done silently instead of all sounding at once on resume.
-    config.intervalBells?.forEach(bell => {
-      if (elapsed >= bell.time && !playedBellsRef.current.has(bell.time)) {
-        playedBellsRef.current.add(bell.time);
-        if (elapsed - bell.time <= MISSED_BELL_TOLERANCE_SEC) {
-          playBell(bell.sound);
+    if (!nativeOwnsBells) {
+      config.intervalBells?.forEach(bell => {
+        if (elapsed >= bell.time && !playedBellsRef.current.has(bell.time)) {
+          playedBellsRef.current.add(bell.time);
+          if (elapsed - bell.time <= MISSED_BELL_TOLERANCE_SEC) {
+            playBell(bell.sound);
+          }
         }
-      }
-    });
+      });
+    }
 
     // Ending bell: always rings once when the duration is crossed, even if we
     // only discover it late (screen came back on) — this is the one bell the
     // user must not miss. The timer itself keeps counting up by design.
+    // Native-pipeline sessions ring natively; the tick still cancels the
+    // scheduled notification here, because a running tick means the user is
+    // looking at the app and needs no notification (locked sessions keep it
+    // as the visible completion trace — the settled Part 7 no-screen-wake
+    // decision makes it the only one).
     if (elapsed >= config.duration && !endingBellFiredRef.current) {
       endingBellFiredRef.current = true;
-      if (config.endingSound !== 'none') {
+      if (!nativeOwnsBells && config.endingSound !== 'none') {
         playBell(config.endingSound);
       }
-      // The scheduled notification is no longer needed if we got to ring in-app
       cancelEndNotification();
     }
   }, [config.preparationTime, config.duration, config.intervalBells, config.endingSound,
@@ -256,9 +331,105 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     };
   }, []);
 
-  // Start background sound with Web Audio API for seamless looping
+  // --- Native pipeline lifecycle ---
+  // Starts when the meditation phase begins, stops on pause, restarts on
+  // resume (with a freshly recomputed plan — same rhythm as the notification
+  // rescheduling), and stops for good on session end / unmount via cleanup.
   useEffect(() => {
-    if (config.backgroundSound === 'none') return;
+    if (!useNativePipeline || isPreparing || isPaused) return;
+
+    let cancelled = false;
+    let listener: { remove: () => Promise<void> } | undefined;
+
+    const handleBellFired = (event: BellFiredEvent) => {
+      // Native is authoritative; this is cosmetic/bookkeeping sync only.
+      if (event.key === BEGIN_BELL_KEY) {
+        beginningBellFiredRef.current = true;
+      } else if (event.key === END_BELL_KEY) {
+        endingBellFiredRef.current = true;
+        // If the user is watching the app, the completion notification is
+        // redundant; locked/hidden sessions keep it as the visible trace.
+        if (document.visibilityState === 'visible') {
+          cancelEndNotification();
+        }
+      } else {
+        const intervalTime = intervalTimeFromKey(event.key);
+        if (intervalTime !== null) playedBellsRef.current.add(intervalTime);
+      }
+      flashBell();
+    };
+
+    const start = async () => {
+      // Resolve every sound this session can ring to a native path first,
+      // so the plan is complete when it crosses the bridge.
+      const soundIds = [
+        config.beginningSound,
+        config.endingSound,
+        config.backgroundSound,
+        ...(config.intervalBells?.map(b => b.sound) ?? [])
+      ];
+      const soundPaths = new Map<string, string | null>();
+      await Promise.all(
+        [...new Set(soundIds)].map(async id => {
+          soundPaths.set(id, await resolveNativeSoundPath(id));
+        })
+      );
+      if (cancelled) return;
+
+      const plan = buildSessionAudioPlan({
+        config,
+        elapsedSec: getPhaseElapsedSec(),
+        nowMs: Date.now(),
+        playedIntervalTimes: playedBellsRef.current,
+        beginningFired: beginningBellFiredRef.current,
+        endingFired: endingBellFiredRef.current,
+        soundPaths
+      });
+
+      listener = await SessionAudio.addListener('bellFired', handleBellFired);
+      if (cancelled) return;
+
+      await SessionAudio.start({
+        ...plan,
+        serviceTitle: 'Meditation in progress',
+        serviceText: 'Session bells will ring on time.'
+      });
+      if (cancelled) {
+        // Effect tore down while start was in flight; don't leave audio running.
+        SessionAudio.stop().catch(() => {});
+        return;
+      }
+      nativePipelineRef.current = true;
+    };
+
+    start().catch(err => {
+      // Degrade to the JS pipeline: bells ring while the app is visible,
+      // and the scheduled notification still covers the locked case. The
+      // beginning bell would otherwise be lost (its JS effect defers to the
+      // native pipeline), so ring it here.
+      console.error('Native session audio failed to start; falling back to in-app audio:', err);
+      nativePipelineRef.current = false;
+      if (!cancelled && !beginningBellFiredRef.current && !isPreparingRef.current) {
+        beginningBellFiredRef.current = true;
+        if (config.beginningSound !== 'none') playBell(config.beginningSound);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      nativePipelineRef.current = false;
+      listener?.remove().catch(() => {});
+      SessionAudio.stop().catch(() => {});
+    };
+    // config is stable for the life of a session (set once at start), so the
+    // real triggers are the phase transitions.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useNativePipeline, isPreparing, isPaused]);
+
+  // Start background sound with Web Audio API for seamless looping
+  // (web-only path — on native the SessionAudio pipeline owns ambient audio)
+  useEffect(() => {
+    if (useNativePipeline || config.backgroundSound === 'none') return;
 
     let isCancelled = false;
 
@@ -314,7 +485,7 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Volume changes handled by separate effect
-  }, [config.backgroundSound, resolveSoundSrc]);
+  }, [useNativePipeline, config.backgroundSound, resolveSoundSrc]);
 
   // Update background volume
   useEffect(() => {
@@ -327,6 +498,9 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   // preparation). Fired-once ref + timeout cleanup: StrictMode double-mounts
   // effects, and playBell's identity can change mid-session (customSounds).
   useEffect(() => {
+    // On the native pipeline the beginning bell is part of the native plan
+    // (rung there, marked via the bellFired event) — don't double-ring it.
+    if (useNativePipeline) return;
     if (isPreparing || beginningBellFiredRef.current) return;
     if (config.beginningSound === 'none') {
       beginningBellFiredRef.current = true;
@@ -338,7 +512,7 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
       playBell(config.beginningSound);
     }, 100);
     return () => clearTimeout(timeoutId);
-  }, [isPreparing, config.beginningSound, playBell]);
+  }, [useNativePipeline, isPreparing, config.beginningSound, playBell]);
 
   // Schedule the end-of-session notification once the meditation phase begins;
   // cancel it whenever this effect tears down (session over, unmount).
@@ -388,6 +562,10 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
     // Stop audio (also handled by unmount cleanup; harmless to do eagerly)
     if (audioContextRef.current) {
       audioContextRef.current.close().catch(() => {});
+    }
+    if (nativePipelineRef.current) {
+      nativePipelineRef.current = false;
+      SessionAudio.stop().catch(() => {});
     }
 
     // If still in preparation phase, don't save a session

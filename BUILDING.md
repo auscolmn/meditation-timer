@@ -131,8 +131,69 @@ Product → Archive → Distribute. Version fields are under the General tab
   policy for exact alarms. When the Play Console asks for a declaration, the answer is:
   *core functionality is a meditation timer; the exact alarm delivers the
   end-of-session notification the user explicitly started.*
-- `POST_NOTIFICATIONS`, `WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED` — merged in by
+- `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED` — merged in by
   `@capacitor/local-notifications` automatically.
+- `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_MEDIA_PLAYBACK` — Part 9 background
+  audio. The service runs ONLY for sessions with an ambient sound and only for the
+  session's duration, genuinely playing audio the whole time — which is what makes
+  the `mediaPlayback` type declaration honest. Play Console will ask for a video/
+  justification for the FGS type: *the user starts a meditation session with
+  looping ambient audio; the service keeps that audio playing while the screen is
+  locked and stops when the session ends.*
+- `WAKE_LOCK` — explicitly declared now (previously merged in by
+  local-notifications): the bell alarm receiver holds a ~25s partial wakelock so a
+  bell rung by an exact alarm can finish sounding before the CPU sleeps again.
+
+## Background session audio (Part 9)
+
+Bells and ambient audio now play natively so they work with the screen locked.
+JS computes absolute wall-clock timestamps for every bell when the meditation
+phase starts (and on every resume) and hands the plan to the in-tree
+`SessionAudio` plugin; native rings them regardless of WebView state.
+
+**Android** — bells ride `AlarmManager` exact wake-up alarms in every session
+mode (Handler timers pause in deep sleep; alarms are the only primitive that
+wakes the CPU at a wall-clock moment — the same reasoning as the Part 7
+exact-alarm permissions). Ambient sound loops in a `mediaPlayback` foreground
+service that exists only while a session with ambient audio is running.
+Known edge, accepted: alarm PendingIntents survive process death, so swiping
+the app away mid-silent-session can let that session's remaining bells still
+ring; the plugin cancels the whole (bounded) alarm range on every app start,
+so nothing outlives the next launch.
+
+**iOS** — `UIBackgroundModes: audio` + an active `.playback` AVAudioSession
+keep the app alive in the background, but *only while audio is genuinely
+playing*. So the native pipeline runs only for sessions WITH ambient sound
+(bells on wall-deadline timers). Silent sessions are suspended on lock no
+matter what: there, the end-of-session notification carries the ending bell
+as its notification sound (IMA4 `.caf` copies of the bundled bells ship in
+`public/sounds/notif/` and are installed to `Library/Sounds` on first run).
+Documented limitations, all settled product decisions:
+
+- `.playback` ignores the silent switch (a deliberately started session must
+  ring); the notification-sound fallback for silent sessions *respects* the
+  switch — the asymmetry is unavoidable without a critical-alerts entitlement.
+- Interval bells cannot ring on a locked iPhone during a *silent* session
+  (each would need its own notification).
+- Custom ending sounds have no CAF counterpart; silent-session notifications
+  fall back to the classic bell.
+- No lock-screen media controls, deliberately: a sit is not a media player.
+
+App Review justification for the audio background mode: *the app plays
+user-selected ambient sound for the duration of a meditation session the user
+explicitly starts, including while the device is locked; the session's ending
+bell plays through the same audio session.*
+
+### iOS status: UNTESTED — no Mac available
+
+The entire iOS side of Part 9 (`SessionAudioPlugin.swift`,
+`MainViewController.swift`, the storyboard/pbxproj/Info.plist changes) was
+written without access to a Mac. It has never been compiled, run, or
+device-tested, and iOS cannot be built or submitted at all until Mac access
+exists. Before any App Store work: build in Xcode, expect to fix compile
+errors, and smoke-test locked-screen ambient + bells on a real device.
+**Android is the launch platform; treat all iOS code as a head start, not a
+finished feature.**
 
 ## Store submission checklist
 

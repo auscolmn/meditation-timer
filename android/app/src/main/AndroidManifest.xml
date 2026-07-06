@@ -25,6 +25,19 @@
 
         </activity>
 
+        <!-- Part 9: session audio. The service loops ambient sound while the
+             screen is locked (mediaPlayback: it genuinely plays audio, and only
+             for the session's duration); the receiver rings scheduled bells
+             fired by exact wake-up alarms. Both are app-internal. -->
+        <service
+            android:name=".sessionaudio.SessionAudioService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <receiver
+            android:name=".sessionaudio.BellAlarmReceiver"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -48,6 +61,14 @@
          USE_EXACT_ALARM (API 33+) is granted automatically; SCHEDULE_EXACT_ALARM
          covers Android 12/12L, where it is granted by default when declared. -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <!-- Part 9: background session audio. The foreground service plays ambient
+         sound while the screen is locked (type declaration mandatory on API
+         34+); WAKE_LOCK keeps the CPU up for the ~16s a bell rings after an
+         exact alarm wakes it. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32" />
