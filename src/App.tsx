@@ -11,6 +11,7 @@ import Completion from './components/Completion/Completion';
 import Progress from './components/Progress/Progress';
 import Settings from './components/Settings/Settings';
 import MissedDayPrompt from './components/Common/MissedDayPrompt';
+import StorageErrorToast from './components/Common/StorageErrorToast';
 import './App.css';
 import type { Screen, TimerConfig, Session, NavigationTab } from './types';
 
@@ -209,6 +210,10 @@ function AppContent() {
       {(currentScreen === SCREENS.WELCOME ||
         currentScreen === SCREENS.TIMER_SETUP ||
         currentScreen === SCREENS.PROGRESS) && <MissedDayPrompt />}
+
+      {/* Persistence failures — suppressed during meditation (the error
+          state persists, so it surfaces as soon as the session ends) */}
+      {currentScreen !== SCREENS.ACTIVE_TIMER && <StorageErrorToast />}
       {showMeditationTransition && (
         <Transition onReady={onTransitionReady} onComplete={onTransitionComplete} />
       )}

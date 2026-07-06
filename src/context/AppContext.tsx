@@ -1,5 +1,5 @@
 import { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { usePersistedState } from '../hooks/usePersistedState';
 import { STORAGE_KEYS, DEFAULT_QUOTES, DEFAULT_SETTINGS } from '../utils/constants';
 import { getTodayString } from '../utils/dateUtils';
 import {
@@ -33,22 +33,29 @@ interface AppProviderProps {
  */
 export function AppProvider({ children }: AppProviderProps) {
   // Sessions state
-  const [sessions, setSessions] = useLocalStorage<Session[]>(STORAGE_KEYS.SESSIONS, []);
+  const [sessions, setSessions, , sessionsError] = usePersistedState<Session[]>(STORAGE_KEYS.SESSIONS, []);
 
   // Settings state
-  const [settings, setSettings] = useLocalStorage<Settings>(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
+  const [settings, setSettings, , settingsError] = usePersistedState<Settings>(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
 
   // Quotes state
-  const [quotes, setQuotes] = useLocalStorage<Quote[]>(STORAGE_KEYS.QUOTES, DEFAULT_QUOTES);
+  const [quotes, setQuotes, , quotesError] = usePersistedState<Quote[]>(STORAGE_KEYS.QUOTES, DEFAULT_QUOTES);
 
   // Custom sounds state
-  const [customSounds, setCustomSounds] = useLocalStorage<CustomSound[]>(STORAGE_KEYS.CUSTOM_SOUNDS, []);
+  const [customSounds, setCustomSounds, , customSoundsError] = usePersistedState<CustomSound[]>(STORAGE_KEYS.CUSTOM_SOUNDS, []);
 
   // Presets state
-  const [presets, setPresets] = useLocalStorage<TimerPreset[]>(STORAGE_KEYS.PRESETS, []);
+  const [presets, setPresets, , presetsError] = usePersistedState<TimerPreset[]>(STORAGE_KEYS.PRESETS, []);
+
+  // First persistence failure across all stores, surfaced globally by
+  // StorageErrorToast. A failed save of years of session history must
+  // never die silently (Part 2 lesson: dropped storage errors hide quota
+  // failures upstream). Clears when the next write to that store succeeds.
+  const storageError =
+    sessionsError ?? settingsError ?? quotesError ?? customSoundsError ?? presetsError;
 
 
-  // Draft timer settings (persists during navigation, not in localStorage)
+  // Draft timer settings (survives navigation only; deliberately not persisted)
   const [draftTimerSettings, setDraftTimerSettings] = useState<DraftTimerSettings | null>(null);
 
   // Session actions
@@ -250,6 +257,7 @@ export function AppProvider({ children }: AppProviderProps) {
     customSounds,
     presets,
     draftTimerSettings,
+    storageError,
 
     // Session actions
     addSession,
@@ -289,6 +297,7 @@ export function AppProvider({ children }: AppProviderProps) {
     customSounds,
     presets,
     draftTimerSettings,
+    storageError,
     addSession,
     deleteSession,
     addManualSession,

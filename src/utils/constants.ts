@@ -7,7 +7,9 @@ export const THEME_OPTIONS: Record<'LIGHT' | 'DARK' | 'AUTO', Theme> = {
   AUTO: 'auto'
 };
 
-// localStorage keys
+// Persisted-state keys (Capacitor Preferences, hydrated at launch).
+// Any new persisted state MUST be registered here — utils/appStorage.ts
+// hydrates exactly this list before the first render.
 export const STORAGE_KEYS = {
   QUOTES: 'sati_quotes',
   SESSIONS: 'sati_sessions',

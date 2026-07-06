@@ -8,10 +8,10 @@ import type { CustomSound } from '../types';
  * Sound audio data lives in the Capacitor Filesystem (real files in the
  * app's data directory on Android/iOS; IndexedDB-backed on the web), while
  * only lightweight metadata ({ id, name, type, fileName, mimeType }) is kept
- * in app state / localStorage. This avoids the WebView localStorage quota
- * (~5MB) that base64 audio previously risked blowing, survives WebView data
- * eviction on native, and gives the future native background-audio pipeline
- * the file URIs it needs.
+ * in app state / Capacitor Preferences. This avoids the storage quota that
+ * base64 audio previously risked blowing, survives WebView data eviction on
+ * native, and gives the future native background-audio pipeline the file
+ * URIs it needs.
  */
 
 const SOUNDS_DIR = 'sounds';

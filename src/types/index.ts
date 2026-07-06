@@ -188,6 +188,9 @@ export interface AppContextValue {
   customSounds: CustomSound[];
   presets: TimerPreset[];
   draftTimerSettings: DraftTimerSettings | null;
+  // First persistence failure across all stores (null when healthy);
+  // surfaced globally by StorageErrorToast
+  storageError: string | null;
 
   // Session actions
   addSession: (session: Omit<Session, 'id' | 'date' | 'timestamp'>) => Session;

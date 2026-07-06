@@ -12,11 +12,24 @@ import '@fontsource/cormorant-garamond/400-italic.css'
 import './index.css'
 import App from './App'
 import ErrorBoundary from './components/Common/ErrorBoundary'
+import { hydrateAppStorage } from './utils/appStorage'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </StrictMode>,
-)
+// Storage is hydrated before the first render: components read persisted
+// state synchronously from the appStorage cache (see usePersistedState),
+// so no loading gates or pre-hydration render states exist anywhere in the
+// tree. hydrateAppStorage never throws — a failed read falls back to
+// defaults. On native the await hides behind the native splash screen; on
+// the web it resolves in microseconds (Preferences is localStorage there).
+async function bootstrap() {
+  await hydrateAppStorage()
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StrictMode>,
+  )
+}
+
+void bootstrap()
