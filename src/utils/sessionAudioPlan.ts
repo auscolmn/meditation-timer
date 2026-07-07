@@ -16,6 +16,12 @@ import type { TimerConfig } from '../types';
  * current position, produce the plan. Wall-clock timing (Part 4) remains the
  * single source of truth — every timestamp here derives from the same
  * Date.now() arithmetic the tick uses.
+ *
+ * The beginning bell is deliberately NOT part of the plan: it rings at the
+ * moment the meditation phase starts, which is always a foreground moment,
+ * so JS plays it directly. Routing it through native scheduling (Android
+ * AlarmManager) adds seconds of dispatch latency — alarms are built for
+ * "wake me later", not "now".
  */
 
 export interface PlannedBell {
@@ -36,7 +42,6 @@ export interface SessionAudioPlan {
   ambient: { soundPath: string; volume: number } | null;
 }
 
-export const BEGIN_BELL_KEY = 'begin';
 export const END_BELL_KEY = 'end';
 
 const INTERVAL_KEY_PREFIX = 'interval-';
@@ -52,12 +57,6 @@ export function intervalTimeFromKey(key: string): number | null {
   return Number.isFinite(time) ? time : null;
 }
 
-/**
- * Give the begin bell a tiny cushion into the future so the native side
- * receives the plan before the bell is already due.
- */
-const BEGIN_BELL_LEAD_MS = 150;
-
 export interface BuildPlanInput {
   config: TimerConfig;
   /** Seconds elapsed in the meditation phase right now (wall-clock derived). */
@@ -66,7 +65,6 @@ export interface BuildPlanInput {
   nowMs: number;
   /** Interval-bell times (sec) already sounded or skipped. */
   playedIntervalTimes: ReadonlySet<number>;
-  beginningFired: boolean;
   endingFired: boolean;
   /**
    * soundId -> native path. A missing or null entry means the sound could
@@ -79,7 +77,7 @@ export interface BuildPlanInput {
 export function buildSessionAudioPlan(input: BuildPlanInput): SessionAudioPlan {
   const {
     config, elapsedSec, nowMs,
-    playedIntervalTimes, beginningFired, endingFired, soundPaths
+    playedIntervalTimes, endingFired, soundPaths
   } = input;
 
   // `??`, not `||`: a bell volume of 0 is a deliberate setting (Part 3 lesson).
@@ -91,18 +89,6 @@ export function buildSessionAudioPlan(input: BuildPlanInput): SessionAudioPlan {
   };
 
   const bells: PlannedBell[] = [];
-
-  if (!beginningFired) {
-    const path = pathFor(config.beginningSound);
-    if (path) {
-      bells.push({
-        key: BEGIN_BELL_KEY,
-        at: nowMs + BEGIN_BELL_LEAD_MS,
-        soundPath: path,
-        volume: bellVolume
-      });
-    }
-  }
 
   // Only strictly-future interval bells belong in the plan. Bells whose
   // moment has already passed are the JS tick's business (missed-bell

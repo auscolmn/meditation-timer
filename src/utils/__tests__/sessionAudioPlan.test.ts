@@ -3,7 +3,6 @@ import {
   buildSessionAudioPlan,
   intervalBellKey,
   intervalTimeFromKey,
-  BEGIN_BELL_KEY,
   END_BELL_KEY,
   type BuildPlanInput
 } from '../sessionAudioPlan';
@@ -35,7 +34,6 @@ function build(overrides: Partial<BuildPlanInput> = {}, config: Partial<TimerCon
     elapsedSec: 0,
     nowMs: NOW,
     playedIntervalTimes: new Set(),
-    beginningFired: false,
     endingFired: false,
     soundPaths: paths,
     ...overrides
@@ -43,37 +41,36 @@ function build(overrides: Partial<BuildPlanInput> = {}, config: Partial<TimerCon
 }
 
 describe('buildSessionAudioPlan', () => {
-  it('plans begin and end bells at absolute wall-clock times', () => {
+  it('plans the end bell at its absolute wall-clock time', () => {
     const plan = build();
-    expect(plan.bells.map(b => b.key)).toEqual([BEGIN_BELL_KEY, END_BELL_KEY]);
+    expect(plan.bells.map(b => b.key)).toEqual([END_BELL_KEY]);
+    expect(plan.bells[0].at).toBe(NOW + 600 * 1000);
+    expect(plan.bells[0].soundPath).toBe('asset:sounds/tibetan-bell.mp3');
+  });
 
-    const begin = plan.bells[0];
-    const end = plan.bells[1];
-    expect(begin.at).toBeGreaterThanOrEqual(NOW);
-    expect(begin.at - NOW).toBeLessThanOrEqual(1000); // small lead only
-    expect(end.at).toBe(NOW + 600 * 1000);
-    expect(end.soundPath).toBe('asset:sounds/tibetan-bell.mp3');
+  it('never plans the beginning bell (it is a foreground moment, JS-played)', () => {
+    const plan = build();
+    expect(plan.bells.some(b => b.key === 'begin')).toBe(false);
   });
 
   it('offsets the end bell by the elapsed time already served', () => {
-    const plan = build({ elapsedSec: 200, beginningFired: true });
+    const plan = build({ elapsedSec: 200 });
     const end = plan.bells.find(b => b.key === END_BELL_KEY);
     expect(end?.at).toBe(NOW + 400 * 1000);
   });
 
-  it('omits the begin bell once fired and the end bell once fired', () => {
-    expect(build({ beginningFired: true }).bells.map(b => b.key)).toEqual([END_BELL_KEY]);
-    expect(build({ endingFired: true }).bells.map(b => b.key)).toEqual([BEGIN_BELL_KEY]);
+  it('omits the end bell once fired', () => {
+    expect(build({ endingFired: true }).bells).toEqual([]);
   });
 
   it('omits the end bell when the duration has already passed', () => {
-    const plan = build({ elapsedSec: 600, beginningFired: true });
+    const plan = build({ elapsedSec: 600 });
     expect(plan.bells).toEqual([]);
   });
 
   it('schedules only strictly-future, unplayed interval bells inside the duration', () => {
     const plan = build(
-      { elapsedSec: 120, beginningFired: true, playedIntervalTimes: new Set([180]) },
+      { elapsedSec: 120, playedIntervalTimes: new Set([180]) },
       {
         intervalBells: [
           { time: 60, sound: 'bell' },   // past — the JS tick's business
@@ -98,7 +95,7 @@ describe('buildSessionAudioPlan', () => {
     );
     const times = plan.bells.map(b => b.at);
     expect(times).toEqual([...times].sort((a, b) => a - b));
-    expect(plan.bells[0].key).toBe(BEGIN_BELL_KEY);
+    expect(plan.bells[0].key).toBe(intervalBellKey(100));
     expect(plan.bells[plan.bells.length - 1].key).toBe(END_BELL_KEY);
   });
 
@@ -106,7 +103,6 @@ describe('buildSessionAudioPlan', () => {
     const plan = build(
       {},
       {
-        beginningSound: 'none',
         endingSound: 'deleted-custom',
         intervalBells: [{ time: 300, sound: 'custom-1' }]
       }
@@ -145,7 +141,6 @@ describe('buildSessionAudioPlan', () => {
 describe('interval bell keys', () => {
   it('round-trips times through keys', () => {
     expect(intervalTimeFromKey(intervalBellKey(300))).toBe(300);
-    expect(intervalTimeFromKey(BEGIN_BELL_KEY)).toBeNull();
     expect(intervalTimeFromKey(END_BELL_KEY)).toBeNull();
     expect(intervalTimeFromKey('interval-abc')).toBeNull();
   });

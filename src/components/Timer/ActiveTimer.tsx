@@ -12,7 +12,6 @@ import type { BellFiredEvent } from '../../plugins/sessionAudio';
 import {
   buildSessionAudioPlan,
   intervalTimeFromKey,
-  BEGIN_BELL_KEY,
   END_BELL_KEY
 } from '../../utils/sessionAudioPlan';
 import { notificationSoundName, SESSION_END_CHANNEL_ID } from '../../utils/notificationSetup';
@@ -343,9 +342,7 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
 
     const handleBellFired = (event: BellFiredEvent) => {
       // Native is authoritative; this is cosmetic/bookkeeping sync only.
-      if (event.key === BEGIN_BELL_KEY) {
-        beginningBellFiredRef.current = true;
-      } else if (event.key === END_BELL_KEY) {
+      if (event.key === END_BELL_KEY) {
         endingBellFiredRef.current = true;
         // If the user is watching the app, the completion notification is
         // redundant; locked/hidden sessions keep it as the visible trace.
@@ -381,7 +378,6 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
         elapsedSec: getPhaseElapsedSec(),
         nowMs: Date.now(),
         playedIntervalTimes: playedBellsRef.current,
-        beginningFired: beginningBellFiredRef.current,
         endingFired: endingBellFiredRef.current,
         soundPaths
       });
@@ -404,15 +400,9 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
 
     start().catch(err => {
       // Degrade to the JS pipeline: bells ring while the app is visible,
-      // and the scheduled notification still covers the locked case. The
-      // beginning bell would otherwise be lost (its JS effect defers to the
-      // native pipeline), so ring it here.
+      // and the scheduled notification still covers the locked case.
       console.error('Native session audio failed to start; falling back to in-app audio:', err);
       nativePipelineRef.current = false;
-      if (!cancelled && !beginningBellFiredRef.current && !isPreparingRef.current) {
-        beginningBellFiredRef.current = true;
-        if (config.beginningSound !== 'none') playBell(config.beginningSound);
-      }
     });
 
     return () => {
@@ -498,9 +488,10 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
   // preparation). Fired-once ref + timeout cleanup: StrictMode double-mounts
   // effects, and playBell's identity can change mid-session (customSounds).
   useEffect(() => {
-    // On the native pipeline the beginning bell is part of the native plan
-    // (rung there, marked via the bellFired event) — don't double-ring it.
-    if (useNativePipeline) return;
+    // The beginning bell stays JS-played even on the native pipeline: the
+    // meditation phase always starts in the foreground, and Android alarm
+    // dispatch adds seconds of latency for "now" — native owns only the
+    // bells that can occur while locked (intervals and the ending bell).
     if (isPreparing || beginningBellFiredRef.current) return;
     if (config.beginningSound === 'none') {
       beginningBellFiredRef.current = true;
@@ -512,7 +503,7 @@ function ActiveTimer({ config, onComplete, onEnd }: ActiveTimerProps) {
       playBell(config.beginningSound);
     }, 100);
     return () => clearTimeout(timeoutId);
-  }, [useNativePipeline, isPreparing, config.beginningSound, playBell]);
+  }, [isPreparing, config.beginningSound, playBell]);
 
   // Schedule the end-of-session notification once the meditation phase begins;
   // cancel it whenever this effect tears down (session over, unmount).

@@ -151,10 +151,16 @@ JS computes absolute wall-clock timestamps for every bell when the meditation
 phase starts (and on every resume) and hands the plan to the in-tree
 `SessionAudio` plugin; native rings them regardless of WebView state.
 
-**Android** — bells ride `AlarmManager` exact wake-up alarms in every session
-mode (Handler timers pause in deep sleep; alarms are the only primitive that
-wakes the CPU at a wall-clock moment — the same reasoning as the Part 7
-exact-alarm permissions). Ambient sound loops in a `mediaPlayback` foreground
+**Android** — the beginning bell is JS-played (session start is always a
+foreground moment; alarm dispatch adds seconds of latency for "now"). All
+locked-screen bells ride `AlarmManager` exact wake-up alarms in every session
+mode. One throttle to know about: `setExactAndAllowWhileIdle` limits an app to
+roughly one alarm per minute, so interval bells spaced closer than ~60s apart
+can be deferred — not a realistic meditation configuration, but worth knowing
+if it ever comes up in testing. (Handler timers pause in deep sleep; alarms
+are the only primitive that wakes the CPU at a wall-clock moment — the same
+reasoning as the Part 7 exact-alarm permissions.) Ambient sound loops in a
+`mediaPlayback` foreground
 service that exists only while a session with ambient audio is running.
 Known edge, accepted: alarm PendingIntents survive process death, so swiping
 the app away mid-silent-session can let that session's remaining bells still
