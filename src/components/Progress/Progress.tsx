@@ -105,7 +105,7 @@ function Progress() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Expandable sections
-  const [statsExpanded, setStatsExpanded] = useState(false);
+  const [statsExpanded, setStatsExpanded] = useState(true);
   const [goalsExpanded, setGoalsExpanded] = useState(false);
 
   // Get calendar data

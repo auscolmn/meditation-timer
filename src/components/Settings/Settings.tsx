@@ -6,11 +6,17 @@ import ChevronIcon from '../Common/ChevronIcon';
 import DataManagement from './DataManagement';
 import styles from './Settings.module.css';
 
+const MAX_QUOTE_LENGTH = 280;
+
 function Settings() {
-  const { customSounds, settings, updateSettings } = useApp();
+  const { customSounds, settings, updateSettings, quotes, addQuote, deleteQuote, resetQuotes } = useApp();
   const [soundsExpanded, setSoundsExpanded] = useState(false);
   const [customizeExpanded, setCustomizeExpanded] = useState(false);
+  const [quotesExpanded, setQuotesExpanded] = useState(false);
   const [newPresetValue, setNewPresetValue] = useState('');
+  const [newQuoteText, setNewQuoteText] = useState('');
+  const [newQuoteAuthor, setNewQuoteAuthor] = useState('');
+  const [confirmResetQuotes, setConfirmResetQuotes] = useState(false);
 
   const bellSounds = customSounds.filter(s => s.type === 'bell');
   const backgroundSounds = customSounds.filter(s => s.type === 'background');
@@ -39,6 +45,29 @@ function Settings() {
         customDurationPresets: currentPresets.filter(m => m !== minutes)
       });
     }
+  };
+
+  // Custom quotes handlers
+  const trimmedQuoteText = newQuoteText.trim();
+  const canAddQuote = trimmedQuoteText.length > 0 && trimmedQuoteText.length <= MAX_QUOTE_LENGTH;
+
+  const handleAddQuote = () => {
+    if (!canAddQuote) return;
+    addQuote({ text: trimmedQuoteText, author: newQuoteAuthor.trim() || 'Unknown' });
+    setNewQuoteText('');
+    setNewQuoteAuthor('');
+  };
+
+  // Newest first so a quote you just added is visible without scrolling
+  const quotesNewestFirst = [...quotes].reverse();
+
+  const handleResetQuotes = () => {
+    if (!confirmResetQuotes) {
+      setConfirmResetQuotes(true);
+      return;
+    }
+    resetQuotes();
+    setConfirmResetQuotes(false);
   };
 
   return (
@@ -313,8 +342,92 @@ function Settings() {
         )}
       </div>
 
-      {/* Data Management Section */}
+      {/* Quotes Section */}
       <div className={`card mb-lg ${styles.animateDelay4}`}>
+        <button
+          type="button"
+          className={styles.expandHeader}
+          onClick={() => setQuotesExpanded(!quotesExpanded)}
+          aria-expanded={quotesExpanded}
+        >
+          <h2 className={styles.sectionTitle}>Quotes</h2>
+          <span className={styles.expandSummary}>
+            {quotes.length} quote{quotes.length !== 1 ? 's' : ''}
+          </span>
+          <ChevronIcon expanded={quotesExpanded} className={styles.expandIcon} expandedClassName={styles.expanded} />
+        </button>
+
+        {quotesExpanded && (
+          <div className={styles.expandContent}>
+            <p className={styles.sectionDescription}>
+              One quote is shown on the welcome screen each day. Add your own or remove any you don't want to see.
+            </p>
+
+            <div className={styles.quoteForm}>
+              <input
+                type="text"
+                className="input"
+                value={newQuoteText}
+                onChange={(e) => setNewQuoteText(e.target.value)}
+                maxLength={MAX_QUOTE_LENGTH}
+                placeholder="Quote"
+                aria-label="Quote text"
+              />
+              <div className={styles.quoteFormRow}>
+                <input
+                  type="text"
+                  className="input"
+                  value={newQuoteAuthor}
+                  onChange={(e) => setNewQuoteAuthor(e.target.value)}
+                  maxLength={80}
+                  placeholder="Author (optional)"
+                  aria-label="Quote author"
+                />
+                <button
+                  className="btn btn--secondary"
+                  onClick={handleAddQuote}
+                  disabled={!canAddQuote}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {quotes.length === 0 ? (
+              <p className={styles.emptyMessage}>No quotes. The welcome screen will show none until you add one.</p>
+            ) : (
+              <ul className={styles.quoteList}>
+                {quotesNewestFirst.map(quote => (
+                  <li key={quote.id} className={styles.quoteItem}>
+                    <div className={styles.quoteBody}>
+                      <p className={styles.quoteText}>{quote.text}</p>
+                      <p className={styles.quoteAuthor}>{quote.author}</p>
+                    </div>
+                    <button
+                      onClick={() => deleteQuote(quote.id)}
+                      className={styles.presetRemove}
+                      aria-label={`Remove quote by ${quote.author}`}
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <button
+              className={`btn btn--secondary btn--full ${styles.quoteReset}`}
+              onClick={handleResetQuotes}
+              onBlur={() => setConfirmResetQuotes(false)}
+            >
+              {confirmResetQuotes ? 'Tap again to restore defaults and remove your quotes' : 'Restore default quotes'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Data Management Section */}
+      <div className={`card mb-lg ${styles.animateDelay5}`}>
         <DataManagement />
       </div>
 
