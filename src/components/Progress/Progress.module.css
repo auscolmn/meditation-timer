@@ -305,74 +305,73 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Frozen day indicator */
+/* Goals - badge grid */
 
-
-
-/* Goals */
-
-.goalsList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+.goalsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: var(--space-md) var(--space-sm);
   margin-top: var(--space-md);
+  padding: 0;
+  list-style: none;
 }
 
 .goalItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
-  border-radius: var(--radius-md);
-  background-color: var(--border-light);
+  gap: var(--space-sm);
+  text-align: center;
   opacity: 0.5;
 }
 
-.goalItem.completed {
-  opacity: 1;
-  background-color: var(--success-bg);
-}
-
+.goalItem.completed,
 .goalItem.current {
   opacity: 1;
-  border: 1px solid var(--border);
-  background-color: var(--surface);
 }
 
 .goalBadge {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  color: var(--text-secondary);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  color: var(--text-tertiary);
+  transition: background-color var(--transition-base), border-color var(--transition-base);
 }
 
 .goalItem.completed .goalBadge {
+  background-color: var(--success-bg);
+  border-color: var(--success-light);
   color: var(--success);
 }
 
 .goalItem.current .goalBadge {
+  border-color: var(--primary);
   color: var(--primary);
 }
 
 .goalLabel {
-  flex: 1;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-regular);
+  color: var(--text-tertiary);
+  line-height: 1.2;
 }
 
-.goalCheck {
-  display: flex;
-  align-items: center;
-  color: var(--success);
+.goalItem.completed .goalLabel,
+.goalItem.current .goalLabel {
+  color: var(--text-primary);
 }
 
 .goalProgress {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  margin-top: calc(-1 * var(--space-xs));
+  font-size: var(--font-size-xs);
+  color: var(--success);
   font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Zen insight message */

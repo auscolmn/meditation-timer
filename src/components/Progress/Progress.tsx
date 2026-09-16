@@ -356,34 +356,29 @@ function Progress() {
           </button>
 
           {goalsExpanded && (
-            <div className={styles.goalsList}>
+            <ul className={styles.goalsGrid} aria-label="Streak milestones">
               {STREAK_GOALS.map(goal => {
                 const isCompleted = streakData.currentStreak >= goal.days;
                 const isCurrent = streakData.nextGoal?.days === goal.days;
+                const status = isCompleted ? 'completed' : isCurrent ? 'in progress' : 'locked';
 
                 return (
-                  <div
+                  <li
                     key={goal.days}
                     className={`${styles.goalItem} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
+                    aria-label={`${goal.label}, ${status}`}
                   >
-                    <span className={styles.goalBadge}><BadgeIcon type={goal.badge} /></span>
+                    <span className={styles.goalBadge} aria-hidden="true"><BadgeIcon type={goal.badge} /></span>
                     <span className={styles.goalLabel}>{goal.label}</span>
-                    {isCompleted && (
-                      <span className={styles.goalCheck}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                      </span>
-                    )}
                     {isCurrent && (
                       <span className={styles.goalProgress}>
                         {streakData.currentStreak}/{goal.days}
                       </span>
                     )}
-                  </div>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
 
           {/* Charts */}
